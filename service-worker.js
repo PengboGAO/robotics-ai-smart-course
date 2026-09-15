@@ -1,5 +1,5 @@
-const CACHE_NAME = "robotics-smart-course-v2";
-const CORE = ["./","./index.html","./assets/styles.css","./assets/runtime-config.js","./assets/course-data.js","./assets/app.js","./manifest.webmanifest"];
+const CACHE_NAME = "robotics-smart-course-v3";
+const CORE = ["./","./index.html","./assets/styles.css","./assets/lifecycle.css","./assets/runtime-config.js","./assets/course-data.js","./assets/app.js","./assets/lifecycle.js","./assets/knowledge-graph.json","./manifest.webmanifest"];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE))));
 self.addEventListener("activate", event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))));
 self.addEventListener("fetch", event => {

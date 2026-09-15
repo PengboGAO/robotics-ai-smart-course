@@ -8,6 +8,7 @@
   <title>机器人学基础 · AI智慧课程</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./assets/styles.css">
+  <link rel="stylesheet" href="./assets/lifecycle.css">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -25,8 +26,9 @@
         <a href="#map" data-route="map"><span>03</span>课程图谱</a>
         <a href="#lab" data-route="lab"><span>04</span>ABB验证实验</a>
         <a href="#assistant" data-route="assistant"><span>05</span>AI诊断助教</a>
-        <a href="#evidence" data-route="evidence"><span>06</span>学习证据</a>
-        <a href="#teacher" data-route="teacher"><span>07</span>教师工作台</a>
+        <a href="#assessment" data-route="assessment"><span>06</span>智能测评</a>
+        <a href="#evidence" data-route="evidence"><span>07</span>学习证据</a>
+        <a href="#teacher" data-route="teacher"><span>08</span>教师工作台</a>
       </nav>
       <div class="sidebar-foot">
         <div class="privacy-note"><span class="status-dot"></span>默认本机存储，不上传个人信息</div>
@@ -99,6 +101,16 @@
 
         <section class="page" data-page="path" aria-labelledby="path-title">
           <div class="page-intro"><span class="eyebrow">ADAPTIVE PATH</span><h1 id="path-title">从基础诊断到独立迁移</h1><p>六个模块按先修关系组织。完成任务并提交直接证据后，系统才记录模块进度；后期任务逐步减少AI提示。</p></div>
+          <div class="learner-console">
+            <form id="learner-profile-form" class="learner-profile">
+              <div><span class="eyebrow">LEARNER PROFILE</span><h2>建立匿名学习档案</h2><p>只需学习代号与目标，不填写姓名、学号等个人信息。</p></div>
+              <label>学习代号<input id="learner-alias" type="text" maxlength="18" placeholder="例如：RBT-01"></label>
+              <label>本轮目标<select id="learner-goal"><option value="系统掌握">系统掌握课程</option><option value="运动学突破">突破运动学建模</option><option value="轨迹验证">完成轨迹验证</option><option value="综合迁移">完成综合迁移</option></select></label>
+              <button class="primary-btn" type="submit">保存学习档案</button>
+            </form>
+            <div class="learning-index"><div class="index-ring" id="learning-index-ring"><strong id="learning-index-value">0</strong><span>学习进展指数</span></div><div><span class="eyebrow">下一步建议</span><h2 id="next-action-title">先完成入口诊断</h2><p id="next-action-detail">系统将依据错题、任务和证据缺口生成学习路径。</p><button class="secondary-btn" data-go="assessment" type="button">进入智能测评</button></div></div>
+          </div>
+          <div id="lifecycle-track" class="lifecycle-track" aria-label="全周期学习阶段"></div>
           <div class="diagnostic-card">
             <div><span class="eyebrow">3分钟入口诊断</span><h2>你最需要先补哪块基础？</h2><p>选择当前最接近的状态，系统只给路径建议，不代替教师评价。</p></div>
             <div id="diagnostic-options" class="diagnostic-options"></div>
@@ -112,6 +124,11 @@
           <div class="map-layout">
             <div class="map-canvas"><svg id="knowledge-map" viewBox="0 0 900 560" role="img" aria-label="课程知识任务能力图谱"></svg></div>
             <aside id="node-inspector" class="node-inspector"><span class="eyebrow">节点说明</span><h2>选择一个节点</h2><p>这里将显示先修关系、任务与证据要求。</p></aside>
+          </div>
+          <div class="knowledge-catalog-card">
+            <div class="catalog-head"><div><span class="eyebrow">57 KNOWLEDGE UNITS</span><h2>知识点可检索、可定位、可关联任务</h2><p>4项课程产出用于课程评价，7项细分OBE指标用于知识点定位；两级指标分工明确，不重复计算。</p></div><div class="catalog-tools"><input id="knowledge-search" type="search" placeholder="搜索知识点、标签或能力"><select id="knowledge-chapter"><option value="all">全部章节</option></select></div></div>
+            <div id="knowledge-stats" class="knowledge-stats"></div>
+            <div id="knowledge-catalog" class="knowledge-catalog"><div class="empty-state">正在加载知识图谱……</div></div>
           </div>
           <div class="resource-callout"><div><span class="eyebrow">已迁移资源</span><h2>原有数字教材作为学习支架保留</h2><p>8章教材、交互动画和检索内容已复制到部署目录；新版门户以任务和证据组织入口。</p></div><a class="secondary-btn" href="./resources/textbook/index.html">打开数字教材</a></div>
         </section>
@@ -150,6 +167,26 @@
           </div>
         </section>
 
+        <section class="page" data-page="assessment" aria-labelledby="assessment-title">
+          <div class="page-intro"><span class="eyebrow">AI ASSESSMENT</span><h1 id="assessment-title">每次测评都生成下一步学习行动</h1><p>入口诊断定位基础，模块测评检查理解，迁移测评在无AI条件下检验独立能力。结果用于学习指导，不自动替代正式课程成绩。</p></div>
+          <div class="assessment-modes">
+            <button type="button" data-assessment-mode="diagnostic"><span>01</span><b>入口诊断</b><small>8题 · 不计成绩 · 生成起点</small></button>
+            <button type="button" data-assessment-mode="module"><span>02</span><b>模块测评</b><small>按模块抽题 · 形成性反馈</small></button>
+            <button type="button" data-assessment-mode="transfer"><span>03</span><b>无AI迁移</b><small>6题 · 提交后统一反馈</small></button>
+          </div>
+          <div class="assessment-workbench">
+            <div class="assessment-builder">
+              <div class="panel-head"><div><span class="eyebrow">ASSESSMENT CONFIG</span><h2>测评设置</h2></div></div>
+              <label>测评类型<select id="assessment-mode"><option value="diagnostic">入口诊断</option><option value="module">模块测评</option><option value="transfer">无AI迁移</option></select></label>
+              <label id="assessment-module-wrap">课程模块<select id="assessment-module"></select></label>
+              <div id="assessment-rules" class="assessment-rules"></div>
+              <button id="start-assessment" class="primary-btn full" type="button">开始测评</button>
+              <div class="assessment-history"><h3>最近测评</h3><div id="assessment-history-list"></div></div>
+            </div>
+            <div class="assessment-stage"><div id="assessment-empty" class="empty-state">选择测评类型后开始。系统将保存错题标签、能力指标和补学建议。</div><form id="assessment-form" hidden></form><div id="assessment-result" hidden></div></div>
+          </div>
+        </section>
+
         <section class="page" data-page="evidence" aria-labelledby="evidence-title">
           <div class="page-intro"><span class="eyebrow">DIRECT EVIDENCE</span><h1 id="evidence-title">成绩来自证据，不来自页面停留时长</h1><p>课程记录模型、代码、仿真和反证四类学习证据。当前部署版仅保存本机学习档案，可导出后提交到学校平台。</p></div>
           <div class="evidence-layout">
@@ -159,6 +196,15 @@
               <fieldset><legend>证据类型</legend><div class="check-grid"><label><input type="checkbox" name="evidenceType" value="模型">模型证据</label><label><input type="checkbox" name="evidenceType" value="代码">代码证据</label><label><input type="checkbox" name="evidenceType" value="仿真">仿真证据</label><label><input type="checkbox" name="evidenceType" value="反证">反证证据</label></div></fieldset>
               <label>证据位置或文件名<input id="evidence-location" type="text" placeholder="例如：提交包/03_fk_recheck.pdf" required></label>
               <label>结论与复算口径<textarea id="evidence-note" rows="5" placeholder="说明该证据证明什么、参数来源、计算口径和未解决问题。" required></textarea></label>
+              <fieldset class="rubric-fieldset"><legend>六维直接证据量规</legend><p>每项0—4级。系统换算为百分制，仅作为过程评价建议，教师可结合原始文件复核。</p><div class="rubric-grid">
+                <label>模型正确性<select name="rubric" data-rubric="model" required><option value="">请选择</option><option value="4">4 完全正确</option><option value="3">3 基本正确</option><option value="2">2 部分正确</option><option value="1">1 错误较多</option><option value="0">0 未提供</option></select></label>
+                <label>模型—代码一致<select name="rubric" data-rubric="consistency" required><option value="">请选择</option><option value="4">4 可逐项对应</option><option value="3">3 主要对应</option><option value="2">2 对应不完整</option><option value="1">1 难以对应</option><option value="0">0 未提供</option></select></label>
+                <label>约束与安全检查<select name="rubric" data-rubric="constraints" required><option value="">请选择</option><option value="4">4 全部复核</option><option value="3">3 主要复核</option><option value="2">2 部分复核</option><option value="1">1 仅作说明</option><option value="0">0 未检查</option></select></label>
+                <label>诊断与技术解释<select name="rubric" data-rubric="explanation" required><option value="">请选择</option><option value="4">4 有反证且解释充分</option><option value="3">3 能定位主要原因</option><option value="2">2 解释不完整</option><option value="1">1 仅描述现象</option><option value="0">0 未解释</option></select></label>
+                <label>可复算与可追溯<select name="rubric" data-rubric="traceability" required><option value="">请选择</option><option value="4">4 参数文件齐全</option><option value="3">3 可基本复算</option><option value="2">2 缺少部分口径</option><option value="1">1 仅有截图</option><option value="0">0 无法复核</option></select></label>
+                <label>AI边界与诚信<select name="rubric" data-rubric="integrity" required><option value="">请选择</option><option value="4">4 使用留痕完整</option><option value="3">3 边界说明清楚</option><option value="2">2 说明不完整</option><option value="1">1 来源不清</option><option value="0">0 存在代做风险</option></select></label>
+              </div><div class="rubric-preview"><span>量规建议分</span><b id="rubric-score-preview">—</b><small>正式认定须核查原始证据</small></div></fieldset>
+              <label>评价主体<select id="evidence-evaluator" required><option value="学生自评">学生自评</option><option value="同伴互评">同伴互评</option><option value="教师评定">教师评定</option></select></label>
               <label class="integrity-check"><input id="integrity-confirm" type="checkbox" required>我确认：数据可追溯；AI使用已说明；待验证项未写成既成结论。</label>
               <button class="primary-btn" type="submit">保存证据记录</button>
             </form>
@@ -174,6 +220,11 @@
             <div class="remediation-card"><div class="panel-head"><div><span class="eyebrow">持续改进</span><h2>补证建议</h2></div></div><div id="remediation-list"></div><button id="export-portfolio" class="primary-btn full" type="button">导出完整学习档案</button></div>
           </div>
           <div class="teacher-note"><b>部署建议</b><p>公开GitHub Pages版本用于展示课程结构和交互原型；真实教学应接入学校统一身份认证、课程平台、对象存储和经审批的教育大模型网关，不在前端保存API密钥或学生敏感信息。</p></div>
+          <div class="teacher-lifecycle-grid">
+            <div class="outcome-attainment-card"><div class="panel-head"><div><span class="eyebrow">OBE ATTAINMENT</span><h2>课程目标达成诊断</h2></div><span class="demo-label">当前学习者记录</span></div><div id="outcome-attainment"></div></div>
+            <div class="cycle-evidence-card"><div class="panel-head"><div><span class="eyebrow">FULL-CYCLE EVIDENCE</span><h2>全周期证据账本</h2></div></div><div id="cycle-evidence-ledger"></div></div>
+          </div>
+          <div class="provincial-audit-card"><div class="panel-head"><div><span class="eyebrow">PROVINCIAL REVIEW</span><h2>省级智慧课程申报自检</h2></div><a href="./docs/省级智慧课程申报证据清单.md" class="secondary-btn">打开证据清单</a></div><div id="provincial-audit"></div></div>
         </section>
       </main>
     </div>
@@ -184,5 +235,6 @@
   <script src="./assets/runtime-config.js"></script>
   <script src="./assets/course-data.js"></script>
   <script src="./assets/app.js"></script>
+  <script src="./assets/lifecycle.js"></script>
 </body>
 </html>
