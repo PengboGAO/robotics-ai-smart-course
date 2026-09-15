@@ -1,0 +1,10 @@
+{
+  "name": "机器人学基础AI智慧课程",
+  "short_name": "机器人学基础",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#071b2d",
+  "theme_color": "#071b2d",
+  "lang": "zh-CN",
+  "description": "面向机器人工程专业的OBE导向AI智慧课程学习应用。"
+}

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071b2d">
+  <meta name="description" content="机器人学基础AI智慧课程：OBE学习任务、ABB IRB 1200工程验证、三级提示AI助教与学习证据档案。">
+  <title>机器人学基础 · AI智慧课程</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="课程导航">
+      <a class="brand" href="#overview" aria-label="返回课程首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M8 35h32M14 35V23l9-7 6 5 6-10M23 16v-5m-4 0h8M35 11h5v5"/></svg>
+        </span>
+        <span><b>机器人学基础</b><small>AI SMART COURSE</small></span>
+      </a>
+      <nav id="primary-nav" class="primary-nav">
+        <a href="#overview" data-route="overview"><span>01</span>课程首页</a>
+        <a href="#path" data-route="path"><span>02</span>学习路径</a>
+        <a href="#map" data-route="map"><span>03</span>课程图谱</a>
+        <a href="#lab" data-route="lab"><span>04</span>ABB验证实验</a>
+        <a href="#assistant" data-route="assistant"><span>05</span>AI诊断助教</a>
+        <a href="#evidence" data-route="evidence"><span>06</span>学习证据</a>
+        <a href="#teacher" data-route="teacher"><span>07</span>教师工作台</a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="privacy-note"><span class="status-dot"></span>默认本机存储，不上传个人信息</div>
+        <button class="ghost-btn" id="theme-toggle" type="button">切换明暗主题</button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button id="menu-toggle" class="icon-btn menu-btn" type="button" aria-label="打开导航">☰</button>
+        <div class="crumb"><span>机器人工程专业核心课</span><b id="route-title">课程首页</b></div>
+        <div class="top-actions">
+          <span class="semester">80学时 · 3.5学分</span>
+          <button class="primary-btn compact" data-go="assistant" type="button">询问AI助教</button>
+        </div>
+      </header>
+
+      <main id="main">
+        <section class="page active" data-page="overview" aria-labelledby="overview-title">
+          <div class="hero">
+            <div class="hero-copy">
+              <span class="eyebrow">2026 · AI智慧课程部署版</span>
+              <h1 id="overview-title">先证明，再结论。<br><em>让每一次机器人运动都可解释。</em></h1>
+              <p>以ABB IRB 1200为贯穿对象，把位姿表示、运动学、动力学、轨迹规划与控制组织为可验证的工程任务。AI只负责诊断与提示，模型、代码、复算和结论由学习者完成。</p>
+              <div class="hero-actions">
+                <button class="primary-btn" data-go="path" type="button">开始学习路径</button>
+                <button class="secondary-btn" data-go="lab" type="button">进入ABB实验</button>
+              </div>
+              <div class="hero-proof">
+                <span><b>6</b> 能力模块</span><span><b>4</b> 直接证据</span><span><b>3</b> 级AI提示</span>
+              </div>
+            </div>
+            <div class="hero-visual" aria-label="六轴机器人结构示意">
+              <div class="visual-grid"></div>
+              <svg class="robot-hero" viewBox="0 0 520 440" role="img" aria-label="工业机器人抽象图">
+                <defs><linearGradient id="armGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffce45"/><stop offset="1" stop-color="#ff7a32"/></linearGradient></defs>
+                <path class="trace" d="M60 320 C145 310 175 225 255 225 S365 160 457 92"/>
+                <g class="arm">
+                  <path d="M100 360h130l-17-47h-96z"/><circle cx="164" cy="301" r="41"/>
+                  <path d="M151 287l50-133 49 16-47 137z"/><circle cx="225" cy="155" r="31"/>
+                  <path d="M240 141l117 55-21 43-121-56z"/><circle cx="354" cy="218" r="27"/>
+                  <path d="M367 218l55-92 25 15-48 98z"/><circle cx="435" cy="126" r="18"/>
+                  <path d="M447 122l36-4 3 16-38 8z"/>
+                </g>
+                <g class="joint-labels"><text x="139" y="306">A1</text><text x="215" y="161">A2</text><text x="344" y="224">A3</text><text x="426" y="132">A5</text></g>
+              </svg>
+              <div class="visual-card"><span>当前主任务</span><b>轨迹规划与工程验证</b><small>模型 → 代码 → 仿真 → 反证</small></div>
+            </div>
+          </div>
+
+          <div class="section-heading"><div><span class="eyebrow">LEARNING OUTCOMES</span><h2>学习产出决定任务与评价</h2></div><p>每项产出都对应任务、直接证据和补证路径，避免“看完视频即学会”。</p></div>
+          <div id="outcome-grid" class="outcome-grid"></div>
+
+          <div class="feature-band">
+            <div><span class="eyebrow">COURSE DESIGN</span><h2>一条贯穿课程的工程证据链</h2></div>
+            <div class="evidence-chain">
+              <article><span>01</span><b>模型证据</b><p>坐标系、参数约定、方程与适用边界。</p></article>
+              <i>→</i><article><span>02</span><b>代码证据</b><p>变量、函数与数学模型逐项对应。</p></article>
+              <i>→</i><article><span>03</span><b>仿真证据</b><p>位姿、速度、限位和连续性可复算。</p></article>
+              <i>→</i><article><span>04</span><b>反证证据</b><p>用超限、奇异或错误参数检验结论。</p></article>
+            </div>
+          </div>
+
+          <div class="standards-strip">
+            <div><b>建设依据</b><span>学生中心 · 产出导向 · 持续改进</span></div>
+            <div><b>智慧场景</b><span>课前诊断 · 课堂研判 · 虚实验证 · 个性补证</span></div>
+            <div><b>技术边界</b><span>最小数据 · 人工复核 · 不上传隐私 · AI输出可追溯</span></div>
+          </div>
+        </section>
+
+        <section class="page" data-page="path" aria-labelledby="path-title">
+          <div class="page-intro"><span class="eyebrow">ADAPTIVE PATH</span><h1 id="path-title">从基础诊断到独立迁移</h1><p>六个模块按先修关系组织。完成任务并提交直接证据后，系统才记录模块进度；后期任务逐步减少AI提示。</p></div>
+          <div class="diagnostic-card">
+            <div><span class="eyebrow">3分钟入口诊断</span><h2>你最需要先补哪块基础？</h2><p>选择当前最接近的状态，系统只给路径建议，不代替教师评价。</p></div>
+            <div id="diagnostic-options" class="diagnostic-options"></div>
+            <div id="diagnostic-result" class="diagnostic-result" aria-live="polite">尚未完成诊断</div>
+          </div>
+          <div id="module-list" class="module-list"></div>
+        </section>
+
+        <section class="page" data-page="map" aria-labelledby="map-title">
+          <div class="page-intro"><span class="eyebrow">KNOWLEDGE · TASK · ABILITY</span><h1 id="map-title">三图联动，不做孤立知识点清单</h1><p>点击节点查看它支撑的工程问题、学习任务、产出证据和评价要求。</p></div>
+          <div class="map-layout">
+            <div class="map-canvas"><svg id="knowledge-map" viewBox="0 0 900 560" role="img" aria-label="课程知识任务能力图谱"></svg></div>
+            <aside id="node-inspector" class="node-inspector"><span class="eyebrow">节点说明</span><h2>选择一个节点</h2><p>这里将显示先修关系、任务与证据要求。</p></aside>
+          </div>
+          <div class="resource-callout"><div><span class="eyebrow">已迁移资源</span><h2>原有数字教材作为学习支架保留</h2><p>8章教材、交互动画和检索内容已复制到部署目录；新版门户以任务和证据组织入口。</p></div><a class="secondary-btn" href="./resources/textbook/index.html">打开数字教材</a></div>
+        </section>
+
+        <section class="page" data-page="lab" aria-labelledby="lab-title">
+          <div class="page-intro"><span class="eyebrow">ABB IRB 1200-5/0.9</span><h1 id="lab-title">用同一模型完成计算、仿真与反证</h1><p>本页计算链与课程可复算MATLAB脚本采用同一组ROS-Industrial参考关节链参数。社区参考模型不是ABB个体标定模型，碰撞和RobotStudio控制器结果仍需站点文件验证。</p></div>
+          <div class="lab-grid">
+            <div class="sim-panel">
+              <div class="panel-head"><div><span class="eyebrow">实时正运动学</span><h2>六轴构型检查</h2></div><button id="reset-joints" class="ghost-btn" type="button">恢复起点</button></div>
+              <canvas id="robot-canvas" width="820" height="560" aria-label="ABB IRB 1200关节链仿真图"></canvas>
+              <div class="sim-readout"><div><span>法兰位置 x</span><b id="fk-x">—</b></div><div><span>法兰位置 y</span><b id="fk-y">—</b></div><div><span>法兰位置 z</span><b id="fk-z">—</b></div><div><span>A5奇异筛查</span><b id="singularity-state">—</b></div></div>
+            </div>
+            <div class="joint-panel"><div class="panel-head"><div><span class="eyebrow">JOINT SPACE</span><h2>关节输入与限位</h2></div></div><div id="joint-controls"></div></div>
+          </div>
+          <div class="trajectory-panel">
+            <div><span class="eyebrow">五次时间标度</span><h2>轨迹约束预检</h2><p>端点速度、加速度为零；峰值速度按1.875×|Δq|/T计算。通过仅表示课程模型预检通过，不等于实体机器人安全放行。</p></div>
+            <div class="trajectory-controls"><label>目标构型<select id="goal-preset"><option value="valid">验证轨迹 [60,40,-70,100,45,180]</option><option value="singular">奇异反例 [60,40,-70,100,0,180]</option><option value="overlimit">超限反例 [60,140,-70,100,45,180]</option></select></label><label>运行时间 / s<input id="duration-input" type="number" min="1" max="15" step="0.5" value="3"></label><button id="check-trajectory" class="primary-btn" type="button">执行约束检查</button><button id="animate-trajectory" class="secondary-btn" type="button">播放轨迹</button></div>
+            <div id="trajectory-results" class="trajectory-results"></div>
+          </div>
+          <div class="truth-note"><b>真实性说明</b><p>D-H链、关节限位、最大速度、正逆解与轨迹结果可由随课程提供的MATLAB脚本复算。RobotStudio站点、工具负载、工件坐标、碰撞集和虚拟控制器日志未提供时，相关结论必须标记“待验证”。</p><a href="./resources/abb/ABB_IRB1200_5_90_trajectory_validation.m" download>下载可复算MATLAB代码</a><a href="./resources/abb/ABB_IRB1200_复算结果.json" download>下载复算结果</a></div>
+        </section>
+
+        <section class="page" data-page="assistant" aria-labelledby="assistant-title">
+          <div class="page-intro"><span class="eyebrow">DIAGNOSTIC AI</span><h1 id="assistant-title">AI给检查路径，不替你交答案</h1><p>先描述“预期—实际—已检查项”。三级提示依次定位问题、提供方法、给出局部支架；完整建模、代码和结论必须由学习者完成。</p></div>
+          <div class="assistant-layout">
+            <div class="chat-card">
+              <div class="assistant-policy"><b id="ai-mode-label">当前模式：课程知识库诊断</b><span>不在前端保存密钥 · 对话默认仅存本机</span></div>
+              <div id="chat-log" class="chat-log" aria-live="polite"><div class="message assistant"><span>AI助教</span><p>请告诉我：你在做哪一项任务？预期结果是什么？实际结果是什么？已经检查过哪些参数或约束？</p></div></div>
+              <form id="assistant-form" class="assistant-form">
+                <label>问题类型<select id="question-type"><option value="model">模型与坐标系</option><option value="code">代码与公式对应</option><option value="simulation">仿真与轨迹约束</option><option value="verification">反证与结果解释</option></select></label>
+                <label class="grow">问题描述<textarea id="question-input" rows="3" placeholder="示例：同一组关节角下，D-H正解与参考关节链的末端位置不一致；已核对单位，但未核对theta偏置。" required></textarea></label>
+                <div class="hint-levels" role="group" aria-label="提示级别"><button type="submit" data-level="1">一级：定位</button><button type="submit" data-level="2">二级：方法</button><button type="submit" data-level="3">三级：局部支架</button></div>
+              </form>
+            </div>
+            <aside class="ai-boundary"><span class="eyebrow">使用边界</span><h2>四条不可越过的线</h2><ol><li><b>不代建模</b><span>AI不得直接给出整套D-H表或完整报告。</span></li><li><b>不代编程</b><span>AI只指出局部错误和检查步骤。</span></li><li><b>不代验证</b><span>数值必须由代码、手算或软件复算。</span></li><li><b>不代负责</b><span>实体运行前由师生完成人工安全复核。</span></li></ol><button id="export-ai-log" class="secondary-btn full" type="button">导出AI使用记录</button></aside>
+          </div>
+        </section>
+
+        <section class="page" data-page="evidence" aria-labelledby="evidence-title">
+          <div class="page-intro"><span class="eyebrow">DIRECT EVIDENCE</span><h1 id="evidence-title">成绩来自证据，不来自页面停留时长</h1><p>课程记录模型、代码、仿真和反证四类学习证据。当前部署版仅保存本机学习档案，可导出后提交到学校平台。</p></div>
+          <div class="evidence-layout">
+            <form id="evidence-form" class="evidence-form">
+              <div class="panel-head"><div><span class="eyebrow">新建记录</span><h2>提交证据索引</h2></div></div>
+              <label>所属模块<select id="evidence-module"></select></label>
+              <fieldset><legend>证据类型</legend><div class="check-grid"><label><input type="checkbox" name="evidenceType" value="模型">模型证据</label><label><input type="checkbox" name="evidenceType" value="代码">代码证据</label><label><input type="checkbox" name="evidenceType" value="仿真">仿真证据</label><label><input type="checkbox" name="evidenceType" value="反证">反证证据</label></div></fieldset>
+              <label>证据位置或文件名<input id="evidence-location" type="text" placeholder="例如：提交包/03_fk_recheck.pdf" required></label>
+              <label>结论与复算口径<textarea id="evidence-note" rows="5" placeholder="说明该证据证明什么、参数来源、计算口径和未解决问题。" required></textarea></label>
+              <label class="integrity-check"><input id="integrity-confirm" type="checkbox" required>我确认：数据可追溯；AI使用已说明；待验证项未写成既成结论。</label>
+              <button class="primary-btn" type="submit">保存证据记录</button>
+            </form>
+            <div class="evidence-archive"><div class="panel-head"><div><span class="eyebrow">本机学习档案</span><h2>证据记录</h2></div><button id="export-evidence" class="ghost-btn" type="button">导出JSON</button></div><div id="evidence-list" class="evidence-list"></div></div>
+          </div>
+        </section>
+
+        <section class="page" data-page="teacher" aria-labelledby="teacher-title">
+          <div class="page-intro"><span class="eyebrow">TEACHER CONSOLE</span><h1 id="teacher-title">用直接证据发现缺口并安排补证</h1><p>此处仅汇总当前浏览器产生的演示记录，不显示虚构班级数据。接入学校平台后，应使用脱敏、同口径、可追溯的真实教学数据。</p></div>
+          <div class="metric-grid"><article><span>已完成任务</span><b id="metric-tasks">0 / 6</b><small>本机记录</small></article><article><span>证据条目</span><b id="metric-evidence">0</b><small>本机记录</small></article><article><span>AI提示调用</span><b id="metric-ai">0</b><small>按级别留痕</small></article><article><span>待补证模块</span><b id="metric-gaps">6</b><small>自动提示</small></article></div>
+          <div class="teacher-grid">
+            <div class="compliance-card"><div class="panel-head"><div><span class="eyebrow">申报对照</span><h2>智慧课程建设要素</h2></div></div><div id="compliance-list"></div></div>
+            <div class="remediation-card"><div class="panel-head"><div><span class="eyebrow">持续改进</span><h2>补证建议</h2></div></div><div id="remediation-list"></div><button id="export-portfolio" class="primary-btn full" type="button">导出完整学习档案</button></div>
+          </div>
+          <div class="teacher-note"><b>部署建议</b><p>公开GitHub Pages版本用于展示课程结构和交互原型；真实教学应接入学校统一身份认证、课程平台、对象存储和经审批的教育大模型网关，不在前端保存API密钥或学生敏感信息。</p></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="module-dialog" class="module-dialog"><button id="dialog-close" class="dialog-close" type="button" aria-label="关闭">×</button><div id="dialog-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./assets/runtime-config.js"></script>
+  <script src="./assets/course-data.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

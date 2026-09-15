@@ -1,0 +1,11 @@
+{
+  "name": "robotics-ai-smart-course",
+  "version": "1.0.0",
+  "private": true,
+  "description": "机器人学基础AI智慧课程静态部署版",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node scripts/validate.mjs"
+  },
+  "engines": { "node": ">=18" }
+}

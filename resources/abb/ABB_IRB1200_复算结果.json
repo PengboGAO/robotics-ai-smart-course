@@ -1,0 +1,125 @@
+{
+  "model": "ABB IRB 1200-5/0.9",
+  "maximumOfficialPointErrorMm": 2.5333255805940258,
+  "officialPointToleranceMm": 3,
+  "officialPointToleranceScope": "作者为复算ABB表格整数显示值设置的容差，不是ABB精度或验收指标",
+  "officialPointErrorsMm": [
+    0.10000000000002274,
+    2.5333255805940258,
+    0.43894784506718132,
+    0.37125720802588508,
+    0.22170600789936731,
+    0.42049269580873622,
+    0.42315983209915409,
+    0.43649932367237665,
+    0.24179407244760159,
+    0.29869308655159227
+  ],
+  "dhConvention": "标准D-H；法兰坐标系使用固定姿态对齐到ROS-Industrial参考链",
+  "dhAMeters": [
+    0,
+    0.448,
+    0.042,
+    0,
+    0,
+    0
+  ],
+  "dhAlphaDeg": [
+    -90,
+    0,
+    -90,
+    90,
+    -90,
+    0
+  ],
+  "dhDMeters": [
+    0.3991,
+    0,
+    0,
+    0.451,
+    0,
+    0.082
+  ],
+  "dhThetaOffsetDeg": [
+    0,
+    -90,
+    0,
+    0,
+    0,
+    0
+  ],
+  "dhMaximumPositionDifferenceMeters": 2.2887833992611187E-16,
+  "dhMaximumRotationFrobeniusDifference": 4.9124232516317306E-16,
+  "qStartDeg": [
+    0,
+    -30,
+    20,
+    0,
+    30,
+    0
+  ],
+  "qGoalDeg": [
+    60,
+    40,
+    -70,
+    100,
+    45,
+    180
+  ],
+  "durationSeconds": 3,
+  "peakSpeedDegPerSecond": [
+    37.5,
+    43.75,
+    56.25,
+    62.5,
+    9.375,
+    112.5
+  ],
+  "speedUtilizationPercent": [
+    13.020833333333334,
+    18.229166666666668,
+    18.939393939393938,
+    15.625,
+    2.3148148148148149,
+    18.75
+  ],
+  "positionPass": true,
+  "speedPass": true,
+  "endpointVelocityPass": true,
+  "endpointAccelerationPass": true,
+  "flangePathLengthMeters": 0.751759567515978,
+  "maximumSpeedSupplyCondition": "ABB三相200-600 V参数；实体执行前核对控制柜供电条件",
+  "inverseInitialGuessDeg": [
+    64,
+    36,
+    -66,
+    96,
+    49,
+    176
+  ],
+  "inverseSolutionDeg": [
+    60.000000000099305,
+    39.999999772305621,
+    -69.999999545256813,
+    100.00000022556611,
+    45.000000036960472,
+    179.99999968170613
+  ],
+  "inverseIterations": 5,
+  "inversePositionErrorMeters": 4.54261063632143E-10,
+  "inverseOrientationErrorRad": 4.9623756799259191E-11,
+  "minimumJacobianSingularValue": 0.040746422276430445,
+  "minimumAbsSinAxis5": 0.49999999999999994,
+  "rejectedSingularityGoalDeg": [
+    60,
+    40,
+    -70,
+    100,
+    -45,
+    180
+  ],
+  "rejectedMinimumJacobianSingularValue": 0.00026358552265885651,
+  "rejectedAxis5DegAtMinimum": -0.056694708148157247,
+  "singularityMetricScope": "几何雅可比筛查量，不是ABB控制器验收阈值",
+  "collisionAndRobotStudioStatus": "待验证：缺少RobotStudio站点、tooldata、loaddata、wobjdata、碰撞集和虚拟控制器事件日志"
+}
