@@ -1,0 +1,18 @@
+<!--META {"kp_id": "kp-4-7", "kp_label": "KP 4.7", "title": "ABB几何雅可比与奇异筛查", "tags": ["重点", "难点", "考点"], "difficulty": 5, "chapter": 4, "order": 7, "file": "kp-04-7.html"}-->
+<div class="kp-card" id="kp-4-7">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.7</span>ABB几何雅可比与奇异筛查</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 难点">难点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span></span></div></div>
+  <div class="kp-body">
+    <p><span class="term">几何雅可比</span>把ABB六轴关节速度映射为法兰线速度和角速度：v=J(q)q̇。构造时必须使用基坐标系表达的关节轴u<sub>i</sub>、轴上点p<sub>i</sub>和法兰点p<sub>e</sub>。</p>
+    <div class="formula-block"><div class="formula-label">IRB 1200六个旋转关节的雅可比列</div><div class="formula">J<sub>i</sub> = [u<sub>i</sub> × (p<sub>e</sub>−p<sub>i</sub>); u<sub>i</sub>]，i=1…6</div></div>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> ABB几何雅可比</div><pre>[T, jointPositions, ~, axesWorld] = forwardKinematics(q, origins, axes);
+for axisIndex = 1:6
+    u = axesWorld(axisIndex,:)';
+    p = jointPositions(axisIndex,:)';
+    J(:,axisIndex) = [cross(u,T(1:3,4)-p); u];
+end
+sigma = svd(J);</pre></div>
+    <p>课程同时报告最小奇异值σ<sub>min</sub>和条件数κ。A5接近0°只作为ABB球腕奇异的快速筛查信号，不能替代完整雅可比分析；σ<sub>min</sub>阈值是课程数值筛查设置，不得写成ABB控制器验收标准。</p>
+    <div class="callout callout-info"><div class="callout-title">轨迹级检查</div><p>在整条轨迹的每个采样点计算σ<sub>min</sub>，保存最小值、发生时刻和对应六轴角度。再构造一条A5穿越0°的反例轨迹，比较修正前后的最小奇异值和关节速度需求。</p></div>
+    <div class="callout callout-warning"><div class="callout-title">结论边界</div><p>雅可比未触发课程阈值，只能写“未发现该类运动学奇异风险”。碰撞、控制器奇异处理、机械柔性和工具负载仍需RobotStudio或实体系统证据。</p></div>
+  </div>
+</div>

@@ -435,7 +435,7 @@ Rz_45 = double(subs(Rz, theta, theta_val))</pre>
               R = cosθ·I + (1 - cosθ)·n·n<sup>T</sup> + sinθ·n×
             </div>
           </div>
-          <p>其中 I 为 3×3 单位阵，n× 为旋转向量 n 的反对称矩阵（叉积矩阵）。轴角表示与四元数关系密切：四元数 q = [cos(θ/2), sin(θ/2)·n] 正是轴角 (n, θ) 的"半角"编码，因此四元数可视为轴角表示的无奇异版本。轴角表示法仅 3 个独立参数（n 的 2 个方向自由度 + θ 的 1 个），但存在 θ=0 和 θ=π 处的多义性。</p>
+          <p>其中 I 为 3×3 单位阵，n× 为旋转轴 n 的反对称矩阵（叉积矩阵）。轴角表示与四元数关系密切：单位四元数 q = [cos(θ/2), sin(θ/2)·n] 是轴角 (n, θ) 的“半角”编码。它避免了欧拉角的万向锁，但仍有 q 与 −q 表示同一旋转的双覆盖性质；轴角本身在 θ=0 和 θ=π 附近也存在轴选择或符号多义性。</p>
         </div>
 
         <p><span class="term">四元数</span>（Quaternion）是扩展复数至四维的超复数，由 Hamilton 于 1843 年提出。单位四元数用 4 个参数描述三维旋转：</p>
@@ -448,7 +448,7 @@ Rz_45 = double(subs(Rz, theta, theta_val))</pre>
         <p>其中 w 为实部，(x, y, z) 为虚部，满足归一化约束 <span class="inline-formula">w<sup>2</sup> + x<sup>2</sup> + y<sup>2</sup> + z<sup>2</sup> = 1</span>。四元数也可用旋转轴 n 与转角 θ 表示：<span class="inline-formula">q = [cos(θ/2), n<sub>x</sub>sin(θ/2), n<sub>y</sub>sin(θ/2), n<sub>z</sub>sin(θ/2)]</span>。</p>
         <p>四元数相比欧拉角的优势：</p>
         <ul>
-          <li><strong>无奇异性</strong>：不存在万向锁问题，全域姿态唯一表示；</li>
+          <li><strong>无万向锁</strong>：单位四元数可连续表示姿态，但 q 与 −q 对应同一旋转，插值前需统一符号分支；</li>
           <li><strong>计算高效</strong>：乘法运算比旋转矩阵少（4 参数 vs 9 参数）；</li>
           <li><strong>插值平滑</strong>：支持球面线性插值（SLERP），姿态过渡自然平滑，无突变。</li>
         </ul>

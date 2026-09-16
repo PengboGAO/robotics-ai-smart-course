@@ -1,0 +1,97 @@
+<!--META {"kp_id": "kp-7-1", "kp_label": "KP 7.1", "title": "PID控制", "tags": ["重点", "考点"], "difficulty": 2, "chapter": 7, "order": 1, "file": "kp-07-1.html"}-->
+<div class="kp-card" id="kp-7-1">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 7.1</span>
+          PID控制
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">PID控制</span>（Proportional-Integral-Derivative Control）是工业控制中应用最广泛的反馈控制策略，通过将<strong>比例（P）</strong>、<strong>积分（I）</strong>、<strong>微分（D）</strong>三种控制作用线性组合，实现对系统误差的快速、准确、稳定调节。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">PID控制律</div>
+          <div class="formula">u(t) = K<sub>p</sub>·e(t) + K<sub>i</sub>·∫e(t)dt + K<sub>d</sub>·de(t)/dt</div>
+          <div class="formula-label" style="text-align:center;">其中 e(t) = r(t) − y(t) 为误差信号</div>
+        </div>
+
+        <p>三项控制作用的物理意义：</p>
+        <ul>
+          <li><strong>比例项 K<sub>p</sub>·e(t)</strong>：与当前误差成正比，误差越大控制量越大，是主要驱动力。但单纯比例控制会产生<span class="highlight">稳态误差</span>。</li>
+          <li><strong>积分项 K<sub>i</sub>·∫e(t)dt</strong>：对历史误差积分，消除稳态误差。但积分作用过强会降低系统稳定性，引起超调和振荡。</li>
+          <li><strong>微分项 K<sub>d</sub>·de(t)/dt</strong>：反映误差变化趋势，具有"预见性"，能抑制超调、加快响应。但对噪声敏感，需配合低通滤波。</li>
+        </ul>
+
+        <!-- PID控制系统框图 SVG -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <defs>
+              <marker id="arr-pid" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+              </marker>
+              <marker id="arr-fb" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#0891b2"/>
+              </marker>
+            </defs>
+
+            <!-- 设定值 -->
+            <rect x="20" y="110" width="90" height="50" rx="8" fill="#1a202c" opacity="0.85"/>
+            <text x="65" y="130" text-anchor="middle" fill="white" font-size="12" font-weight="700">设定值</text>
+            <text x="65" y="148" text-anchor="middle" fill="#93c5fd" font-size="11">r(t)</text>
+
+            <!-- 比较器 -->
+            <circle cx="180" cy="135" r="22" fill="white" stroke="#2563eb" stroke-width="2"/>
+            <text x="180" y="140" text-anchor="middle" fill="#2563eb" font-size="20" font-weight="700">±</text>
+
+            <!-- PID控制器 -->
+            <rect x="250" y="105" width="140" height="60" rx="8" fill="#2563eb"/>
+            <text x="320" y="130" text-anchor="middle" fill="white" font-size="13" font-weight="700">PID 控制器</text>
+            <text x="320" y="150" text-anchor="middle" fill="#dbeafe" font-size="11">Kp·e + Ki∫e + Kd·ė</text>
+
+            <!-- 执行器+被控对象 -->
+            <rect x="460" y="105" width="140" height="60" rx="8" fill="#0891b2"/>
+            <text x="530" y="130" text-anchor="middle" fill="white" font-size="13" font-weight="700">执行器 + 对象</text>
+            <text x="530" y="150" text-anchor="middle" fill="#cffafe" font-size="11">机器人关节</text>
+
+            <!-- 输出 -->
+            <rect x="670" y="110" width="90" height="50" rx="8" fill="#059669" opacity="0.85"/>
+            <text x="715" y="130" text-anchor="middle" fill="white" font-size="12" font-weight="700">输出</text>
+            <text x="715" y="148" text-anchor="middle" fill="#a7f3d0" font-size="11">y(t)</text>
+
+            <!-- 传感器（反馈） -->
+            <rect x="460" y="215" width="140" height="45" rx="8" fill="white" stroke="#0891b2" stroke-width="2"/>
+            <text x="530" y="242" text-anchor="middle" fill="#0891b2" font-size="12" font-weight="600">传感器反馈</text>
+
+            <!-- 连线 -->
+            <line x1="110" y1="135" x2="158" y2="135" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-pid)"/>
+            <line x1="202" y1="135" x2="248" y2="135" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-pid)"/>
+            <text x="225" y="128" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="700">e(t)</text>
+
+            <line x1="390" y1="135" x2="458" y2="135" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-pid)"/>
+            <text x="424" y="128" text-anchor="middle" fill="#2563eb" font-size="11" font-weight="700">u(t)</text>
+
+            <line x1="600" y1="135" x2="668" y2="135" stroke="#059669" stroke-width="2" marker-end="url(#arr-pid)"/>
+
+            <!-- 反馈路径 -->
+            <line x1="715" y1="160" x2="715" y2="237" stroke="#0891b2" stroke-width="2"/>
+            <line x1="715" y1="237" x2="602" y2="237" stroke="#0891b2" stroke-width="2" marker-end="url(#arr-fb)"/>
+            <line x1="460" y1="237" x2="180" y2="237" stroke="#0891b2" stroke-width="2"/>
+            <line x1="180" y1="237" x2="180" y2="157" stroke="#0891b2" stroke-width="2" marker-end="url(#arr-fb)"/>
+
+            <!-- 标注 -->
+            <text x="450" y="232" text-anchor="middle" fill="#0891b2" font-size="10">y(t) 反馈</text>
+          </svg>
+          <div class="diagram-caption">图7-1 PID控制系统标准框图：设定值 → 误差比较 → PID控制器 → 执行器 → 输出 → 反馈</div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠ 参数整定的重要性</div>
+          <p>PID控制的核心在于三个参数 K<sub>p</sub>、K<sub>i</sub>、K<sub>d</sub> 的合理选取。参数过小则响应迟缓、误差大；参数过大则系统振荡甚至失稳。工程中常用 <span class="term">Ziegler-Nichols法</span> 进行参数整定。</p>
+        </div>
+      </div>
+    </div>

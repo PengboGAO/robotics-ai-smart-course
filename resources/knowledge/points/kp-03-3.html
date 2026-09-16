@@ -1,0 +1,85 @@
+<!--META {"kp_id": "kp-3-3", "kp_label": "KP 3.3", "title": "改进D-H法", "tags": ["难点", "考点"], "difficulty": 4, "chapter": 3, "order": 3, "file": "kp-03-3.html"}-->
+<div class="kp-card" id="kp-3-3">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 3.3</span>改进D-H法</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">改进 D-H 法</span>（Modified D-H，常指Craig约定）改变了相邻坐标系之间四个基本变换的排列，并常采用 a<sub>i-1</sub>、α<sub>i-1</sub>、d<sub>i</sub>、θ<sub>i</sub> 的下标体系。不同教材对坐标系归属和下标描述可能存在差异，因此本课程不把“坐标系固连于哪一编号连杆”作为脱离公式的记忆结论，而以本页给出的变换次序和坐标轴定义为准。使用时必须保证坐标系、参数表、变换矩阵与软件接口采用同一约定。</p>
+        <div class="formula-block">
+          <div class="formula-label">改进 D-H 变换矩阵分解</div>
+          <div class="formula"><sup>i-1</sup><sub>i</sub>T = Rot(x, α<sub>i-1</sub>) · Trans(x, a<sub>i-1</sub>) · Rot(z, θ<sub>i</sub>) · Trans(z, d<sub>i</sub>)</div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-label">改进 D-H 连杆变换矩阵通式（3-2）</div>
+          <div class="formula">
+            <sup>i-1</sup><sub>i</sub>T = ⎡ cθ<sub>i</sub> &nbsp; −sθ<sub>i</sub> &nbsp; 0 &nbsp;&nbsp;&nbsp; a<sub>i-1</sub> ⎤<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ sθ<sub>i</sub>cα<sub>i-1</sub> &nbsp; cθ<sub>i</sub>cα<sub>i-1</sub> &nbsp; −sα<sub>i-1</sub> &nbsp; −sα<sub>i-1</sub>d<sub>i</sub> ⎥<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ sθ<sub>i</sub>sα<sub>i-1</sub> &nbsp; cθ<sub>i</sub>sα<sub>i-1</sub> &nbsp; cα<sub>i-1</sub> &nbsp; cα<sub>i-1</sub>d<sub>i</sub> ⎥<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎣ 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 ⎦
+          </div>
+        </div>
+
+        <p>两种约定在数学上等价，最终的位姿结果一致，但<span class="highlight">参数表与变换矩阵形式不同</span>，使用时必须保证参数表与公式约定一致。下表系统对比两种约定：</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>比较项目</th>
+                <th>经典 D-H（标准约定）</th>
+                <th>改进 D-H（Craig 约定）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>坐标系 {i} 固连位置</td>
+                <td>连杆 i（关节 i 处）</td>
+                <td>连杆 i-1（关节 i+1 处）</td>
+              </tr>
+              <tr>
+                <td>z<sub>i</sub> 轴方向</td>
+                <td>沿关节 i 轴线</td>
+                <td>沿关节 i+1 轴线</td>
+              </tr>
+              <tr>
+                <td>x<sub>i</sub> 轴方向</td>
+                <td>沿 z<sub>i-1</sub> 与 z<sub>i</sub> 公垂线</td>
+                <td>沿 z<sub>i-1</sub> 与 z<sub>i</sub> 公垂线</td>
+              </tr>
+              <tr>
+                <td>四参数下标</td>
+                <td>a<sub>i</sub>, α<sub>i</sub>, d<sub>i</sub>, θ<sub>i</sub></td>
+                <td>a<sub>i-1</sub>, α<sub>i-1</sub>, d<sub>i</sub>, θ<sub>i</sub></td>
+              </tr>
+              <tr>
+                <td>变换分解顺序</td>
+                <td>R(z,θ)·T(z,d)·T(x,a)·R(x,α)</td>
+                <td>R(x,α)·T(x,a)·R(z,θ)·T(z,d)</td>
+              </tr>
+              <tr>
+                <td>代表文献</td>
+                <td>Spong《Robot Modeling and Control》</td>
+                <td>Craig《Introduction to Robotics》</td>
+              </tr>
+              <tr>
+                <td>主要优点</td>
+                <td>概念直观、历史沿用广</td>
+                <td>下标统一、平行关节处理清晰</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="font-size:0.85rem;color:#64748b;">注：两种约定中 x<sub>i</sub> 均描述为"沿 z<sub>i-1</sub> 与 z<sub>i</sub> 公垂线"，但因 z<sub>i</sub> 定义不同（经典 D-H 中 z<sub>i</sub> 沿关节 i 轴线，改进 D-H 中 z<sub>i</sub> 沿关节 i+1 轴线），其实际几何位置不同。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">约定选择提示</div>
+          <p>本课程后续案例统一采用 <strong>ABB IRB 1200-5/0.9</strong>。建模时先以ROS-Industrial的关节原点与轴向建立参考链，再由学生建立课程等价的经典D-H链；两条链必须在零位和多组非零构型下同时比较位置误差与姿态误差。课程D-H表是教学建模结果，不表述为ABB厂家公布参数。</p>
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,76 @@
+<!--META {"kp_id": "kp-4-1", "kp_label": "KP 4.1", "title": "多解问题", "tags": ["重点", "考点"], "difficulty": 3, "chapter": 4, "order": 1, "file": "kp-04-1.html"}-->
+<div class="kp-card" id="kp-4-1">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 4.1</span>多解问题</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>逆运动学的根本困难在于非线性方程的多解、无解与奇异性。正运动学 T<sub>0n</sub>=f(q) 对给定关节变量是单值映射，而逆映射通常不是单值。具有球形腕和常见几何结构的6R工业机器人常出现“肩左/右、肘上/下、腕翻转/不翻转”组合，因而最多可得到8组候选解；但这不是任意6R串联机器人的一般上界，一般6R机构的复数孤立解上界可达16。实际实数可用解还要受工作空间、关节限位、碰撞和连续性约束。</p>
+
+        <p>多解的存在与三个因素有关：（1）<strong>关节极限</strong>会排除物理不可达的解；（2）<strong>连杆参数</strong>会改变候选解数量；（3）<strong>冗余度</strong>会使解成为连续族。下图用ABB IRB 1200的A2–A3平面教学子链说明同一腕心投影对应“肘上”与“肘下”两支。</p>
+
+        <div class="svg-diagram">
+          <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
+            <!-- common base -->
+            <rect x="80" y="240" width="30" height="50" fill="#94a3b8" opacity="0.5"/>
+            <circle cx="95" cy="240" r="6" fill="#2563eb"/>
+            <text x="60" y="305" font-size="11" fill="#64748b">基座</text>
+            <!-- target end point -->
+            <circle cx="520" cy="120" r="7" fill="#dc2626"/>
+            <text x="530" y="118" font-size="12" fill="#dc2626" font-weight="700">目标点 P (同一位置)</text>
+            <!-- solution 1: elbow up -->
+            <line x1="95" y1="240" x2="330" y2="80" stroke="#059669" stroke-width="4"/>
+            <line x1="330" y1="80" x2="520" y2="120" stroke="#059669" stroke-width="4"/>
+            <circle cx="330" cy="80" r="6" fill="#059669"/>
+            <text x="338" y="76" font-size="12" fill="#059669" font-weight="700">肘上 (解1)</text>
+            <text x="180" y="170" font-size="11" fill="#059669">l₁</text>
+            <text x="430" y="92" font-size="11" fill="#059669">l₂</text>
+            <!-- solution 2: elbow down -->
+            <line x1="95" y1="240" x2="350" y2="220" stroke="#7c3aed" stroke-width="4" stroke-dasharray="6,3"/>
+            <line x1="350" y1="220" x2="520" y2="120" stroke="#7c3aed" stroke-width="4" stroke-dasharray="6,3"/>
+            <circle cx="350" cy="220" r="6" fill="#7c3aed"/>
+            <text x="358" y="235" font-size="12" fill="#7c3aed" font-weight="700">肘下 (解2)</text>
+            <text x="200" y="245" font-size="11" fill="#7c3aed">l₁</text>
+            <text x="430" y="185" font-size="11" fill="#7c3aed">l₂</text>
+            <!-- theta labels -->
+            <path d="M 130 240 A 35 35 0 0 0 120 232" fill="none" stroke="#059669" stroke-width="1.5"/>
+            <text x="135" y="232" font-size="11" fill="#059669">θ₁⁽¹⁾</text>
+            <path d="M 135 240 A 40 40 0 0 1 138 252" fill="none" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="140" y="262" font-size="11" fill="#7c3aed">θ₁⁽²⁾</text>
+            <!-- note -->
+            <g transform="translate(560,200)">
+              <rect x="0" y="0" width="150" height="110" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+              <text x="10" y="20" font-size="11" font-weight="700" fill="#1a202c">多解来源</text>
+              <text x="10" y="40" font-size="10" fill="#475569">ABB A2–A3平面教学子链</text>
+              <text x="10" y="56" font-size="10" fill="#475569">同一末端位置 P</text>
+              <text x="10" y="72" font-size="10" fill="#059669">→ 解1：肘在上</text>
+              <text x="10" y="88" font-size="10" fill="#7c3aed">→ 解2：肘在下</text>
+            <text x="10" y="104" font-size="10" fill="#64748b">典型球腕6R最多8组候选解</text>
+            </g>
+          </svg>
+          <div class="diagram-caption">图 4-1 逆运动学多解问题：同一末端位姿对应多个机器人构型</div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">最优解的选取</div>
+          <p>多解存在时，需根据任务需求选取<strong>最优解</strong>。常用判据包括：（1）<strong>最短路径</strong>——选择与当前关节角偏差最小的解，减少运动时间与能耗；（2）<strong>避障</strong>——排除会与障碍物碰撞的构型；（3）<strong>远离奇异</strong>——选择雅可比条件数较小的解；（4）<strong>关节极限</strong>——排除超出关节范围的解。工程上常综合上述判据加权评分。</p>
+        </div>
+
+        <p>对本节讨论的典型球形腕6R机器人，8组候选解可由三个常见二选一构型组合解释：</p>
+        <ul>
+          <li><strong>左臂/右臂（2 组）</strong>：由 θ<sub>1</sub> 的两组解产生，对应机器人从左侧或右侧接近目标。</li>
+          <li><strong>肘上/肘下（2 组）</strong>：由 θ<sub>3</sub> 的正负号产生，对应肘部向上或向下弯曲。</li>
+          <li><strong>腕部翻转/不翻转（2 组）</strong>：由 θ<sub>5</sub> 的正负号产生，对应腕部两种姿态。</li>
+        </ul>
+        <p>2×2×2=8说明了该类结构的候选构型数。实际可用解数通常更少；对不满足该结构假设的6R机构，解的数目与形式可能不同，必须依据具体几何模型分析。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">解的存在性、唯一性与多重性</div>
+          <p>逆运动学解的三种情形：（1）<strong>无解</strong>——目标位姿超出工作空间，无任何关节角可达；（2）<strong>唯一解</strong>——目标在工作空间边界且处于退化位形，仅一组解；（3）<strong>多解</strong>——目标在工作空间内部，通常多解。冗余机器人（自由度&gt;6）的解形成连续族，可在解空间中优化次级目标。</p>
+        </div>
+      </div>
+    </div>

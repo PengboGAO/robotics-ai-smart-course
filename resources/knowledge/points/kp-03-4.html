@@ -1,0 +1,82 @@
+<!--META {"kp_id": "kp-3-4", "kp_label": "KP 3.4", "title": "连杆坐标系建立", "tags": ["重点"], "difficulty": 3, "chapter": 3, "order": 4, "file": "kp-03-4.html"}-->
+<div class="kp-card" id="kp-3-4">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 3.4</span>连杆坐标系建立</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>建立连杆坐标系是 D-H 参数法中最关键、也最易出错的一步。坐标系一旦建立错误，参数表与变换矩阵均会出错。以经典 D-H 约定为例，建立 n 自由度机器人连杆坐标系的标准步骤如下：</p>
+
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">确定关节轴线</div>
+            <div class="step-desc">标出各关节 i=1..n 的运动轴线 z 方向。旋转关节轴线即转轴；移动关节轴线即平移方向。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">定 z<sub>i</sub> 轴</div>
+            <div class="step-desc">令 z<sub>i</sub> 沿关节 i 轴线方向（经典 D-H）。基座 z<sub>0</sub> 沿关节 1 轴线。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-title">定 x<sub>i</sub> 轴</div>
+            <div class="step-desc">x<sub>i</sub> 沿 z<sub>i-1</sub> 与 z<sub>i</sub> 的公垂线（a<sub>i</sub> 方向）。若两轴相交，x<sub>i</sub> 取 z<sub>i-1</sub>×z<sub>i</sub>；若两轴平行，任取公垂线。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-title">定原点 O<sub>i</sub></div>
+            <div class="step-desc">O<sub>i</sub> 为 x<sub>i</sub> 与 z<sub>i</sub> 的交点。基座原点 O<sub>0</sub> 任选。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-title">定 y<sub>i</sub> 轴</div>
+            <div class="step-desc">由右手定则 y<sub>i</sub> = z<sub>i</sub> × x<sub>i</sub> 确定，保证坐标系为右手系。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-title">读 D-H 参数</div>
+            <div class="step-desc">依次量取 a<sub>i</sub>、α<sub>i</sub>、d<sub>i</sub>、θ<sub>i</sub>，填入参数表。注意关节变量的位置。</div>
+          </div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">坐标系选取的自由度</div>
+          <p>当 z<sub>i-1</sub> 与 z<sub>i</sub> 平行时，公垂线方向不唯一（可沿轴线任意平移），此时通常令 d<sub>i</sub>=0 以简化参数表；当 z<sub>i-1</sub> 与 z<sub>i</sub> 相交时，a<sub>i</sub>=0，x<sub>i</sub> 方向有两种选择，可任选其一但需保持一致。这种自由度会导致参数表非唯一，但最终的位姿结果等价。</p>
+        </div>
+
+        <p>建立坐标系后，需对照参数表逐关节验证：每个关节变量（旋转关节为 θ<sub>i</sub>，移动关节为 d<sub>i</sub>）应出现在对应列；结构常量应反映机械设计图纸的真实尺寸。常见错误包括：把 d 与 a 混淆、α 的正负号判断错误（取决于绕 x 轴的右手定则方向）、坐标系编号错位等。</p>
+
+        <p>D-H 参数表的标准格式如下，每行对应一个关节，每列对应一个参数。务必在表头注明所采用的约定（经典或改进），并标明单位（长度单位 mm，角度单位 rad）：</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>关节 i</th>
+                <th>a<sub>i</sub> (mm)</th>
+                <th>α<sub>i</sub> (rad)</th>
+                <th>d<sub>i</sub> (mm)</th>
+                <th>θ<sub>i</sub> (rad)</th>
+                <th>关节类型</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>a<sub>1</sub></td><td>α<sub>1</sub></td><td>d<sub>1</sub></td><td>θ<sub>1</sub>★</td><td>旋转(R) / 移动(P)</td></tr>
+              <tr><td>2</td><td>a<sub>2</sub></td><td>α<sub>2</sub></td><td>d<sub>2</sub></td><td>θ<sub>2</sub>★</td><td>旋转(R) / 移动(P)</td></tr>
+              <tr><td>⋮</td><td colspan="5" style="text-align:center;color:#94a3b8;">依此类推，共 n 行</td></tr>
+              <tr><td>n</td><td>a<sub>n</sub></td><td>α<sub>n</sub></td><td>d<sub>n</sub></td><td>θ<sub>n</sub>★</td><td>旋转(R) / 移动(P)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.85rem;color:#64748b;">表 3-1 D-H 参数表标准格式（★ 标记关节变量；旋转关节变量在 θ 列，移动关节变量在 d 列）</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">参数表快速校验法</div>
+          <p>参数表不能靠“首行 a<sub>1</sub>=0”或“末行 d<sub>n</sub> 等于工具长度”等经验规则判真，因为数值取决于坐标系约定。可靠校验应包括：（1）旋转关节的变量在 θ 列、移动关节的变量在 d 列，变量数与自由度一致；（2）零位和至少一组非零位姿的矩阵连乘与几何尺寸一致；（3）与 CAD/URDF/厂商模型比较时统一基座、法兰、工具坐标系和零位偏置。三类检查同时通过后，参数表才具备工程可用性。</p>
+        </div>
+      </div>
+    </div>

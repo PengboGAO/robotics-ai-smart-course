@@ -1,0 +1,86 @@
+<!--META {"kp_id": "kp-7-5", "kp_label": "KP 7.5", "title": "柔顺控制", "tags": ["难点"], "difficulty": 4, "chapter": 7, "order": 5, "file": "kp-07-5.html"}-->
+<div class="kp-card" id="kp-7-5">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 7.5</span>
+          柔顺控制
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">柔顺控制</span>（Compliance Control）是使机器人在与环境接触时表现出"柔性"行为的控制策略。与刚性位置控制不同，柔顺控制允许机器人在受力时产生合理的位移，模拟弹簧-阻尼系统的力学行为。柔顺控制主要分为两类：</p>
+
+        <ul>
+          <li><strong>阻抗控制（Impedance Control）</strong>：控制机器人末端呈现目标阻抗特性（质量-阻尼-刚度），即力与运动的动态关系。机器人"主动"调节力学行为。</li>
+          <li><strong>导纳控制（Admittance Control）</strong>：测量外力后，根据目标导纳模型计算期望运动，再由内层位置控制器跟踪。机器人"被动"响应外力。</li>
+        </ul>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>对比维度</th>
+                <th>阻抗控制</th>
+                <th>导纳控制</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>控制对象</td>
+                <td>力（输出力矩）</td>
+                <td>运动（位置/速度）</td>
+              </tr>
+              <tr>
+                <td>传感器需求</td>
+                <td>位置/速度反馈；可结合力传感或力估计</td>
+                <td>通常需要外力测量或可靠的外力估计</td>
+              </tr>
+              <tr>
+                <td>内层环路</td>
+                <td>不需要</td>
+                <td>需要位置控制内环</td>
+              </tr>
+              <tr>
+                <td>刚性环境表现</td>
+                <td>可能不稳定</td>
+                <td>更稳定</td>
+              </tr>
+              <tr>
+                <td>柔性环境表现</td>
+                <td>表现好</td>
+                <td>受内环带宽限制</td>
+              </tr>
+              <tr>
+                <td>典型应用</td>
+                <td>力觉交互机器人</td>
+                <td>协作机器人（Cobot）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">阻抗控制目标方程</div>
+          <div class="formula">M<sub>d</sub>·ẍ + B<sub>d</sub>·ẋ + K<sub>d</sub>·(x − x<sub>d</sub>) = F<sub>ext</sub></div>
+          <div class="formula-label" style="text-align:center;">M<sub>d</sub>: 目标惯性矩阵 | B<sub>d</sub>: 目标阻尼矩阵 | K<sub>d</sub>: 目标刚度矩阵 | x<sub>d</sub>: 期望位置 | F<sub>ext</sub>: 外部接触力</div>
+        </div>
+
+        <p>阻抗控制通过调节力矩输出使末端呈现上述二阶动力学行为。当 F<sub>ext</sub>=0 时退化为位置控制；当与环境接触时，F<sub>ext</sub> 反馈使机器人"柔顺"地响应外力。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">导纳控制目标方程</div>
+          <div class="formula">M<sub>d</sub>·ẍ<sub>c</sub> + B<sub>d</sub>·ẋ<sub>c</sub> + K<sub>d</sub>·(x<sub>c</sub> − x<sub>d</sub>) = F<sub>ext</sub></div>
+          <div class="formula-label" style="text-align:center;">x<sub>c</sub>: 导纳模型输出的修正位置指令，送入内层位置控制器跟踪</div>
+        </div>
+
+          <p>导纳与阻抗描述的是不同的因果实现关系。力矩控制机器人常直接实现阻抗律；位置接口机器人常根据测得或估计的外力通过导纳模型生成运动指令，再由内层位置环跟踪。传感器需求取决于控制架构，不能简单理解为阻抗控制“不需要力信息”。</p>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✓ 协作机器人的核心</div>
+          <p>现代协作机器人（如UR、Franka Panda）广泛采用导纳控制实现"拖拽示教"和"碰撞检测"功能：外力传感器检测到接触力后，通过导纳模型计算期望速度修正，使机器人柔顺地"让步"。</p>
+        </div>
+      </div>
+    </div>

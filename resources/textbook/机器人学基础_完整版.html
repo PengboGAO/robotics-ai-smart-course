@@ -715,7 +715,7 @@
           </tr>
           <tr>
             <td>典型代表</td>
-            <td>ABB IRB 系列、KUKA</td>
+            <td>ABB IRB 1200、IRB 1300等</td>
             <td>达芬奇、iRobot 扫地机</td>
             <td>Canadarm、火星机械臂</td>
           </tr>
@@ -1205,7 +1205,7 @@ Rz_45 = double(subs(Rz, theta, theta_val))</pre>
               R = cosθ·I + (1 - cosθ)·n·n<sup>T</sup> + sinθ·n×
             </div>
           </div>
-          <p>其中 I 为 3×3 单位阵，n× 为旋转向量 n 的反对称矩阵（叉积矩阵）。轴角表示与四元数关系密切：四元数 q = [cos(θ/2), sin(θ/2)·n] 正是轴角 (n, θ) 的"半角"编码，因此四元数可视为轴角表示的无奇异版本。轴角表示法仅 3 个独立参数（n 的 2 个方向自由度 + θ 的 1 个），但存在 θ=0 和 θ=π 处的多义性。</p>
+          <p>其中 I 为 3×3 单位阵，n× 为旋转轴 n 的反对称矩阵（叉积矩阵）。轴角表示与四元数关系密切：单位四元数 q = [cos(θ/2), sin(θ/2)·n] 是轴角 (n, θ) 的“半角”编码。它避免了欧拉角的万向锁，但仍有 q 与 −q 表示同一旋转的双覆盖性质；轴角本身在 θ=0 和 θ=π 附近也存在轴选择或符号多义性。</p>
         </div>
 
         <p><span class="term">四元数</span>（Quaternion）是扩展复数至四维的超复数，由 Hamilton 于 1843 年提出。单位四元数用 4 个参数描述三维旋转：</p>
@@ -1218,7 +1218,7 @@ Rz_45 = double(subs(Rz, theta, theta_val))</pre>
         <p>其中 w 为实部，(x, y, z) 为虚部，满足归一化约束 <span class="inline-formula">w<sup>2</sup> + x<sup>2</sup> + y<sup>2</sup> + z<sup>2</sup> = 1</span>。四元数也可用旋转轴 n 与转角 θ 表示：<span class="inline-formula">q = [cos(θ/2), n<sub>x</sub>sin(θ/2), n<sub>y</sub>sin(θ/2), n<sub>z</sub>sin(θ/2)]</span>。</p>
         <p>四元数相比欧拉角的优势：</p>
         <ul>
-          <li><strong>无奇异性</strong>：不存在万向锁问题，全域姿态唯一表示；</li>
+          <li><strong>无万向锁</strong>：单位四元数可连续表示姿态，但 q 与 −q 对应同一旋转，插值前需统一符号分支；</li>
           <li><strong>计算高效</strong>：乘法运算比旋转矩阵少（4 参数 vs 9 参数）；</li>
           <li><strong>插值平滑</strong>：支持球面线性插值（SLERP），姿态过渡自然平滑，无突变。</li>
         </ul>
@@ -1638,9 +1638,9 @@ T_reverse = T2 * T1                 % 反序对比</pre>
     <div class="chapter-header">
       <div class="chapter-num">CHAPTER 03</div>
       <h1>正运动学</h1>
-      <p class="subtitle">D-H参数法 · 连杆坐标系 · 正运动学方程 · PUMA560与斯坦福臂案例</p>
+      <p class="subtitle">D-H参数法 · ABB IRB 1200参考链 · 等价模型一致性验证</p>
       <div class="meta-row">
-        <div class="meta-item">📖 7个知识点 + 1个拓展案例</div>
+        <div class="meta-item">📖 8个知识点 · ABB贯穿案例</div>
         <div class="meta-item">⏱ 8学时</div>
         <div class="meta-item">🎬 5个精讲视频</div>
       </div>
@@ -1649,7 +1649,7 @@ T_reverse = T2 * T1                 % 反序对比</pre>
 
     <div class="callout callout-info">
       <div class="callout-title">本章导读</div>
-      <p>正运动学（Forward Kinematics）研究在已知机器人各关节变量的前提下，求解末端执行器相对于基坐标系的位姿。它是机器人学最基础、也是唯一具有<span class="highlight">封闭且唯一解</span>的运动学问题。本章从 Denavit 与 Hartenberg 于 1955 年提出的 D-H 参数法出发，系统讲解连杆坐标系的建立规则、相邻坐标系变换矩阵的推导，并以 PUMA560 与斯坦福臂两类典型构型为例完成正运动学方程的求解与 MATLAB 验证。</p>
+      <p>正运动学在已知关节变量时求解末端位姿。本章以ABB IRB 1200-5/0.9贯穿：先依据参考关节链逐级计算T<sub>01</sub>至T<sub>06</sub>，再由学生建立课程等价D-H模型，通过零位和多组非零构型同时比较位置与姿态误差。重点不是让程序“跑起来”，而是证明坐标系、参数、代码和结果相互一致。</p>
     </div>
 
     <h2 class="section-title" id="sec-1"><span class="section-num">3.1</span>D-H参数法</h2>
@@ -1666,11 +1666,11 @@ T_reverse = T2 * T1                 % 反序对比</pre>
         </div>
       </div>
       <div class="kp-body">
-        <p>D-H 参数法（Denavit-Hartenberg Parameterization）由 Jacques Denavit 与 Richard S. Hartenberg 于 1955 年提出，是一种<span class="highlight">系统化、参数最少</span>的机器人运动学建模方法。其核心思想是：为每个连杆固连一个坐标系，并用<span class="term">四个几何参数</span>完全描述相邻两个坐标系之间的位姿关系。由于单自由度关节只有 1 个自由度，而两坐标系间的一般位姿关系有 6 个自由度，D-H 法利用关节轴线的特殊几何约束消去了 2 个冗余自由度，因此仅需 4 个参数即可。</p>
+        <p>D-H 参数法（Denavit-Hartenberg Parameterization）由 Jacques Denavit 与 Richard S. Hartenberg 于 1955 年提出，是一种<span class="highlight">利用关节轴几何约束进行参数化</span>的串联机器人运动学建模方法。其核心思想是：按明确约定为相邻连杆建立坐标系，并用<span class="term">四个几何参数</span>描述两坐标系之间受约束的相对位姿。四参数表示依赖D-H坐标系建立规则，并不意味着任意两个坐标系的一般位姿只需要四个参数。</p>
 
         <div class="callout callout-info">
           <div class="callout-title">为什么是 4 个参数而非 6 个？</div>
-          <p>两个坐标系间的一般位姿关系有 6 个自由度（3 平移 + 3 旋转）。但 D-H 法通过<strong>两条约束</strong>消去了 2 个自由度：（1）将 x<sub>i</sub> 轴取为两相邻 z 轴的公垂线方向，使坐标系绕该公垂线的转动被唯一确定（消去 1 自由度）；（2）原点取在公垂线与 z 轴的交点，使沿 x 轴的位置被约束（消去 1 自由度）。因此 6−2=4，仅需 a、α、d、θ 四个参数。这是 D-H 法"参数最少"的数学本质，也是它优于一般位姿描述的关键。</p>
+          <p>两个任意坐标系之间的一般位姿具有6个自由度。D-H法不是对任意位姿降维，而是把z轴与关节轴对齐、把x轴选在相邻z轴的公垂线方向，并据此限制坐标系的选取。完成这些约束后，相邻连杆变换可以按约定分解为绕z转θ、沿z移d、沿x移a、绕x转α四个基本变换。平行、相交或重合关节轴会带来坐标系选择自由度，因此参数表可能不唯一，必须用正运动学结果验证约定是否一致。</p>
         </div>
 
         <p>四个 D-H 参数的几何含义如下：</p>
@@ -1791,7 +1791,7 @@ T_reverse = T2 * T1                 % 反序对比</pre>
         </div>
       </div>
       <div class="kp-body">
-        <p><span class="term">改进 D-H 法</span>（Modified D-H，又称 Craig 约定）由 John J. Craig 在《Introduction to Robotics》中推广。其关键差异在于：<strong>坐标系 {i} 固连于连杆 i-1</strong>（即建在关节 i 的远端），z<sub>i</sub> 轴沿关节 i+1 的轴线方向，x<sub>i</sub> 轴沿 z<sub>i-1</sub> 与 z<sub>i</sub> 的公垂线。这一调整使得参数下标统一为 a<sub>i-1</sub>、α<sub>i-1</sub>、d<sub>i</sub>、θ<sub>i</sub>，物理意义更清晰，特别适合处理含平行关节的工业机器人。</p>
+        <p><span class="term">改进 D-H 法</span>（Modified D-H，常指Craig约定）改变了相邻坐标系之间四个基本变换的排列，并常采用 a<sub>i-1</sub>、α<sub>i-1</sub>、d<sub>i</sub>、θ<sub>i</sub> 的下标体系。不同教材对坐标系归属和下标描述可能存在差异，因此本课程不把“坐标系固连于哪一编号连杆”作为脱离公式的记忆结论，而以本页给出的变换次序和坐标轴定义为准。使用时必须保证坐标系、参数表、变换矩阵与软件接口采用同一约定。</p>
         <div class="formula-block">
           <div class="formula-label">改进 D-H 变换矩阵分解</div>
           <div class="formula"><sup>i-1</sup><sub>i</sub>T = Rot(x, α<sub>i-1</sub>) · Trans(x, a<sub>i-1</sub>) · Rot(z, θ<sub>i</sub>) · Trans(z, d<sub>i</sub>)</div>
@@ -1861,7 +1861,7 @@ T_reverse = T2 * T1                 % 反序对比</pre>
 
         <div class="callout callout-info">
           <div class="callout-title">约定选择提示</div>
-          <p>本课程后续案例（PUMA560、斯坦福臂、UR5）<strong>统一采用经典 D-H 约定</strong>，这也是 MATLAB Robotics Toolbox 的 standard 模式所采用的约定。引用不同教材的 D-H 参数表时，务必先确认其采用的是经典还是改进约定，否则会导致正运动学结果错误。</p>
+          <p>本课程后续案例统一采用 <strong>ABB IRB 1200-5/0.9</strong>。建模时先以ROS-Industrial的关节原点与轴向建立参考链，再由学生建立课程等价的经典D-H链；两条链必须在零位和多组非零构型下同时比较位置误差与姿态误差。课程D-H表是教学建模结果，不表述为ABB厂家公布参数。</p>
         </div>
       </div>
     </div>
@@ -1946,7 +1946,7 @@ T_reverse = T2 * T1                 % 反序对比</pre>
 
         <div class="callout callout-info">
           <div class="callout-title">参数表快速校验法</div>
-          <p>填写参数表后可用三条规则快速校验：（1）<strong>关节变量计数</strong>——表中标★的变量数应等于机器人自由度数；（2）<strong>基座行</strong>——第 1 行通常 a<sub>1</sub>=0（基座无连杆长度），α<sub>1</sub> 反映关节 1、2 轴线的夹角；（3）<strong>末端行</strong>——最后一行 d<sub>n</sub> 常为工具长度（end-effector offset）。若这三条不符，应重新检查坐标系建立。</p>
+          <p>参数表不能靠“首行 a<sub>1</sub>=0”或“末行 d<sub>n</sub> 等于工具长度”等经验规则判真，因为数值取决于坐标系约定。可靠校验应包括：（1）旋转关节的变量在 θ 列、移动关节的变量在 d 列，变量数与自由度一致；（2）零位和至少一组非零位姿的矩阵连乘与几何尺寸一致；（3）与 CAD/URDF/厂商模型比较时统一基座、法兰、工具坐标系和零位偏置。三类检查同时通过后，参数表才具备工程可用性。</p>
         </div>
       </div>
     </div>
@@ -2027,9 +2027,9 @@ T_reverse = T2 * T1                 % 反序对比</pre>
         </div>
 
         <div class="callout callout-success">
-          <div class="callout-title">例题：两连杆平面机器人正运动学</div>
-          <p>两连杆平面机器人（RR）是最简单的多关节机器人，是理解 D-H 参数法的入门案例。设连杆 1、2 长度分别为 l<sub>1</sub>、l<sub>2</sub>，两关节均为旋转关节，且共面运动。建立坐标系：z<sub>0</sub>、z<sub>1</sub> 均垂直于运动平面（同向），z<sub>2</sub> 同向；x<sub>0</sub> 沿连杆 1 方向，x<sub>1</sub> 沿连杆 2 方向。</p>
-          <p>按经典 D-H 约定，两连杆平面机器人的 D-H 参数为：</p>
+          <div class="callout-title">例题：ABB IRB 1200 A2–A3平面教学子链</div>
+          <p>为单独观察肩、肘角对腕心位置的影响，先把ABB IRB 1200的A2–A3定位部分投影为RR平面教学子链。设两段等效长度为l<sub>1</sub>、l<sub>2</sub>，该简化仅用于推导与查错，不替代第3.6节的六轴参考链。</p>
+          <p>按经典 D-H 约定，ABB A2–A3平面教学子链的参数为：</p>
           <ul>
             <li>关节 1：a<sub>1</sub>=l<sub>1</sub>，α<sub>1</sub>=0，d<sub>1</sub>=0，θ<sub>1</sub>（变量）</li>
             <li>关节 2：a<sub>2</sub>=l<sub>2</sub>，α<sub>2</sub>=0，d<sub>2</sub>=0，θ<sub>2</sub>（变量）</li>
@@ -2038,7 +2038,7 @@ T_reverse = T2 * T1                 % 反序对比</pre>
         </div>
 
         <div class="formula-block">
-          <div class="formula-label">两连杆平面机器人末端位姿（3-8）</div>
+          <div class="formula-label">ABB A2–A3平面教学子链末端位姿（3-8）</div>
           <div class="formula">
             T<sub>02</sub> = ⎡ c<sub>12</sub> &nbsp; −s<sub>12</sub> &nbsp; 0 &nbsp; l<sub>1</sub>c<sub>1</sub>+l<sub>2</sub>c<sub>12</sub> ⎤<br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ s<sub>12</sub> &nbsp; c<sub>12</sub> &nbsp;&nbsp; 0 &nbsp; l<sub>1</sub>s<sub>1</sub>+l<sub>2</sub>s<sub>12</sub> ⎥<br>
@@ -2090,7 +2090,7 @@ T_reverse = T2 * T1                 % 反序对比</pre>
             <line x1="100" y1="220" x2="100" y2="190" stroke="#059669" stroke-width="2" marker-end="url(#arr3_b2)"/>
             <text x="78" y="188" font-size="11" fill="#059669">y₀</text>
           </svg>
-          <div class="diagram-caption">图 3-2 两连杆平面机器人 D-H 坐标系与正运动学几何关系</div>
+          <div class="diagram-caption">图 3-2 ABB A2–A3平面教学子链的D-H坐标系与几何关系</div>
         </div>
       </div>
     </div>
@@ -2111,317 +2111,53 @@ T_reverse = T2 * T1                 % 反序对比</pre>
 
 
     <div class="kp-card" id="kp-3-6">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 3.6</span>PUMA560正运动学</div>
-        <div class="kp-tags">
-          <span class="kp-tag 考点">考点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p>PUMA560 是机器人学教学中经典的 6 自由度全旋转关节工业机器人，由 Unimation 公司于 1978 年推出。其结构特征为：腰部回转（关节1）、肩部俯仰（关节2）、肘部俯仰（关节3），后三个关节构成<span class="highlight">球形腕</span>（关节4、5、6 轴线交于一点），是典型的可解析构型。</p>
-
-        <p>按经典 D-H 约定建立坐标系，PUMA560 的 D-H 参数表如下（单位：m，角度单位：rad。参数值与 MATLAB Robotics Toolbox 内置 mdl_puma560 一致）：</p>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>关节 i</th>
-                <th>a<sub>i</sub> (m)</th>
-                <th>α<sub>i</sub> (rad)</th>
-                <th>d<sub>i</sub> (m)</th>
-                <th>θ<sub>i</sub> (rad)</th>
-                <th>关节类型</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>0</td>
-                <td>−π/2</td>
-                <td>0</td>
-                <td>θ<sub>1</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>a<sub>2</sub>=0.4318</td>
-                <td>0</td>
-                <td>0</td>
-                <td>θ<sub>2</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>a<sub>3</sub>=0.0203</td>
-                <td>−π/2</td>
-                <td>d<sub>3</sub>=0.15</td>
-                <td>θ<sub>3</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td>0</td>
-                <td>π/2</td>
-                <td>d<sub>4</sub>=0.4318</td>
-                <td>θ<sub>4</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>5</td>
-                <td>0</td>
-                <td>−π/2</td>
-                <td>0</td>
-                <td>θ<sub>5</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>6</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>θ<sub>6</sub></td>
-                <td>旋转</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-2 PUMA560 机器人 D-H 参数表（经典 D-H 约定，参数值取自 MATLAB Robotics Toolbox 内置 mdl_puma560）</p>
-
-        <p>将各关节参数代入经典 D-H 变换矩阵通式（3-1），得到 6 个连杆变换矩阵 A<sub>1</sub>~A<sub>6</sub>，连乘即得 T<sub>06</sub>。前三个关节（手臂）确定腕部中心位置：</p>
-        <div class="formula-block">
-          <div class="formula-label">腕部中心位置（3-6）</div>
-          <div class="formula">
-            p<sub>c</sub> = [ a<sub>2</sub>c<sub>1</sub>c<sub>2</sub> + a<sub>3</sub>c<sub>1</sub>c<sub>23</sub> − d<sub>4</sub>c<sub>1</sub>s<sub>23</sub> − d<sub>3</sub>s<sub>1</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a<sub>2</sub>s<sub>1</sub>c<sub>2</sub> + a<sub>3</sub>s<sub>1</sub>c<sub>23</sub> − d<sub>4</sub>s<sub>1</sub>s<sub>23</sub> + d<sub>3</sub>c<sub>1</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; −a<sub>2</sub>s<sub>2</sub> − a<sub>3</sub>s<sub>23</sub> − d<sub>4</sub>c<sub>23</sub> ]<sup>T</sup>
-          </div>
-        </div>
-        <p>其中 c<sub>i</sub>=cos θ<sub>i</sub>，s<sub>i</sub>=sin θ<sub>i</sub>，c<sub>23</sub>=cos(θ<sub>2</sub>+θ<sub>3</sub>)，s<sub>23</sub>=sin(θ<sub>2</sub>+θ<sub>3</sub>)。后三个关节（腕部）仅改变末端姿态，不改变腕部中心位置——这是球腕结构的标志特性。</p>
-
-        <p>下面给出使用 MATLAB Robotics Toolbox 建立 PUMA560 模型并求解正运动学的完整代码：</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> Robotics Toolbox · PUMA560 正运动学</div>
-<pre><span class="comment">% PUMA560 正运动学求解（经典 D-H 约定）</span>
-<span class="comment">% 需安装 MATLAB Robotics Toolbox for MATLAB (Peter Corke)</span>
-clc; clear; close all;
-
-<span class="comment">% --- 1. 按 D-H 参数表定义 6 个连杆（L1~L6）---</span>
-<span class="comment">%    参数顺序为 [theta, d, a, alpha]，'standard' 表示经典 D-H</span>
-<span class="comment">%    长度单位 m，角度单位 rad（与 Robotics Toolbox 内置 mdl_puma560 一致）</span>
-L(1) = Link([0       0        0           -pi/2  ], <span class="string">'standard'</span>);
-L(2) = Link([0       0        0.4318      0      ], <span class="string">'standard'</span>);
-L(3) = Link([0       0.15     0.0203      -pi/2  ], <span class="string">'standard'</span>);
-L(4) = Link([0       0.4318   0           pi/2   ], <span class="string">'standard'</span>);
-L(5) = Link([0       0        0           -pi/2  ], <span class="string">'standard'</span>);
-L(6) = Link([0       0        0           0      ], <span class="string">'standard'</span>);
-
-<span class="comment">% --- 2. 构造串联机器人对象 ---</span>
-puma = SerialLink(L, <span class="string">'name'</span>, <span class="string">'PUMA560'</span>, ...
-                      <span class="string">'manufacturer'</span>, <span class="string">'Unimation'</span>);
-
-<span class="comment">% --- 3. 设定一组关节角，求正运动学 ---</span>
-q = [0  pi/4  -pi/2  0  pi/2  0];   <span class="comment">% 单位 rad</span>
-T  = puma.fkine(q);                  <span class="comment">% 末端位姿齐次矩阵</span>
-disp(<span class="string">'末端位姿 T06 ='</span>); disp(T);
-
-<span class="comment">% --- 4. 提取位置与姿态 ---</span>
-position = transl(T);                <span class="comment">% 末端位置 [x;y;z]</span>
-rpy      = tr2rpy(T);                <span class="comment">% RPY 欧拉角</span>
-fprintf(<span class="string">'末端位置 = [%.4f %.4f %.4f] m\n'</span>, position);
-fprintf(<span class="string">'末端姿态 RPY = [%.3f %.3f %.3f] rad\n'</span>, rpy);
-
-<span class="comment">% --- 5. 可视化机器人构型 ---</span>
-figure; puma.plot(q); title(<span class="string">'PUMA560 @ q=[0 pi/4 -pi/2 0 pi/2 0]'</span>);
-
-<span class="comment">% --- 6. 工作空间采样验证 ---</span>
-q_samples = rand(6,50)*2*pi - pi;    <span class="comment">% 随机 50 组关节角</span>
-T_samples = puma.fkine(q_samples);
-positions = transl(T_samples);
-figure; plot3(positions(1,:),positions(2,:),positions(3,:),<span class="string">'b.'</span>); axis equal;
-xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>); title(<span class="string">'PUMA560 工作空间采样'</span>);</pre>
-        </div>
-
-        <div class="callout callout-success">
-          <div class="callout-title">运行结果</div>
-          <p>当 q = [0, π/4, −π/2, 0, π/2, 0] 时，末端位置约为 [0.625, 0.150, −0.596] m，姿态 RPY 约为 [π, π/4, 0] rad。<strong>以上结果基于修正后的 D-H 参数重新计算</strong>（参数取值与 MATLAB Robotics Toolbox 内置 mdl_puma560 一致，长度单位为 m）。由于 d<sub>6</sub>=0，末端位置即腕部中心位置。该结果可手工代入式（3-6）验证，从而确认 D-H 参数表与代码实现一致。</p>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">手工验证：代入式（3-6）</div>
-          <p>以 q = [0, π/4, −π/2, 0, π/2, 0] 为例手工计算腕部中心位置。代入 θ<sub>1</sub>=0 得 c<sub>1</sub>=1, s<sub>1</sub>=0；θ<sub>2</sub>=π/4 得 c<sub>2</sub>=s<sub>2</sub>=√2/2≈0.7071；θ<sub>23</sub>=θ<sub>2</sub>+θ<sub>3</sub>=π/4−π/2=−π/4 得 c<sub>23</sub>=0.7071, s<sub>23</sub>=−0.7071。代入式（3-6）：</p>
-          <p>p<sub>x</sub>=a<sub>2</sub>c<sub>1</sub>c<sub>2</sub>+a<sub>3</sub>c<sub>1</sub>c<sub>23</sub>−d<sub>4</sub>c<sub>1</sub>s<sub>23</sub>−d<sub>3</sub>s<sub>1</sub>=0.4318×0.7071+0.0203×0.7071−0.4318×(−0.7071)−0=(0.4318+0.0203+0.4318)×0.7071≈0.625 m</p>
-          <p>p<sub>y</sub>=a<sub>2</sub>s<sub>1</sub>c<sub>2</sub>+a<sub>3</sub>s<sub>1</sub>c<sub>23</sub>−d<sub>4</sub>s<sub>1</sub>s<sub>23</sub>+d<sub>3</sub>c<sub>1</sub>=0+0−0+0.15×1=0.150 m</p>
-          <p>p<sub>z</sub>=−a<sub>2</sub>s<sub>2</sub>−a<sub>3</sub>s<sub>23</sub>−d<sub>4</sub>c<sub>23</sub>=−0.4318×0.7071−0.0203×(−0.7071)−0.4318×0.7071=(−0.4318+0.0203−0.4318)×0.7071≈−0.596 m</p>
-          <p>手工计算结果 [0.625, 0.150, −0.596] m 与 MATLAB 输出吻合，确认 D-H 参数表与代码实现一致。这种手工验证是确认参数表正确性的必要步骤。</p>
-        </div>
-
-        <div class="callout callout-warning">
-          <div class="callout-title">常见参数表错误</div>
-          <p>引用 PUMA560 参数时易出错的三点：（1）<strong>约定混淆</strong>——经典 D-H 与改进 D-H 的 a、α 下标不同，混用导致结果错误；（2）<strong>参数顺序错误</strong>——MATLAB Robotics Toolbox 的 Link 构造函数参数顺序为 [theta, d, a, alpha]，若误写为 [theta, a, d, alpha] 等其他顺序将导致模型错误；（3）<strong>单位混淆</strong>——不同文献有的用 mm、有的用 m，需统一单位。本课程代码统一采用 m，与 Robotics Toolbox 内置 mdl_puma560 一致。建议以 Robotics Toolbox 官方文档为基准核对。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.6</span>ABB IRB 1200关节链正运动学</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>课程统一对象为 <span class="term">ABB IRB 1200-5/0.9</span>。参考关节链取自ROS-Industrial <code>abb_irb1200_support</code> 的 <code>irb1200_5_90_macro.xacro</code>：每个关节先执行固定原点平移，再绕该关节局部轴旋转。该模型属于社区维护的教学参考链；工作范围和最大轴速度仍以ABB产品规格为准。</p>
+    <div class="table-wrap"><table><thead><tr><th>轴</th><th>原点平移 xyz / m</th><th>局部转轴</th></tr></thead><tbody>
+      <tr><td>A1</td><td>[0, 0, 0.3991]</td><td>[0, 0, 1]</td></tr><tr><td>A2</td><td>[0, 0, 0]</td><td>[0, 1, 0]</td></tr><tr><td>A3</td><td>[0, 0, 0.4480]</td><td>[0, 1, 0]</td></tr><tr><td>A4</td><td>[0, 0, 0.0420]</td><td>[1, 0, 0]</td></tr><tr><td>A5</td><td>[0.4510, 0, 0]</td><td>[0, 1, 0]</td></tr><tr><td>A6</td><td>[0.0820, 0, 0]</td><td>[1, 0, 0]</td></tr>
+    </tbody></table></div>
+    <div class="formula-block"><div class="formula-label">参考链递推</div><div class="formula">T<sub>0i</sub> = T<sub>0,i-1</sub> · Trans(r<sub>i</sub>) · Rot(u<sub>i</sub>, q<sub>i</sub>)，i=1…6</div></div>
+    <p>学生必须逐级保存T<sub>01</sub>…T<sub>06</sub>，不能只提交最终矩阵。零位只能检查尺寸和轴向的明显错误；至少再选两组非零构型，计算位置差 Δp=‖p<sub>1</sub>−p<sub>2</sub>‖ 和姿态差 ΔR=‖R<sub>1</sub>−R<sub>2</sub>‖<sub>F</sub>。</p>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> 单关节递推核心</div><pre>T = eye(4);
+for axisIndex = 1:6
+    T = T * translationMatrix(jointOrigins(axisIndex,:));
+    T = T * axisRotationMatrix(jointAxes(axisIndex,:), qRad(axisIndex));
+    T0i(:,:,axisIndex) = T;
+end</pre></div>
+    <div class="callout callout-warning"><div class="callout-title">证据边界</div><p>“参考链复算通过”只证明课程代码与该关节链定义一致，不等于RobotStudio站点无碰撞，也不等于实体机器人绝对精度达到某一数值。工具、负载、工件坐标与控制器日志必须另行验证。</p></div>
+    <div class="callout callout-success"><div class="callout-title">学习产出</div><p>提交关节轴图、原点/轴向表、三组构型的逐级矩阵与误差记录。AI可定位第一处差异，但完整矩阵、复算代码和结论由学生完成。</p></div>
+  </div>
+</div>
 
 
     <div class="kp-card" id="kp-3-7">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 3.7</span>斯坦福臂正运动学</div>
-        <div class="kp-tags">
-          <span class="kp-tag 重点">重点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">斯坦福臂</span>（Stanford Arm）由 Victor Scheinman 于 1969 年在斯坦福大学设计，是机器人学史上另一经典构型。它与 PUMA560 的关键区别在于：第 3 关节为<strong>移动关节（Prismatic）</strong>，构成 5R1P 结构（5 个旋转关节 + 1 个移动关节）。该设计使腕部中心可在球面上沿径向伸缩，工作空间呈球壳形。</p>
-
-        <p>斯坦福臂的 D-H 参数表如下（经典 D-H 约定，关节 3 为移动关节，d<sub>3</sub> 为变量。单位：m，角度单位：rad。结构常量 d<sub>2</sub>=0.152 m、d<sub>6</sub>=0.0563 m 取自 MATLAB Robotics Toolbox 内置 mdl_stanford）：</p>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>关节 i</th>
-                <th>a<sub>i</sub> (m)</th>
-                <th>α<sub>i</sub> (rad)</th>
-                <th>d<sub>i</sub> (m)</th>
-                <th>θ<sub>i</sub> (rad)</th>
-                <th>关节类型</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>0</td><td>−π/2</td><td>0</td><td>θ<sub>1</sub></td><td>旋转</td></tr>
-              <tr><td>2</td><td>0</td><td>π/2</td><td>d<sub>2</sub>=0.152</td><td>θ<sub>2</sub></td><td>旋转</td></tr>
-              <tr><td>3</td><td>0</td><td>0</td><td>d<sub>3</sub> (变量)</td><td>0</td><td>移动</td></tr>
-              <tr><td>4</td><td>0</td><td>−π/2</td><td>0</td><td>θ<sub>4</sub></td><td>旋转</td></tr>
-              <tr><td>5</td><td>0</td><td>π/2</td><td>0</td><td>θ<sub>5</sub></td><td>旋转</td></tr>
-              <tr><td>6</td><td>0</td><td>0</td><td>d<sub>6</sub>=0.0563</td><td>θ<sub>6</sub></td><td>旋转</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-3 斯坦福臂 D-H 参数表（5R1P 构型，关节 3 为移动关节，参数值取自 MATLAB Robotics Toolbox 内置 mdl_stanford）</p>
-
-        <p>注意表中有两点与 PUMA560 不同：（1）关节 3 的 <strong>d<sub>3</sub> 是变量</strong>，θ<sub>3</sub>=0 为常量，这是移动关节的标志；（2）所有 a<sub>i</sub> 均为 0，表明相邻关节轴线要么相交要么平行，结构紧凑。前三个关节构成<strong>球坐标定位机构</strong>（RRP），后三个关节构成球形腕（RRR），同样满足 Pieper 准则，逆运动学可解析。</p>
-
-        <p>代入经典 D-H 通式，前三个关节变换矩阵连乘得腕部中心位置：</p>
-        <div class="formula-block">
-          <div class="formula-label">斯坦福臂腕部中心位置（3-7）</div>
-          <div class="formula">
-            p<sub>c</sub> = [ c<sub>1</sub>s<sub>2</sub>d<sub>3</sub> − s<sub>1</sub>d<sub>2</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s<sub>1</sub>s<sub>2</sub>d<sub>3</sub> + c<sub>1</sub>d<sub>2</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c<sub>2</sub>d<sub>3</sub> ]<sup>T</sup>
-          </div>
-        </div>
-
-        <p>位置仅依赖 θ<sub>1</sub>、θ<sub>2</sub>、d<sub>3</sub> 三个变量，几何上对应球坐标 (r, φ, θ) = (d<sub>3</sub>, θ<sub>2</sub>, θ<sub>1</sub>)，这就是"球坐标臂"名称的由来。后三个关节仅决定末端姿态。</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> Robotics Toolbox · 斯坦福臂建模</div>
-<pre><span class="comment">% 斯坦福臂 (5R1P) 正运动学</span>
-<span class="comment">% 需安装 MATLAB Robotics Toolbox for MATLAB (Peter Corke)</span>
-<span class="comment">% 参数顺序为 [theta, d, a, alpha]，'standard' 表示经典 D-H</span>
-<span class="comment">% 长度单位 m，角度单位 rad（与 Robotics Toolbox 内置 mdl_stanford 一致）</span>
-clc; clear; close all;
-
-<span class="comment">% 结构常量定义</span>
-d2 = <span class="number">0.152</span>;   <span class="comment">% 关节2偏移 (m)</span>
-d6 = <span class="number">0.0563</span>;  <span class="comment">% 末端工具长度 (m)</span>
-
-L(1) = Link([0    0    0  -pi/2], <span class="string">'standard'</span>);
-L(2) = Link([0    d2   0   pi/2], <span class="string">'standard'</span>);
-L(3) = Link([0    0    0   0   ], <span class="string">'standard'</span>, <span class="string">'P'</span>); <span class="comment">% 移动关节，d3 为变量</span>
-L(4) = Link([0    0    0  -pi/2], <span class="string">'standard'</span>);
-L(5) = Link([0    0    0   pi/2], <span class="string">'standard'</span>);
-L(6) = Link([0    d6   0   0   ], <span class="string">'standard'</span>);
-
-stanford = SerialLink(L, <span class="string">'name'</span>, <span class="string">'Stanford Arm'</span>);
-
-<span class="comment">% 关节变量：前2个为角度(rad)，第3个为位移(m)，后3个为角度(rad)</span>
-q = [0.3  0.5  0.4  1.0  -0.8  0.2];
-T = stanford.fkine(q);
-disp(<span class="string">'斯坦福臂末端位姿 ='</span>); disp(T);
-fprintf(<span class="string">'末端位置 = [%.4f %.4f %.4f] m\n'</span>, transl(T));
-figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'</span>);</pre>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">构型对比</div>
-          <p>PUMA560（6R）与斯坦福臂（5R1P）都是满足 Pieper 准则的可解析构型，但定位方式不同：PUMA560 用三个旋转关节实现肘部弯曲定位（工作空间近似环形），斯坦福臂用 RRP 实现球坐标定位（工作空间为球壳）。工业上 6R 构型因结构紧凑、维护方便更为常见。</p>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>对比维度</th>
-                <th>PUMA560</th>
-                <th>斯坦福臂</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>构型</td><td>6R（全旋转关节）</td><td>5R1P（含1移动关节）</td></tr>
-              <tr><td>定位机构</td><td>RRR（肘部弯曲）</td><td>RRP（球坐标）</td></tr>
-              <tr><td>腕部</td><td>球形腕（RRR）</td><td>球形腕（RRR）</td></tr>
-              <tr><td>是否满足 Pieper 准则</td><td>是</td><td>是</td></tr>
-              <tr><td>工作空间形状</td><td>近似环形/球冠</td><td>球壳</td></tr>
-              <tr><td>位置变量</td><td>θ<sub>1</sub>, θ<sub>2</sub>, θ<sub>3</sub></td><td>θ<sub>1</sub>, θ<sub>2</sub>, d<sub>3</sub></td></tr>
-              <tr><td>逆运动学解数</td><td>最多8组</td><td>最多8组</td></tr>
-              <tr><td>移动关节优势</td><td>—</td><td>径向伸缩直接、定位精度高</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-4 PUMA560 与斯坦福臂构型对比</p>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.7</span>ABB等价D-H模型与一致性验证</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>厂家产品规格不提供可直接复制到本课程代码中的标准D-H表。本节给出的是依据参考关节链推导的<span class="term">课程等价标准D-H模型</span>，用于训练坐标系建模和模型间一致性验证，不冒充ABB标定参数。</p>
+    <div class="table-wrap"><table><thead><tr><th>i</th><th>a<sub>i</sub> / m</th><th>α<sub>i</sub></th><th>d<sub>i</sub> / m</th><th>θ偏置</th></tr></thead><tbody>
+      <tr><td>1</td><td>0</td><td>−90°</td><td>0.3991</td><td>0°</td></tr><tr><td>2</td><td>0.4480</td><td>0°</td><td>0</td><td>−90°</td></tr><tr><td>3</td><td>0.0420</td><td>−90°</td><td>0</td><td>0°</td></tr><tr><td>4</td><td>0</td><td>90°</td><td>0.4510</td><td>0°</td></tr><tr><td>5</td><td>0</td><td>−90°</td><td>0</td><td>0°</td></tr><tr><td>6</td><td>0</td><td>0°</td><td>0.0820</td><td>0°</td></tr>
+    </tbody></table></div>
+    <p>标准D-H连乘后需增加一个固定法兰姿态对齐矩阵，才能与参考链的link_6坐标系完全一致。对齐矩阵只能修正固定坐标系定义，不能掩盖随关节角变化的模型错误。</p>
+    <div class="formula-block"><div class="formula-label">双链一致性判据</div><div class="formula">e<sub>p</sub>=‖p<sub>DH</sub>−p<sub>ref</sub>‖₂；e<sub>R</sub>=‖R<sub>DH</sub>−R<sub>ref</sub>‖<sub>F</sub></div></div>
+    <div class="callout callout-info"><div class="callout-title">最小验证集</div><p>使用零位、课程起点[0, −30, 20, 0, 30, 0]°、课程目标[60, 40, −70, 100, 45, 180]°及至少两组自选非零构型。先找第一处超差的T<sub>0i</sub>，再检查D-H约定、θ偏置、轴向、单位和法兰固定变换。</p></div>
+    <div class="callout callout-success"><div class="callout-title">直接证据</div><p>提交“坐标系图—D-H表—代码变量—多构型误差”四项对应表。只有位置和姿态均在自定数值容差内，才能写“课程模型一致”；容差必须注明仅用于浮点复算。</p></div>
+  </div>
+</div>
 
 
     <div class="kp-card" id="kp-3-8">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">拓展</span>UR5 协作机器人 D-H 参数简介</div>
-        <div class="kp-tags">
-          <span class="kp-tag 重点">重点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">UR5</span> 是丹麦 Universal Robots 公司推出的 6 自由度协作机器人（Cobot），负载 5 kg、工作半径 850 mm，以人机协作安全性和易用性著称，是现代工业协作机器人的代表产品。与 PUMA560 相比，UR5 在机械结构上有两个显著差异：（1）关节内置扭矩传感器，实现碰撞检测与安全停机；（2）腕部采用<strong>非球形腕</strong>设计（后三关节轴线不完全交于一点），牺牲了严格的 Pieper 可解析条件以换取结构紧凑与灵活度。</p>
-
-        <p>按经典 D-H 约定建立坐标系，UR5 的 D-H 参数表如下（单位：m，角度单位：rad）：</p>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>关节 i</th>
-                <th>a<sub>i</sub> (m)</th>
-                <th>α<sub>i</sub> (rad)</th>
-                <th>d<sub>i</sub> (m)</th>
-                <th>θ<sub>i</sub> (rad)</th>
-                <th>关节类型</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>0</td><td>π/2</td><td>0.089</td><td>θ<sub>1</sub></td><td>旋转</td></tr>
-              <tr><td>2</td><td>−0.425</td><td>0</td><td>0</td><td>θ<sub>2</sub></td><td>旋转</td></tr>
-              <tr><td>3</td><td>−0.392</td><td>0</td><td>0</td><td>θ<sub>3</sub></td><td>旋转</td></tr>
-              <tr><td>4</td><td>0</td><td>π/2</td><td>0.109</td><td>θ<sub>4</sub></td><td>旋转</td></tr>
-              <tr><td>5</td><td>0</td><td>−π/2</td><td>0.094</td><td>θ<sub>5</sub></td><td>旋转</td></tr>
-              <tr><td>6</td><td>0</td><td>0</td><td>0.0823</td><td>θ<sub>6</sub></td><td>旋转</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-5 UR5 协作机器人 D-H 参数表（经典 D-H 约定，参数值取自 Universal Robots 官方文档）</p>
-
-        <p>注意 UR5 参数表的两个特征：（1）a<sub>2</sub> 和 a<sub>3</sub> 为<strong>负值</strong>，这是由于 UR5 的肘部关节几何配置导致 x 轴方向与经典约定中的正方向相反；（2）d<sub>5</sub>≠0（0.094 m），意味着关节 5 和关节 6 之间存在偏置，后三关节轴线不完全交于一点——这正是 UR5 <strong>不严格满足 Pieper 准则</strong>的原因。尽管如此，UR5 仍可通过特殊代数技巧获得半解析逆解，也可用数值法求解，相关内容将在第 4 章详细讨论。</p>
-
-        <div class="callout callout-info">
-          <div class="callout-title">协作机器人 vs 传统工业机器人</div>
-          <p>PUMA560 代表传统工业机器人设计哲学：球形腕保证解析可解性，控制器计算效率高。UR5 代表协作机器人新趋势：非球形腕换取结构紧凑与灵活度，借助现代计算能力（数值法或半解析法）补偿算法复杂度。这一设计转变体现了"机械简单→算法复杂"到"机械灵活→算法智能"的范式演进，也是机器人学从经典走向现代的缩影。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.8</span>ABB型号参数与模型边界</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>同一系列机器人也不能混用型号参数。本课程固定使用 <span class="term">ABB IRB 1200-5/0.9</span>，其中5表示额定负载等级，0.9表示到达距离等级。IRB 1200-7/0.7的工作范围、速度和几何条件不得直接代入本课程模型。</p>
+    <div class="table-wrap"><table><thead><tr><th>轴</th><th>工作范围 / °</th><th>三相供电最大速度 / (°·s⁻¹)</th></tr></thead><tbody>
+      <tr><td>A1</td><td>−170～170</td><td>288</td></tr><tr><td>A2</td><td>−100～130</td><td>240</td></tr><tr><td>A3</td><td>−200～70</td><td>297</td></tr><tr><td>A4</td><td>−270～270</td><td>400</td></tr><tr><td>A5</td><td>−130～130</td><td>405</td></tr><tr><td>A6</td><td>−400～400</td><td>600</td></tr>
+    </tbody></table></div>
+    <p>上表用于课程轨迹预检。单相供电时A4/A5最大速度还需按产品规格下调；实体执行时必须以具体控制柜、RobotWare配置、tooldata、loaddata和wobjdata为准。</p>
+    <div class="callout callout-warning"><div class="callout-title">三类参数不能混写</div><p><strong>ABB产品规格</strong>用于型号、工作范围和速度；<strong>ROS-Industrial参考链</strong>用于教学几何与轴向；<strong>课程等价D-H表</strong>由学习者推导并用多构型复算。三者来源、用途和责任边界必须分别标注。</p></div>
+    <div class="callout callout-info"><div class="callout-title">工程记录要求</div><p>每次提交都写明型号、供电条件、单位、坐标系、工具/工件数据状态和未完成验证项。无法提供RobotStudio站点与事件日志时，应写“课程模型通过，控制器与碰撞待验证”。</p></div>
+  </div>
+</div>
 
     <h2 class="section-title" id="sec-summary"><span class="section-num">3.4</span>本章小结</h2>
 
@@ -2434,7 +2170,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           <li><strong>经典 D-H</strong>（坐标系固连于连杆 i）与<strong>改进 D-H</strong>（坐标系固连于连杆 i-1）在参数下标与变换矩阵形式上不同，但结果等价。使用时必须保证参数表与公式约定一致，本课程统一采用经典 D-H 约定。</li>
           <li><strong>连杆坐标系建立</strong>遵循"定 z 轴→定 x 轴→定原点→定 y 轴→读参数"六步法，是 D-H 建模中最易出错的一步，需结合结构图反复核对。</li>
           <li><strong>正运动学方程</strong>为各连杆变换矩阵的连乘 T<sub>0n</sub>=A<sub>1</sub>·A<sub>2</sub>·…·A<sub>n</sub>，结果唯一且连续可微，是机器人学中唯一具有封闭唯一解的运动学问题。</li>
-          <li><strong>典型构型</strong>：PUMA560（6R 球腕）与斯坦福臂（5R1P 球坐标臂）均满足 Pieper 准则，是可解析构型的代表；球形腕结构使位置与姿态解耦，为第 4 章逆运动学求解奠定基础。</li>
+          <li><strong>ABB贯穿案例</strong>：IRB 1200参考关节链、课程等价D-H链与法兰固定变换共同构成可复算模型；多构型的位置与姿态误差用于证明模型一致。</li>
         </ul>
         <div class="callout callout-info">
           <div class="callout-title">与下一章的衔接</div>
@@ -2446,7 +2182,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           <p>D-H 参数法虽是运动学建模的经典工具，但在现代机器人学中，以下前沿方法正在拓展其边界：</p>
           <ul>
             <li><strong>指数积公式（PoE, Product of Exponentials）</strong>：由 Brockett 提出，基于李群 SE(3) 的指数映射描述运动学。与 D-H 法相比，PoE 无需为每个连杆建立坐标系，直接用关节轴线的旋量（twist）描述运动，公式更简洁、几何意义更统一，特别适合并联机器人和冗余机器人的建模。现代机器人学教材（如 Lynch & Park《Modern Robotics》）已将 PoE 作为与 D-H 并列的核心方法。</li>
-            <li><strong>基于优化的逆运动学（QP-IK）</strong>：将逆运动学表述为二次规划（Quadratic Programming）问题，以 ‖Jδq−v‖² 为目标函数，叠加关节极限、避障等不等式约束。QP-IK 天然处理冗余度与约束，是协作机器人（如 UR5）实时控制的主流方法，也是 ROS MoveIt! 运动规划框架的底层求解器。</li>
+            <li><strong>基于优化的逆运动学（QP-IK）</strong>：以末端速度误差为主要目标，叠加ABB工作范围、速度和避障约束。课程要求记录求解器、权重和约束，不能把“软件返回结果”当作模型正确的证据。</li>
             <li><strong>学习法逆运动学</strong>：利用神经网络（MLP、ResNet）或高斯过程回归（GPR），从大量"关节角-末端位姿"样本中学习逆映射。其优势是无需显式推导解析公式，适用于任意复杂构型；缺点是需要训练数据、泛化性受限于训练分布、且难以保证数值精度。近年来，可微分运动学层与深度学习端到端融合的方法（如 Differentiable Robot Model）正在兴起。</li>
           </ul>
           <p>这些方法并非取代 D-H 法，而是与其互补：D-H 法仍是理解机器人运动学的基础语言，PoE 提供更优雅的理论框架，QP-IK 与学习法则在实时控制与复杂约束场景中发挥优势。读者应在掌握 D-H 法的基础上，逐步了解这些前沿方法。</p>
@@ -2461,18 +2197,18 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
       <div class="callout-title">课后思考 · 巩固提升</div>
       <p>1. D-H 参数法的四个参数 a、α、d、θ 分别描述什么几何关系？为什么单自由度关节只需 4 个参数就能描述 6 自由度的位姿变换？</p>
       <p>2. 经典 D-H 法与改进 D-H 法在坐标系固连位置和变换矩阵通式上有何区别？为什么改进 D-H 更适合处理含平行关节的机器人？</p>
-      <p>3. 给定一组 PUMA560 的关节角，请手工代入式（3-6）计算腕部中心位置，并与 MATLAB 代码运行结果对比，分析误差来源。</p>
+      <p>3. 给定一组ABB IRB 1200关节角，使用参考关节链手工计算前三个中间变换，并与MATLAB输出比较，定位第一处误差。</p>
       <p>4. 为什么说正运动学解是唯一的，而逆运动学可能多解？这一性质对机器人控制与路径规划有何影响？</p>
-      <p>5. 斯坦福臂的关节 3 为移动关节，其 D-H 参数表中哪个参数是变量？若将斯坦福臂的关节 3 改为旋转关节，工作空间形状将如何变化？</p>
+      <p>5. 说明ABB课程等价D-H表为何不能写成“ABB官方D-H参数”，并列出证明模型一致所需的最小构型集合。</p>
       <p>6. 球形腕（后三关节轴线交于一点）对机器人运动学有何重要意义？这一结构特征如何简化后续的逆运动学求解？</p>
-      <p>7. UR5 协作机器人的 D-H 参数表中 d<sub>5</sub>≠0，这意味着它不严格满足 Pieper 准则。请查阅资料，了解 UR5 是如何实现逆运动学求解的（半解析法还是数值法），并与 PUMA560 的解析法对比。</p>
+      <p>7. 比较ABB产品规格、ROS-Industrial参考链和课程等价D-H模型的来源与用途；若缺少RobotStudio站点，哪些结论必须标为待验证？</p>
       <p>8. 除 D-H 参数法外，指数积公式（PoE）也是一种重要的运动学建模方法。请简述 PoE 的基本思想，并比较其与 D-H 法的优缺点。</p>
     </div>
 
 
     <div class="callout callout-warning">
       <div class="callout-title">学习提示</div>
-      <p>本章是机器人学的核心基础，D-H 参数法的掌握程度直接决定第 4 章逆运动学的学习效果。建议结合 MATLAB Robotics Toolbox 实际运行 PUMA560 代码，亲手验证参数表与变换矩阵，培养"参数表↔坐标系↔变换矩阵"三者对应的空间想象能力。</p>
+      <p>完成本章后，应能用ABB IRB 1200同一组关节角分别驱动参考关节链与课程等价D-H链，定位第一处不一致的中间变换，并说明产品规格、参考模型和教学模型各自证明什么。</p>
     </div>
 
 
@@ -2517,9 +2253,9 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
         </div>
       </div>
       <div class="kp-body">
-        <p>逆运动学的根本困难在于<span class="highlight">三角函数的多值性</span>。正运动学 T<sub>0n</sub>=f(θ<sub>1</sub>,…,θ<sub>n</sub>) 是单值映射，而其逆映射 θ=f<sup>-1</sup>(T) 通常多值。对于 6 自由度全旋转关节机器人，理论上最多存在 <strong>8 组解</strong>（每个关节一般有"上肘/下肘""左臂/右臂""腕部翻转/不翻转"等组合）。这些解对应同一末端位姿的不同机器人构型。</p>
+        <p>逆运动学的根本困难在于非线性方程的多解、无解与奇异性。正运动学 T<sub>0n</sub>=f(q) 对给定关节变量是单值映射，而逆映射通常不是单值。具有球形腕和常见几何结构的6R工业机器人常出现“肩左/右、肘上/下、腕翻转/不翻转”组合，因而最多可得到8组候选解；但这不是任意6R串联机器人的一般上界，一般6R机构的复数孤立解上界可达16。实际实数可用解还要受工作空间、关节限位、碰撞和连续性约束。</p>
 
-        <p>多解的存在与三个因素有关：（1）<strong>关节极限</strong>会排除物理不可达的解；（2）<strong>连杆参数</strong>（如 a<sub>3</sub>≠0 的偏置）会增加或减少解的数目；（3）<strong>冗余度</strong>（自由度大于任务空间维度）会使解成为连续族。下图以两连杆平面机器人为例，展示同一末端位置对应的两组解（"肘上"与"肘下"）。</p>
+        <p>多解的存在与三个因素有关：（1）<strong>关节极限</strong>会排除物理不可达的解；（2）<strong>连杆参数</strong>会改变候选解数量；（3）<strong>冗余度</strong>会使解成为连续族。下图用ABB IRB 1200的A2–A3平面教学子链说明同一腕心投影对应“肘上”与“肘下”两支。</p>
 
         <div class="svg-diagram">
           <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
@@ -2553,11 +2289,11 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
             <g transform="translate(560,200)">
               <rect x="0" y="0" width="150" height="110" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
               <text x="10" y="20" font-size="11" font-weight="700" fill="#1a202c">多解来源</text>
-              <text x="10" y="40" font-size="10" fill="#475569">两连杆RR机器人</text>
+              <text x="10" y="40" font-size="10" fill="#475569">ABB A2–A3平面教学子链</text>
               <text x="10" y="56" font-size="10" fill="#475569">同一末端位置 P</text>
               <text x="10" y="72" font-size="10" fill="#059669">→ 解1：肘在上</text>
               <text x="10" y="88" font-size="10" fill="#7c3aed">→ 解2：肘在下</text>
-              <text x="10" y="104" font-size="10" fill="#64748b">6DOF最多8组解</text>
+            <text x="10" y="104" font-size="10" fill="#64748b">典型球腕6R最多8组候选解</text>
             </g>
           </svg>
           <div class="diagram-caption">图 4-1 逆运动学多解问题：同一末端位姿对应多个机器人构型</div>
@@ -2568,13 +2304,13 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           <p>多解存在时，需根据任务需求选取<strong>最优解</strong>。常用判据包括：（1）<strong>最短路径</strong>——选择与当前关节角偏差最小的解，减少运动时间与能耗；（2）<strong>避障</strong>——排除会与障碍物碰撞的构型；（3）<strong>远离奇异</strong>——选择雅可比条件数较小的解；（4）<strong>关节极限</strong>——排除超出关节范围的解。工程上常综合上述判据加权评分。</p>
         </div>
 
-        <p>6 自由度机器人最多 8 组解的来源可分解为三个独立的二选一决策：</p>
+        <p>对本节讨论的典型球形腕6R机器人，8组候选解可由三个常见二选一构型组合解释：</p>
         <ul>
           <li><strong>左臂/右臂（2 组）</strong>：由 θ<sub>1</sub> 的两组解产生，对应机器人从左侧或右侧接近目标。</li>
           <li><strong>肘上/肘下（2 组）</strong>：由 θ<sub>3</sub> 的正负号产生，对应肘部向上或向下弯曲。</li>
           <li><strong>腕部翻转/不翻转（2 组）</strong>：由 θ<sub>5</sub> 的正负号产生，对应腕部两种姿态。</li>
         </ul>
-        <p>2×2×2=8，故最多 8 组解。实际可用解数受关节极限与碰撞约束限制，通常少于 8 组。当存在肩部偏置（a<sub>3</sub>≠0）或连杆扭曲时，解的数目与形式会变化。</p>
+        <p>2×2×2=8说明了该类结构的候选构型数。实际可用解数通常更少；对不满足该结构假设的6R机构，解的数目与形式可能不同，必须依据具体几何模型分析。</p>
 
         <div class="callout callout-info">
           <div class="callout-title">解的存在性、唯一性与多重性</div>
@@ -2594,7 +2330,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
         </div>
       </div>
       <div class="kp-body">
-        <p><span class="term">解析法</span>（Closed-form / Analytical Method）通过对正运动学方程直接求逆，得到关节角的显式表达式。其优点是计算速度快、精度高、能枚举所有解；缺点是仅对满足特定几何条件的构型可行，且推导过程复杂。解析法是工业机器人控制器的首选方法，主流工业机器人（ABB、KUKA、FANUC）几乎都采用解析逆解。</p>
+        <p><span class="term">解析法</span>（Closed-form / Analytical Method）利用机构几何关系或代数消元得到有限步骤的关节变量表达。其优点是计算快、结果可重复，并可针对给定结构枚举候选分支；缺点是依赖具体构型，推导和分支处理复杂。工业机器人控制器可能采用解析、数值或混合求解策略，厂商内部实现通常不公开，不能仅凭品牌推断算法。</p>
 
         <p>解析法的基本思路是：将正运动学方程 T<sub>0n</sub>=A<sub>1</sub>A<sub>2</sub>…A<sub>n</sub> 两边左乘 A<sub>1</sub><sup>-1</sup>，分离出第一个关节变量；再依次左乘 A<sub>2</sub><sup>-1</sup>、A<sub>3</sub><sup>-1</sup> 等，逐个解出各关节角。核心技巧是利用<strong>等式两边对应元素相等</strong>构造方程，并通过平方和消元去除多变量耦合。</p>
 
@@ -2606,7 +2342,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           </div>
         </div>
 
-        <p>并非所有构型都存在解析解。<span class="highlight">可解析的充分条件</span>是 Pieper 准则（见下文 KP 4.5）：后三个关节轴线交于一点（球形腕）。目前几乎所有 6 自由度工业机器人都设计为满足此准则，以获得解析逆解。下表对比解析法与数值法：</p>
+        <p>并非所有构型都存在便于实现的封闭形式解。Pieper条件（见KP 4.3）给出一类重要的充分条件，例如三个相邻转动关节轴线相交于一点时可实现位置—姿态解耦。实际工业机器人结构多样，应根据关节轴几何关系、厂商接口和任务实时性选择解析法、数值法或二者结合。下表对比两类方法：</p>
 
         <div class="table-wrap">
           <table>
@@ -2678,7 +2414,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
 
     <div class="kp-card" id="kp-4-3">
       <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 4.5</span>Pieper准则</div>
+        <div class="kp-title"><span class="kp-id">KP 4.3</span>Pieper准则</div>
         <div class="kp-tags">
           <span class="kp-tag 重点">重点</span>
           <span class="kp-tag 难点">难点</span>
@@ -2705,7 +2441,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           </div>
         </div>
 
-        <p>Pieper 准则是<strong>工业机器人设计的指导原则</strong>。PUMA560、斯坦福臂、ABB IRB120、FANUC LR Mate、KUKA KR 系列等几乎所有主流 6 自由度工业机器人都采用球形腕设计，正是为了满足 Pieper 准则、获得解析逆解。这是"机械结构为算法服务"的典型范例——通过结构约束换取算法的封闭性与实时性。</p>
+        <p>Pieper条件是理解6R机器人可解析结构的重要工具。部分经典和工业机器人采用三轴相交的腕部结构，从而实现位置—姿态解耦；也有机器人依靠其他几何条件、专用代数方法或数值算法求解。判断具体型号时必须依据关节轴几何模型，不能把系列品牌或外观直接等同于球形腕。</p>
 
         <div class="callout callout-warning">
           <div class="callout-title">不满足 Pieper 准则怎么办？</div>
@@ -2716,7 +2452,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           <div class="callout-title">前沿方法展望：超越经典解析与数值的逆运动学</div>
           <p>除本章介绍的解析法与牛顿-拉夫逊数值法外，现代机器人学中以下方法正在拓展逆运动学的求解边界：</p>
           <ul>
-            <li><strong>基于优化的逆运动学（QP-IK）</strong>：将逆运动学表述为二次规划（Quadratic Programming）问题，以 ‖Jδq−v‖² 为目标函数，叠加关节极限、避障等不等式约束。QP-IK 天然处理冗余度与约束，是协作机器人（如 UR5）实时控制的主流方法，也是 ROS MoveIt! 运动规划框架的底层求解器。</li>
+            <li><strong>基于优化的逆运动学（QP-IK）</strong>：将逆运动学表述为带约束优化问题，以 ‖Jδq−v‖² 为主要目标，叠加关节极限、速度和避障约束。对ABB IRB 1200课程任务，解析或OPW候选解用于快速求解，数值优化用于处理约束和连续性；具体求解器配置必须记录，不能笼统写成“软件自动求解”。</li>
             <li><strong>学习法逆运动学</strong>：利用神经网络（MLP、ResNet）或高斯过程回归（GPR），从大量"关节角-末端位姿"样本中学习逆映射。其优势是无需显式推导解析公式，适用于任意复杂构型；缺点是需要训练数据、泛化性受限于训练分布、且难以保证数值精度。近年来，可微分运动学层与深度学习端到端融合的方法正在兴起。</li>
             <li><strong>指数积公式（PoE, Product of Exponentials）</strong>：基于李群 SE(3) 的指数映射描述运动学，无需 D-H 参数即可建立正/逆运动学方程。PoE 与数值法结合可构造更鲁棒的逆解算法，现代机器人学教材（如 Lynch & Park《Modern Robotics》）已将 PoE 作为核心方法之一。</li>
           </ul>
@@ -2730,375 +2466,69 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
 
 
     <div class="kp-card" id="kp-4-4">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 4.3</span>代数法</div>
-        <div class="kp-tags">
-          <span class="kp-tag 难点">难点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">代数法</span>通过代数运算（主要是矩阵求逆、元素比较、三角恒等变换）求解关节角。以 PUMA560 为例，利用球形腕的解耦特性，可将 6 自由度逆运动学分解为两个独立的 3 自由度子问题：<strong>位置逆解</strong>（求 θ<sub>1</sub>、θ<sub>2</sub>、θ<sub>3</sub>）与<strong>姿态逆解</strong>（求 θ<sub>4</sub>、θ<sub>5</sub>、θ<sub>6</sub>）。</p>
-
-        <div class="callout callout-info">
-          <div class="callout-title">参数符号与第 3 章参数表的映射</div>
-          <p>本节公式中使用的连杆参数符号与第 3 章表 3-2（PUMA560 D-H 参数表）的对应关系如下：</p>
-          <ul>
-            <li><strong>a<sub>2</sub></strong>：大臂长度（第 3 章表中关节 2 的 a 参数，0.4318 m）</li>
-            <li><strong>d<sub>2</sub></strong>：肩部偏置（第 3 章表中关节 2 的 d 参数；注意 Robotics Toolbox 的 mdl_puma560 将此偏置放在关节 3 即 d<sub>3</sub>=0.15 m，二者描述同一物理偏置，仅 D-H 坐标系分配不同）</li>
-            <li><strong>d<sub>4</sub></strong>：小臂长度（肘关节到腕部中心的距离，第 3 章表中关节 4 的 d 参数，0.4318 m）</li>
-            <li><strong>d<sub>6</sub></strong>：末端工具偏置（第 3 章表中关节 6 的 d 参数）</li>
-          </ul>
-          <p>引用不同教材的 PUMA560 参数时，务必核对各符号对应的是哪个关节的 D-H 参数，避免混淆。</p>
-        </div>
-
-        <p><strong>第一步：求 θ<sub>1</sub>。</strong>设末端位姿 T<sub>06</sub> 的位置为 (p<sub>x</sub>, p<sub>y</sub>, p<sub>z</sub>)，腕部中心位置 p<sub>c</sub> = p − d<sub>6</sub>·n（n 为末端 z 轴方向）。由腕部中心位置的第 1、2 分量得：</p>
-        <div class="formula-block">
-          <div class="formula-label">代数法求 θ<sub>1</sub>（4-1）</div>
-          <div class="formula">θ<sub>1</sub> = atan2(p<sub>cy</sub>, p<sub>cx</sub>) − atan2(d<sub>2</sub>, ±√(p<sub>cx</sub><sup>2</sup> + p<sub>cy</sub><sup>2</sup> − d<sub>2</sub><sup>2</sup>))</div>
-        </div>
-        <p>其中 d<sub>2</sub> 为肩部偏置（第 2 关节沿 z<sub>1</sub> 轴的偏移量）。正负号对应"左臂/右臂"两种构型，共两组解。当 d<sub>2</sub>=0（无肩部偏置）时，公式退化为 θ<sub>1</sub> = atan2(p<sub>cy</sub>, p<sub>cx</sub>)，即两组解相差 π。</p>
-
-        <p><strong>第二步：求 θ<sub>3</sub>。</strong>利用腕部中心到肩部距离的平方等于前三个连杆的几何关系，构造方程：</p>
-        <div class="formula-block">
-          <div class="formula-label">代数法求 θ<sub>3</sub>（4-2）</div>
-          <div class="formula">
-            r = √(p<sub>cx</sub><sup>2</sup> + p<sub>cy</sub><sup>2</sup>) − a<sub>1</sub>，&nbsp; s = p<sub>cz</sub> − d<sub>1</sub><br>
-            c<sub>3</sub> = (r<sup>2</sup> + s<sup>2</sup> − a<sub>2</sub><sup>2</sup> − d<sub>4</sub><sup>2</sup>) / (2·a<sub>2</sub>·d<sub>4</sub>)<br>
-            θ<sub>3</sub> = atan2(±√(1−c<sub>3</sub><sup>2</sup>), c<sub>3</sub>)
-          </div>
-        </div>
-        <p>正负号对应"肘上/肘下"两种构型。</p>
-
-        <p><strong>第三步：求 θ<sub>2</sub>。</strong>代入 θ<sub>3</sub> 后，由几何关系直接写出：</p>
-        <div class="formula-block">
-          <div class="formula-label">代数法求 θ<sub>2</sub>（4-3）</div>
-          <div class="formula">θ<sub>2</sub> = atan2(s, r) − atan2(d<sub>4</sub>s<sub>3</sub>, a<sub>2</sub> + d<sub>4</sub>c<sub>3</sub>)</div>
-        </div>
-
-        <p><strong>第四步：求 θ<sub>4</sub>、θ<sub>5</sub>、θ<sub>6</sub>。</strong>由于球形腕轴线交于一点，姿态仅由后三关节决定。计算 R<sub>36</sub> = R<sub>03</sub><sup>-1</sup>·R<sub>06</sub>，比较其元素即可解出后三关节角（ZYZ 欧拉角逆解）。</p>
-
-        <div class="callout callout-success">
-          <div class="callout-title">代数法关键技巧</div>
-          <p>代数法的核心是<strong>平方和消元</strong>：当某关节角同时出现在多个方程中时，将含该角的方程两两平方相加，可消去其他变量，得到单一变量的方程。这是处理三角耦合的标准手段。此外，<strong>atan2 优于 atan</strong>，因为它能自动判断象限，避免解丢失。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.4</span>ABB逆运动学代数分解</div><div class="kp-tags"><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p><span class="term">代数法</span>从目标位姿T<sub>d</sub>与正运动学T<sub>06</sub>(q)的矩阵元素关系求关节变量。对ABB IRB 1200，应先把目标从工件坐标和工具坐标统一到机器人法兰坐标，再讨论逆解；遗漏tooldata或wobjdata会使“数学逆解正确、现场目标错误”。</p>
+    <div class="formula-block"><div class="formula-label">目标坐标统一</div><div class="formula"><sup>base</sup>T<sub>flange,d</sub> = <sup>base</sup>T<sub>workobject</sub> · <sup>workobject</sup>T<sub>tool,d</sub> · (<sup>flange</sup>T<sub>tool</sub>)<sup>−1</sup></div></div>
+    <p>IRB 1200后三轴形成球腕几何条件，可按“腕心位置—腕部姿态”分解候选解。先由目标法兰位姿回退到腕心，再求A1～A3；随后计算R<sub>36</sub>=R<sub>03</sub><sup>T</sup>R<sub>06</sub>并求A4～A6。实际实现仍需核对本课程D-H坐标系与ABB轴角定义之间的固定偏置。</p>
+    <div class="formula-block"><div class="formula-label">姿态分离</div><div class="formula">R<sub>36</sub> = R<sub>03</sub><sup>T</sup>R<sub>d</sub></div></div>
+    <div class="callout callout-warning"><div class="callout-title">多解不是错误</div><p>同一目标可能出现肩左/右、肘上/下、腕翻转等候选解。必须依次执行工作范围检查、与当前构型的连续性比较、雅可比奇异筛查和碰撞检查；不能只返回第一组数学解。</p></div>
+    <div class="callout callout-success"><div class="callout-title">评价证据</div><p>提交目标坐标变换、候选解列表、每组解的再正解误差、限位状态与选解理由。再正解一致只证明运动学内部一致，不证明无碰撞或实体安全。</p></div>
+  </div>
+</div>
 
 
     <div class="kp-card" id="kp-4-5">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 4.4</span>几何法</div>
-        <div class="kp-tags">
-          <span class="kp-tag 难点">难点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">几何法</span>利用机器人结构的几何关系（平面三角形、球面三角形等）直接求解关节角。它不依赖矩阵运算，而是通过<strong>几何投影与三角函数</strong>建立关节角与末端位姿的直观联系。几何法特别适合前三个关节共面或近似共面的机器人（如 PUMA、SCARA）。</p>
-
-        <p>以 PUMA560 为例，前三个关节构成一个平面机构。设腕部中心 W 在基坐标系的位置为 (x<sub>w</sub>, y<sub>w</sub>, z<sub>w</sub>)，则：</p>
-        <ul>
-          <li><strong>θ<sub>1</sub></strong>：W 在 x<sub>0</sub>y<sub>0</sub> 平面的投影与 x<sub>0</sub> 轴的夹角。考虑肩部偏置 d<sub>2</sub>，需修正为 θ<sub>1</sub> = atan2(y<sub>w</sub>, x<sub>w</sub>) − atan2(d<sub>2</sub>, ±√(x<sub>w</sub><sup>2</sup>+y<sub>w</sub><sup>2</sup>−d<sub>2</sub><sup>2</sup>))。</li>
-          <li><strong>θ<sub>3</sub></strong>：在肩-肘-腕三角形中，由余弦定理 c<sub>3</sub> = (r<sup>2</sup>+s<sup>2</sup>−a<sub>2</sub><sup>2</sup>−d<sub>4</sub><sup>2</sup>)/(2a<sub>2</sub>d<sub>4</sub>)，再由反余弦求得。</li>
-          <li><strong>θ<sub>2</sub></strong>：肩-肘-腕三角形中，由正弦定理求内角，再叠加 θ<sub>3</sub> 的影响。</li>
-        </ul>
-
-        <div class="svg-diagram">
-          <svg viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
-            <!-- shoulder point S -->
-            <circle cx="100" cy="200" r="6" fill="#2563eb"/>
-            <text x="70" y="220" font-size="12" fill="#2563eb" font-weight="700">肩 S</text>
-            <!-- elbow point E -->
-            <circle cx="280" cy="90" r="6" fill="#2563eb"/>
-            <text x="288" y="86" font-size="12" fill="#2563eb" font-weight="700">肘 E</text>
-            <!-- wrist point W -->
-            <circle cx="450" cy="180" r="6" fill="#dc2626"/>
-            <text x="458" y="178" font-size="12" fill="#dc2626" font-weight="700">腕 W</text>
-            <!-- links -->
-            <line x1="100" y1="200" x2="280" y2="90" stroke="#1a202c" stroke-width="4"/>
-            <text x="170" y="155" font-size="12" fill="#1a202c">a₂ (大臂)</text>
-            <line x1="280" y1="90" x2="450" y2="180" stroke="#1a202c" stroke-width="4"/>
-            <text x="350" y="125" font-size="12" fill="#1a202c">d₄ (小臂)</text>
-            <!-- triangle angles -->
-            <path d="M 130 200 A 30 30 0 0 0 124 188" fill="none" stroke="#d97706" stroke-width="2"/>
-            <text x="132" y="194" font-size="12" fill="#d97706" font-weight="700">θ₂</text>
-            <path d="M 260 90 A 30 30 0 0 1 270 102" fill="none" stroke="#7c3aed" stroke-width="2"/>
-            <text x="240" y="78" font-size="12" fill="#7c3aed" font-weight="700">θ₃</text>
-            <!-- reference dashed -->
-            <line x1="100" y1="200" x2="430" y2="200" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="450" y1="180" x2="450" y2="200" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
-            <text x="250" y="218" font-size="11" fill="#64748b">水平参考线</text>
-            <text x="455" y="195" font-size="11" fill="#64748b">s</text>
-            <text x="270" y="215" font-size="11" fill="#64748b">r</text>
-            <!-- note -->
-            <text x="120" y="40" font-size="12" fill="#475569" font-weight="700">几何法：肩-肘-腕三角形（余弦/正弦定理求解）</text>
-          </svg>
-          <div class="diagram-caption">图 4-2 几何法示意图：肩-肘-腕三角形与关节角的几何关系</div>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">代数法 vs 几何法</div>
-          <p>代数法与几何法本质等价，结果一致。代数法<strong>推导规范、可程序化</strong>，适合一般构型；几何法<strong>直观、便于校验</strong>，适合共面机构。工程中常先用几何法建立直觉，再用代数法严格推导，二者交叉验证。</p>
-        </div>
-
-        <div class="callout callout-success">
-          <div class="callout-title">数值算例：两连杆平面机器人逆运动学</div>
-          <p>设两连杆平面机器人 l<sub>1</sub>=1 m，l<sub>2</sub>=0.8 m，末端目标位置 (x, y)=(1.2, 0.5) m。用几何法求解：先计算 r=√(x<sup>2</sup>+y<sup>2</sup>)=√(1.44+0.25)=√1.69=1.3 m。由余弦定理 cos θ<sub>2</sub>=(r<sup>2</sup>−l<sub>1</sub><sup>2</sup>−l<sub>2</sub><sup>2</sup>)/(2l<sub>1</sub>l<sub>2</sub>)=(1.69−1−0.64)/(1.6)=0.05/1.6=0.03125，得 θ<sub>2</sub>=±1.5395 rad（肘上/肘下两组解）。再由 θ<sub>1</sub>=atan2(y,x)−atan2(l<sub>2</sub>sin θ<sub>2</sub>, l<sub>1</sub>+l<sub>2</sub>cos θ<sub>2</sub>) 解出 θ<sub>1</sub>。该算例展示了几何法"先求末端关节角，再求基部关节角"的标准流程。</p>
-        </div>
-
-        <div class="callout callout-warning">
-          <div class="callout-title">无解判定</div>
-          <p>当 r&gt;l<sub>1</sub>+l<sub>2</sub>（目标超出手臂可达范围）时，cos θ<sub>2</sub>&gt;1，无实数解——即目标点在工作空间外。这是几何法判定无解的直观依据。同理，当 r&lt;|l<sub>1</sub>−l<sub>2</sub>| 时也无解（目标在内边界以内）。解析法通过判别式负值同样可判定无解。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.5</span>ABB腕心几何法</div><div class="kp-tags"><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p><span class="term">几何法</span>把ABB IRB 1200的前三轴定位问题投影到由A1确定的肩—肘平面，再利用余弦定理得到A2、A3候选解。几何图必须对应课程采用的轴原点、零位和角度正方向，不能把其他六轴机器人的长度符号直接套用。</p>
+    <div class="formula-block"><div class="formula-label">二维定位子问题</div><div class="formula">r = √(x<sub>w</sub><sup>2</sup>+y<sub>w</sub><sup>2</sup>)；D=(r′²+z′²−L<sub>2</sub>²−L<sub>3</sub>²)/(2L<sub>2</sub>L<sub>3</sub>)</div></div>
+    <div class="formula-block"><div class="formula-label">肘部两支</div><div class="formula">q<sub>3</sub> = atan2(±√(1−D²), D)</div></div>
+    <p>r′、z′、L<sub>2</sub>、L<sub>3</sub>必须由当前ABB等价模型的坐标系推导，不能仅凭外形尺寸填写。若|D|&gt;1，目标在该简化定位模型下不可达；若D接近±1，肘部接近伸直或折叠边界，应进一步检查雅可比条件数。</p>
+    <div class="callout callout-info"><div class="callout-title">正确使用几何法</div><p>先画腕心与肩、肘的几何关系，再写公式；用几何法得到候选解后，必须送回同一套ABB正运动学函数复算。图、公式、代码使用不同零位定义时，即使数值看似合理也不能通过。</p></div>
+    <div class="callout callout-success"><div class="callout-title">反证任务</div><p>将腕心目标沿径向外移，构造|D|&gt;1的不可达反例；保留目标、D值、失败原因和修正后的可达目标，形成“不可达不是求解器故障”的证据。</p></div>
+  </div>
+</div>
 
     <h2 class="section-title" id="sec-3"><span class="section-num">4.3</span>数值法与雅可比</h2>
 
 
     <div class="kp-card" id="kp-4-6">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 4.6</span>数值法</div>
-        <div class="kp-tags">
-          <span class="kp-tag 难点">难点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">数值法</span>通过迭代逼近目标位姿求解逆运动学，适用于任意构型（包括不满足 Pieper 准则的机器人）。最经典的是<strong>牛顿-拉夫逊迭代法</strong>（Newton-Raphson Method），其核心是利用雅可比矩阵的线性化，将非线性方程求解转化为迭代修正。</p>
-
-        <p>设当前关节角为 q<sub>k</sub>，对应末端位姿为 T(q<sub>k</sub>)，目标位姿为 T<sub>d</sub>。将位姿误差表示为 e<sub>k</sub> = log<sub>SE(3)</sub>(T<sub>d</sub>·T(q<sub>k</sub>)<sup>-1</sup>)（6 维位姿误差向量），则牛顿-拉夫逊迭代步骤如下：</p>
-
-        <div class="step-flow">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-title">初始化</div>
-            <div class="step-desc">给定目标位姿 T<sub>d</sub>，选初始关节角 q<sub>0</sub>（常取当前位形），设 k=0。</div>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-title">正运动学</div>
-            <div class="step-desc">计算 T(q<sub>k</sub>)=fkine(q<sub>k</sub>)，得当前末端位姿。</div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-title">求误差</div>
-            <div class="step-desc">计算位姿误差 e<sub>k</sub>=log<sub>SE(3)</sub>(T<sub>d</sub>·T(q<sub>k</sub>)<sup>-1</sup>)（6 维李代数误差向量），判断 ‖e<sub>k</sub>‖&lt;ε 是否收敛。</div>
-          </div>
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-title">求雅可比</div>
-            <div class="step-desc">计算当前雅可比 J(q<sub>k</sub>)，并求其逆（或伪逆 J<sup>+</sup>）。</div>
-          </div>
-          <div class="step">
-            <div class="step-num">5</div>
-            <div class="step-title">更新关节角</div>
-            <div class="step-desc">q<sub>k+1</sub>=q<sub>k</sub>+J<sup>+</sup>·e<sub>k</sub>，k←k+1，返回步骤 2。</div>
-          </div>
-          <div class="step">
-            <div class="step-num">6</div>
-            <div class="step-title">收敛判定</div>
-            <div class="step-desc">若 ‖e<sub>k</sub>‖&lt;ε 或达到最大迭代次数，停止；否则继续迭代。</div>
-          </div>
-        </div>
-
-        <div class="formula-block">
-          <div class="formula-label">牛顿-拉夫逊迭代公式（4-5）</div>
-          <div class="formula">q<sub>k+1</sub> = q<sub>k</sub> + J(q<sub>k</sub>)<sup>+</sup> · e<sub>k</sub></div>
-        </div>
-        <p>其中 J<sup>+</sup> 为雅可比的伪逆（Moore-Penrose 伪逆）。当 J 为方阵且非奇异时，J<sup>+</sup>=J<sup>-1</sup>；当机器人冗余（关节数大于任务维度）时，J<sup>+</sup>=J<sup>T</sup>(JJ<sup>T</sup>)<sup>-1</sup>，此时还能利用零空间优化次级目标（如避障、远离奇异）。</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> 牛顿-拉夫逊逆运动学数值求解</div>
-<pre><span class="comment">% 牛顿-拉夫逊法数值求解逆运动学（PUMA560）</span>
-clc; clear;
-mdl_puma560;                      <span class="comment">% 加载 PUMA560 模型</span>
-Td = transl(0.3, 0.2, 0.5) * rpy2tr(0, pi/4, 0); <span class="comment">% 目标位姿</span>
-
-q  = [0 0 0 0 0 0]';               <span class="comment">% 初始猜测</span>
-eps = 1e-4;  kmax = 100;          <span class="comment">% 收敛阈值与最大迭代</span>
-for k = 1:kmax
-    Tk = p560.fkine(q);            <span class="comment">% 当前位姿</span>
-    e  = tr2delta(Td / Tk)';            <span class="comment">% 位姿误差(一阶近似: 前三维位置, 后三维姿态)</span>
-    if norm(e) &lt; eps, break; end
-    J  = p560.jacob0(q);           <span class="comment">% 雅可比矩阵</span>
-    dq = pinv(J) * e;              <span class="comment">% 伪逆求关节角修正</span>
-    q  = q + dq;                  <span class="comment">% 更新关节角</span>
-end
-fprintf(<span class="string">'迭代次数=%d, 误差=%.2e\n'</span>, k, norm(e));
-disp(<span class="string">'数值解 q ='</span>); disp(q');
-p560.plot(q);</pre>
-        </div>
-
-        <div class="callout callout-warning">
-          <div class="callout-title">数值法的局限</div>
-          <p>数值法的主要问题是：（1）<strong>收敛性依赖初值</strong>——初值离真解太远可能收敛到错误解或不收敛；（2）<strong>奇异附近发散</strong>——雅可比接近奇异时，伪逆数值不稳定，迭代步长爆炸；（3）<strong>无法枚举多解</strong>——每次只能给出一组解。工程上常结合解析法（对可解析部分用解析，其余用数值）以兼顾速度与通用性。</p>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">收敛判据与步长控制</div>
-          <p>牛顿-拉夫逊法的收敛常用三个判据：（1）<strong>位姿误差判据</strong>——‖e<sub>k</sub>‖&lt;ε（如 ε=10<sup>-4</sup>）；（2）<strong>关节修正判据</strong>——‖Δq‖&lt;δ，表示关节角已不再显著变化；（3）<strong>最大迭代数判据</strong>——达到 k<sub>max</sub>（如 100 次）即停止，防止死循环。为提高数值稳定性，常引入<strong>步长因子</strong> α∈(0,1]，使 q<sub>k+1</sub>=q<sub>k</sub>+α·J<sup>+</sup>e<sub>k</sub>，在奇异附近缩小步长避免发散。现代控制器还采用信赖域、Levenberg-Marquardt 等改进算法，在收敛速度与稳定性间取得平衡。</p>
-        </div>
-
-        <div class="callout callout-success">
-          <div class="callout-title">解析-数值混合法</div>
-          <p>实际工程中常用<strong>混合策略</strong>：对满足 Pieper 准则的球腕机器人，先用解析法解出后三关节角（姿态），再用解析或数值法解前三关节角（位置）；对不满足准则的部分，用数值法补充。这种混合法兼顾解析法的速度与数值法的通用性，是多数工业机器人控制器的实际实现方式。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.6</span>ABB数值逆运动学</div><div class="kp-tags"><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>数值逆运动学从初值q<sub>0</sub>出发，利用当前ABB关节链的几何雅可比迭代减小位姿误差。课程采用阻尼最小二乘法，降低接近奇异位形时伪逆放大的风险。</p>
+    <div class="formula-block"><div class="formula-label">阻尼最小二乘更新</div><div class="formula">Δq = J<sup>T</sup>(JJ<sup>T</sup>+λ²I)<sup>−1</sup>e；q<sub>k+1</sub>=clip(q<sub>k</sub>+Δq, q<sub>min</sub>, q<sub>max</sub>)</div></div>
+    <p>误差e由位置误差和姿态误差组成，二者单位不同，实际工程中应说明权重。每次迭代后执行ABB IRB 1200-5/0.9工作范围裁剪；收敛判据分别报告位置误差、姿态误差与迭代次数。</p>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> ABB阻尼最小二乘核心</div><pre>for iteration = 1:300
+    T = forwardKinematics(q, jointOrigins, jointAxes);
+    error = poseError(T, targetTransform);
+    J = geometricJacobian(q, jointOrigins, jointAxes);
+    step = J' * ((J*J' + damping^2*eye(6)) \ error);
+    q = min(max(q + step', lowerRad), upperRad);
+end</pre></div>
+    <div class="callout callout-warning"><div class="callout-title">必须检查的失败类型</div><p>初值落入另一解支、目标不可达、关节限位截断、姿态权重不合理或雅可比病态都可能导致不收敛。AI只能帮助判断先检查哪一类原因，不能把某次收敛结果直接宣布为唯一正确解。</p></div>
+    <div class="callout callout-success"><div class="callout-title">验证要求</div><p>对求得的q执行再正解，并同时报告位置误差、姿态误差、限位状态和最小奇异值。完整可运行实现见 <a href="../abb/ABB_IRB1200_5_90_trajectory_validation.m">ABB复算脚本</a>。</p></div>
+  </div>
+</div>
 
 
     <div class="kp-card" id="kp-4-7">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 4.7</span>雅可比矩阵</div>
-        <div class="kp-tags">
-          <span class="kp-tag 重点">重点</span>
-          <span class="kp-tag 难点">难点</span>
-          <span class="kp-tag 考点">考点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">雅可比矩阵</span>（Jacobian Matrix）是机器人学中最重要的矩阵之一，它描述了<strong>关节速度与末端速度之间的线性映射关系</strong>。从数学上，雅可比是正运动学方程 T<sub>0n</sub>(q) 对关节变量 q 的偏导数矩阵。</p>
-
-        <div class="formula-block">
-          <div class="formula-label">雅可比矩阵定义（4-6）</div>
-          <div class="formula">
-            J(q) = [ J<sub>1</sub> &nbsp; J<sub>2</sub> &nbsp; ⋯ &nbsp; J<sub>n</sub> ] &nbsp;∈ ℝ<sup>6×n</sup>，其中 J<sub>i</sub> = [ J<sub>i</sub><sup>v</sup>; &nbsp; J<sub>i</sub><sup>ω</sup> ]<br>
-            J<sub>i</sub><sup>v</sup> = ∂p/∂q<sub>i</sub>（线速度雅可比），J<sub>i</sub><sup>ω</sup> 为关节 i 对末端角速度的贡献列<br>
-            <strong>旋转关节</strong>：J<sub>i</sub> = [ z<sub>i-1</sub> × (p<sub>e</sub> − p<sub>i-1</sub>) ; &nbsp; z<sub>i-1</sub> ]<br>
-            <strong>移动关节</strong>：J<sub>i</sub> = [ z<sub>i-1</sub> ; &nbsp; 0 ]
-          </div>
-        </div>
-
-        <p>对 n 自由度机器人，雅可比是 6×n 矩阵（6 为末端速度维数：3 线速度 + 3 角速度）。它将关节速度 q̇ 映射为末端速度 v<sub>e</sub>：</p>
-
-        <div class="formula-block">
-          <div class="formula-label">速度级运动学方程（4-7）</div>
-          <div class="formula">v<sub>末端</sub> = J(q) · q̇<sub>关节</sub></div>
-        </div>
-        <p>展开为：</p>
-        <div class="formula-block">
-          <div class="formula-label">展开形式（4-8）</div>
-          <div class="formula">
-            ⎡ v<sub>x</sub> ⎤ &nbsp;&nbsp; ⎡ J<sub>11</sub> &nbsp; J<sub>12</sub> &nbsp; ⋯ &nbsp; J<sub>1n</sub> ⎤ &nbsp; ⎡ q̇<sub>1</sub> ⎤<br>
-            ⎢ v<sub>y</sub> ⎥ &nbsp;&nbsp; ⎢ J<sub>21</sub> &nbsp; J<sub>22</sub> &nbsp; ⋯ &nbsp; J<sub>2n</sub> ⎥ &nbsp; ⎢ q̇<sub>2</sub> ⎥<br>
-            ⎢ v<sub>z</sub> ⎥ = ⎢ J<sub>31</sub> &nbsp; J<sub>32</sub> &nbsp; ⋯ &nbsp; J<sub>3n</sub> ⎥ · ⎢ ⋮ ⎥<br>
-            ⎢ ω<sub>x</sub> ⎥ &nbsp;&nbsp; ⎢ J<sub>41</sub> &nbsp; J<sub>42</sub> &nbsp; ⋯ &nbsp; J<sub>4n</sub> ⎥ &nbsp; ⎢ ⋮ ⎥<br>
-            ⎢ ω<sub>y</sub> ⎥ &nbsp;&nbsp; ⎢ J<sub>51</sub> &nbsp; J<sub>52</sub> &nbsp; ⋯ &nbsp; J<sub>5n</sub> ⎥ &nbsp; ⎢ ⋮ ⎥<br>
-            ⎣ ω<sub>z</sub> ⎦ &nbsp;&nbsp; ⎣ J<sub>61</sub> &nbsp; J<sub>62</sub> &nbsp; ⋯ &nbsp; J<sub>6n</sub> ⎦ &nbsp; ⎣ q̇<sub>n</sub> ⎦
-          </div>
-        </div>
-
-        <p>其中前 3 行描述线速度映射，后 3 行描述角速度映射。雅可比矩阵的构造主要有两种方法：<strong>矢量积法</strong>（Whitney 1972，几何直观）与<strong>微分法</strong>（对 T<sub>0n</sub> 微分，代数规范）。</p>
-
-        <div class="formula-block">
-          <div class="formula-label">矢量积法构造雅可比（4-9）</div>
-          <div class="formula">
-            J<sub>i</sub><sup>v</sup> = z<sub>i-1</sub> × (p<sub>e</sub> − p<sub>i-1</sub>), &nbsp;&nbsp; J<sub>i</sub><sup>ω</sup> = z<sub>i-1</sub> &nbsp;&nbsp;（旋转关节）<br>
-            J<sub>i</sub><sup>v</sup> = z<sub>i-1</sub>, &nbsp;&nbsp; J<sub>i</sub><sup>ω</sup> = 0 &nbsp;&nbsp;（移动关节）
-          </div>
-        </div>
-        <p>其中 z<sub>i-1</sub> 为关节 i 轴线方向（基坐标系下），p<sub>i-1</sub> 为关节 i-1 原点位置，p<sub>e</sub> 为末端位置。矢量积法无需显式运动学方程，可直接从 D-H 参数计算。</p>
-
-        <div class="svg-diagram">
-          <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
-            <defs>
-              <marker id="arr4_b" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#2563eb"/></marker>
-              <marker id="arr4_r" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#dc2626"/></marker>
-              <marker id="arr4_g" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#059669"/></marker>
-            </defs>
-            <!-- base -->
-            <rect x="40" y="250" width="30" height="40" fill="#94a3b8" opacity="0.5"/>
-            <!-- joints chain -->
-            <circle cx="55" cy="250" r="6" fill="#2563eb"/>
-            <text x="30" y="275" font-size="11" fill="#2563eb">关节1</text>
-            <circle cx="180" cy="180" r="6" fill="#2563eb"/>
-            <text x="158" y="200" font-size="11" fill="#2563eb">关节i</text>
-            <circle cx="320" cy="120" r="6" fill="#2563eb"/>
-            <text x="300" y="110" font-size="11" fill="#2563eb">关节i+1</text>
-            <circle cx="520" cy="80" r="6" fill="#2563eb"/>
-            <text x="505" y="70" font-size="11" fill="#2563eb">关节n</text>
-            <!-- end effector -->
-            <circle cx="600" cy="150" r="7" fill="#dc2626"/>
-            <text x="555" y="180" font-size="12" fill="#dc2626" font-weight="700">末端 p_e</text>
-            <!-- links -->
-            <line x1="55" y1="250" x2="180" y2="180" stroke="#1a202c" stroke-width="3"/>
-            <line x1="180" y1="180" x2="320" y2="120" stroke="#1a202c" stroke-width="3"/>
-            <line x1="320" y1="120" x2="520" y2="80" stroke="#1a202c" stroke-width="3"/>
-            <line x1="520" y1="80" x2="600" y2="150" stroke="#1a202c" stroke-width="3"/>
-            <!-- joint i angular velocity -->
-            <path d="M 180 150 A 30 30 0 1 1 150 180" fill="none" stroke="#d97706" stroke-width="2"/>
-            <text x="118" y="148" font-size="12" fill="#d97706" font-weight="700">q̇_i (关节速度)</text>
-            <!-- z axis at joint i -->
-            <line x1="180" y1="180" x2="180" y2="130" stroke="#7c3aed" stroke-width="2" marker-end="url(#arr4_b)"/>
-            <text x="185" y="135" font-size="11" fill="#7c3aed">z_{i-1}</text>
-            <!-- vector from joint i to end effector -->
-            <line x1="180" y1="180" x2="600" y2="150" stroke="#059669" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr4_g)"/>
-            <text x="340" y="158" font-size="11" fill="#059669">(p_e - p_{i-1})</text>
-            <!-- end effector velocity -->
-            <line x1="600" y1="150" x2="640" y2="110" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arr4_r)"/>
-            <text x="540" y="105" font-size="12" fill="#dc2626" font-weight="700">v_末端</text>
-            <!-- mapping label -->
-            <text x="220" y="40" font-size="13" fill="#475569" font-weight="700">雅可比映射：q̇_关节 → v_末端</text>
-            <text x="180" y="300" font-size="11" fill="#059669">J_i^v = z_{i-1} × (p_e − p_{i-1})</text>
-          </svg>
-          <div class="diagram-caption">图 4-3 雅可比矩阵的速度传递：关节速度经雅可比映射为末端速度</div>
-        </div>
-
-        <p>雅可比矩阵有三大用途：（1）<strong>速度分析</strong>——由关节速度求末端速度；（2）<strong>静力学分析</strong>——由虚功原理得 F<sub>末端</sub> = J<sup>-T</sup>·τ<sub>关节</sub>，即力雅可比是速度雅可比的转置逆；（3）<strong>奇异分析</strong>——雅可比降秩时机器人进入奇异位形。下面给出 MATLAB 中雅可比的计算：</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> Robotics Toolbox · 雅可比矩阵 jacob0()</div>
-<pre><span class="comment">% 雅可比矩阵计算与速度分析（PUMA560）</span>
-mdl_puma560;                      <span class="comment">% 加载内置 PUMA560 模型</span>
-q = [0 0.3 -pi/3 0 pi/2 0];       <span class="comment">% 某构型关节角</span>
-
-<span class="comment">% --- 1. 基坐标系下的雅可比 (6×6) ---</span>
-J0 = p560.jacob0(q);
-disp(<span class="string">'基坐标系雅可比 J0 ='</span>); disp(J0);
-
-<span class="comment">% --- 2. 末端坐标系下的雅可比 ---</span>
-Je = p560.jacobe(q);
-disp(<span class="string">'末端坐标系雅可比 Je ='</span>); disp(Je);
-
-<span class="comment">% --- 3. 由关节速度求末端速度 ---</span>
-qd = [0.1 0.2 -0.1 0 0.3 0.1]';   <span class="comment">% 关节速度 (rad/s)</span>
-ve = J0 * qd;                      <span class="comment">% 末端速度 [vx vy vz wx wy wz]</span>
-fprintf(<span class="string">'末端线速度 = [%.3f %.3f %.3f] m/s\n'</span>, ve(1:3));
-fprintf(<span class="string">'末端角速度 = [%.3f %.3f %.3f] rad/s\n'</span>, ve(4:6));
-
-<span class="comment">% --- 4. 由末端速度求关节速度（逆速度运动学）---</span>
-vd = [0.1 0 0 0 0 0]';            <span class="comment">% 期望末端速度</span>
-qd_sol = pinv(J0) * vd;            <span class="comment">% 伪逆求关节速度</span>
-fprintf(<span class="string">'所需关节速度 = '</span>); fprintf(<span class="string">'%.3f '</span>, qd_sol);
-
-<span class="comment">% --- 5. 可操作度（远离奇异程度的度量）---</span>
-w = sqrt(det(J0 * J0'));           <span class="comment">% Yoshikawa 可操作度</span>
-fprintf(<span class="string">'\n可操作度 w = %.4f (越大越远离奇异)\n'</span>, w);
-
-<span class="comment">% --- 6. 雅可比条件数（数值稳定性指标）---</span>
-kappa = cond(J0);
-fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'</span>, kappa);</pre>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">💡 力雅可比与对偶性</div>
-          <p>由虚功原理 δW = τ<sup>T</sup>δq = F<sup>T</sup>δx，结合 δx=Jδq 得 τ=J<sup>T</sup>F。即<strong>力雅可比等于速度雅可比的转置</strong>。这一对偶性是机器人静力学的基础：雅可比既描述速度传递，也描述力传递。关节力矩小但末端力大，对应"力放大"构型；反之对应"速度放大"构型。</p>
-        </div>
-
-        <div class="callout callout-success">
-          <div class="callout-title">✓ 可操作度椭球——运动能力的几何刻画</div>
-          <p>对雅可比做奇异值分解 J = UΣV<sup>T</sup>，奇异值 σ<sub>1</sub>≥σ<sub>2</sub>≥…≥σ<sub>r</sub> 描述末端在各方向的运动能力。以奇异值为半轴的椭球称为<strong>可操作度椭球</strong>（Manipulability Ellipsoid）：长轴方向运动能力强（易实现高速运动），短轴方向运动能力弱。椭球越接近球，各向同性越好；椭球越扁，越接近奇异。Yoshikawa 可操作度 w=σ<sub>1</sub>σ<sub>2</sub>…σ<sub>r</sub> 即椭球"体积"，条件数 κ=σ<sub>1</sub>/σ<sub>r</sub> 即椭球"扁平度"，二者从不同角度度量运动灵活性。</p>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">💡 应用：分解加速度运动控制</div>
-          <p>雅可比不仅用于速度分析，还是<strong>分解加速度控制</strong>（Resolved-Rate Motion Control）的核心。给定期望末端速度 v<sub>d</sub>，通过 q̇ = J<sup>+</sup>v<sub>d</sub> 实时计算关节速度指令，再积分得关节位置。这种方法将笛卡尔空间轨迹实时映射到关节空间，是工业机器人笛卡尔空间插补的算法基础。当机器人冗余（n&gt;6）时，零空间项 (I−J<sup>+</sup>J)ẑ 可用于优化次级目标（避障、远离奇异），其中 ẑ 为任意向量。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.7</span>ABB几何雅可比与奇异筛查</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 难点">难点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span></span></div></div>
+  <div class="kp-body">
+    <p><span class="term">几何雅可比</span>把ABB六轴关节速度映射为法兰线速度和角速度：v=J(q)q̇。构造时必须使用基坐标系表达的关节轴u<sub>i</sub>、轴上点p<sub>i</sub>和法兰点p<sub>e</sub>。</p>
+    <div class="formula-block"><div class="formula-label">IRB 1200六个旋转关节的雅可比列</div><div class="formula">J<sub>i</sub> = [u<sub>i</sub> × (p<sub>e</sub>−p<sub>i</sub>); u<sub>i</sub>]，i=1…6</div></div>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> ABB几何雅可比</div><pre>[T, jointPositions, ~, axesWorld] = forwardKinematics(q, origins, axes);
+for axisIndex = 1:6
+    u = axesWorld(axisIndex,:)';
+    p = jointPositions(axisIndex,:)';
+    J(:,axisIndex) = [cross(u,T(1:3,4)-p); u];
+end
+sigma = svd(J);</pre></div>
+    <p>课程同时报告最小奇异值σ<sub>min</sub>和条件数κ。A5接近0°只作为ABB球腕奇异的快速筛查信号，不能替代完整雅可比分析；σ<sub>min</sub>阈值是课程数值筛查设置，不得写成ABB控制器验收标准。</p>
+    <div class="callout callout-info"><div class="callout-title">轨迹级检查</div><p>在整条轨迹的每个采样点计算σ<sub>min</sub>，保存最小值、发生时刻和对应六轴角度。再构造一条A5穿越0°的反例轨迹，比较修正前后的最小奇异值和关节速度需求。</p></div>
+    <div class="callout callout-warning"><div class="callout-title">结论边界</div><p>雅可比未触发课程阈值，只能写“未发现该类运动学奇异风险”。碰撞、控制器奇异处理、机械柔性和工具负载仍需RobotStudio或实体系统证据。</p></div>
+  </div>
+</div>
 
 
     <div class="kp-card" id="kp-4-8">
@@ -3256,9 +2686,9 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
       <div class="callout-title">课后思考 · 巩固提升</div>
       <p>1. 为什么正运动学解唯一而逆运动学可能多解？6 自由度全旋转关节机器人最多有几组解？这些解对应哪些构型选择？</p>
       <p>2. Pieper 准则的内容是什么？为什么球形腕结构能使逆运动学可解析？若机器人不满足 Pieper 准则，应采用何种方法求解？</p>
-      <p>3. 代数法与几何法在求解 PUMA560 逆运动学时各有何优缺点？为什么工程中常将二者结合使用？</p>
+      <p>3. 对ABB IRB 1200目标位姿，代数分解与腕心几何法各产生哪些候选解？为什么必须再做工作范围和连续性筛选？</p>
       <p>4. 雅可比矩阵的物理意义是什么？它如何将关节速度映射为末端速度？矢量积法构造雅可比的公式中，旋转关节与移动关节有何不同？</p>
-      <p>5. 什么是奇异位形？边界奇异与内部奇异有何区别？在 PUMA560 中，θ<sub>5</sub>=0 对应哪种奇异？</p>
+      <p>5. 什么是奇异位形？为什么ABB IRB 1200的A5接近0°只能作为腕部奇异筛查，还需计算雅可比最小奇异值？</p>
       <p>6. 牛顿-拉夫逊数值法求解逆运动学时，为何在奇异位形附近会发散？阻尼最小二乘法（DLS）如何缓解这一问题？阻尼系数 λ 应如何选取？</p>
       <p>7. 力雅可比与速度雅可比有何关系？这一对偶性在机器人静力学与力控制中有何应用？</p>
       <p>8. 可操作度 w 与条件数 κ(J) 都可度量远离奇异的程度，二者各有何特点？在轨迹规划中如何利用它们规避奇异？</p>
@@ -3309,7 +2739,7 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
       <p><strong>3.</strong> 理解牛顿-欧拉法的两趟递推结构，掌握正向递推（速度加速度）与反向递推（力与力矩）的计算流程。</p>
       <p><strong>4.</strong> 掌握机器人动力学方程的统一形式 M(q)q̈ + C(q,q̇)q̇ + G(q) = τ，理解惯性矩阵、科氏力矩阵、重力向量的物理意义。</p>
       <p><strong>5.</strong> 能够对比拉格朗日法与牛顿-欧拉法的适用场景、计算复杂度与工程价值，根据任务需求合理选择。</p>
-      <p><strong>6.</strong> 能够使用 MATLAB 符号工具箱推导二连杆机器人动力学方程，并用 Robotics Toolbox 进行验证。</p>
+      <p><strong>6.</strong> 能够使用MATLAB符号工具箱推导ABB A2–A3平面教学子模型的动力学方程，并说明其与整机模型的边界。</p>
     </div>
 
     <h2 class="section-title" id="sec-1"><span class="section-num">5.1</span>拉格朗日法</h2>
@@ -3328,6 +2758,7 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
       </div>
       <div class="kp-body">
         <p><span class="term">拉格朗日法</span>（Lagrangian Formulation）是一种基于能量观点建立系统动力学方程的方法。它从系统的动能与势能出发，通过拉格朗日函数自动消去理想约束力，直接得到与广义坐标数目相同的运动微分方程。其核心优势在于<span class="highlight">只需标量运算（能量），无需分析约束力</span>，对多自由度串联机器人尤为便利。</p>
+        <div class="callout callout-warning"><div class="callout-title">ABB子模型边界</div><p>本章符号算例统一解释为ABB IRB 1200的A2–A3平面教学子模型。m、I、质心位置均为课程符号或教学设定值，不是ABB厂家动力学参数；完整六轴力矩预测必须使用可追溯的辨识参数并另行验证。</p></div>
         <p>对于 n 自由度机器人，定义广义坐标 <span class="inline-formula">q = [q₁, q₂, ..., qₙ]ᵀ</span>，拉格朗日函数 L 定义为系统动能 K 与势能 V 之差：</p>
 
         <div class="formula-block">
@@ -3356,6 +2787,33 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
         <div class="callout callout-warning">
           <div class="callout-title">⚠️ 注意事项</div>
           <p>拉格朗日法虽然推导过程系统化，但能量表达式中包含复杂的偏导数运算，对于自由度较多的机器人，<span class="highlight">符号推导工作量随自由度呈非线性增长</span>。这也是工程中常借助 MATLAB Symbolic Math Toolbox 或递归牛顿-欧拉法的原因。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型拉格朗日推导</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；参数为教学设定</span>
+syms q1 q2 qd1 qd2 t real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>;
+I1=<span class="number">0.5</span>; I2=<span class="number">0.2</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心位置（广义坐标的函数）</span>
+xc1=lc1*cos(q1);  yc1=lc1*sin(q1);
+xc2=l1*cos(q1)+lc2*cos(q1+q2);  yc2=l1*sin(q1)+lc2*sin(q1+q2);
+<span class="comment">% 质心速度平方</span>
+vc1sq=(diff(xc1,q1)*qd1)^<span class="number">2</span>+(diff(yc1,q1)*qd1)^<span class="number">2</span>;
+vc2sq=(diff(xc2,q1)*qd1+diff(xc2,q2)*qd2)^<span class="number">2</span>+(diff(yc2,q1)*qd1+diff(yc2,q2)*qd2)^<span class="number">2</span>;
+<span class="comment">% 动能K、势能V、拉格朗日函数L=K-V</span>
+K=<span class="number">0.5</span>*m1*vc1sq+<span class="number">0.5</span>*I1*qd1^<span class="number">2</span>+<span class="number">0.5</span>*m2*vc2sq+<span class="number">0.5</span>*I2*(qd1+qd2)^<span class="number">2</span>;
+V=m1*g*yc1+m2*g*yc2;  L=K-V;
+<span class="comment">% 拉格朗日方程：tau_i = d/dt(dL/dqd_i) - dL/dq_i</span>
+<span class="comment">% 使用链式法则：d/dt(dL/dqd_i) = sum_j d2L/dqj_dqd_i * qd_j + d2L/dqdj_dqd_i * qdd_j</span>
+syms qdd1 qdd2 real
+dL_dqd1=diff(L,qd1);  dL_dqd2=diff(L,qd2);
+d_dt_dL_dqd1=jacobian(dL_dqd1,[q1,q2,qd1,qd2])*[qd1;qd2;qdd1;qdd2];
+d_dt_dL_dqd2=jacobian(dL_dqd2,[q1,q2,qd1,qd2])*[qd1;qd2;qdd1;qdd2];
+tau1=simplify(d_dt_dL_dqd1-diff(L,q1));
+tau2=simplify(d_dt_dL_dqd2-diff(L,q2));
+disp(<span class="string">'tau1='</span>), disp(tau1), disp(<span class="string">'tau2='</span>), disp(tau2)
+</pre>
         </div>
       </div>
     </div>
@@ -3404,12 +2862,34 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
 
         <div class="callout callout-success">
           <div class="callout-title">✅ 惯性张量的平行轴定理</div>
-          <p>当已知连杆绕质心的惯性张量 <sup>c</sup>I<sub>i</sub>，而需计算绕非质心轴（如关节轴）的惯性张量时，应用平行轴定理：<sup>a</sup>I = <sup>c</sup>I + m·(r<sup>T</sup>r·I₃ − r·r<sup>T</sup>)，其中 r 为质心到参考点的位置向量。这在二连杆动力学推导中频繁使用。</p>
+          <p>当已知连杆绕质心的惯性张量 <sup>c</sup>I<sub>i</sub>，而需计算绕非质心轴（如关节轴）的惯性张量时，应用平行轴定理：<sup>a</sup>I = <sup>c</sup>I + m·(r<sup>T</sup>r·I₃ − r·r<sup>T</sup>)，其中 r 为质心到参考点的位置向量。本节在ABB A2–A3平面教学子模型中演示该步骤。</p>
         </div>
 
         <div class="callout callout-info">
           <div class="callout-title">💡 动能计算的实用技巧</div>
           <p>在实际推导中，计算质心速度雅可比 J<sub>v,i</sub> 可借助正运动学结果：先求各连杆质心位置 r<sub>ci</sub>(q)，再对 q 求偏导即得 J<sub>v,i</sub> = ∂r<sub>ci</sub>/∂q。对于平面机器人，角速度雅可比 J<sub>ω,i</sub> 退化为1×n行向量（转动惯量直接为常数），推导大幅简化。三维机器人的惯性张量则需通过旋转矩阵转换到统一坐标系后才能相加，这是三维动力学比平面复杂得多的根本原因。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型惯性矩阵M(q)</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；非厂家惯量</span>
+syms q1 q2 qd1 qd2 real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>;
+I1=<span class="number">0.5</span>; I2=<span class="number">0.2</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心线速度雅可比 Jv（行=x,y方向，列=关节1,2）</span>
+Jv1=[-lc1*sin(q1), <span class="number">0</span>; lc1*cos(q1), <span class="number">0</span>];
+Jv2=[-l1*sin(q1)-lc2*sin(q1+q2), -lc2*sin(q1+q2);
+      l1*cos(q1)+lc2*cos(q1+q2),  lc2*cos(q1+q2)];
+<span class="comment">% 角速度雅可比 Jw（平面机器人退化为列向量）</span>
+Jw1=[<span class="number">1</span>; <span class="number">0</span>];  Jw2=[<span class="number">1</span>; <span class="number">1</span>];
+<span class="comment">% 惯性矩阵 M(q) = sum(Jv'*m*Jv + Jw'*I*Jw)</span>
+M = m1*Jv1'*Jv1 + I1*Jw1'*Jw1 + m2*Jv2'*Jv2 + I2*Jw2'*Jw2;
+M = simplify(M)
+<span class="comment">% 动能 K = 0.5 * qd' * M * qd</span>
+qd=[qd1; qd2];  K=simplify(<span class="number">0.5</span>*qd'*M*qd);
+disp(<span class="string">'惯性矩阵 M(q) ='</span>), disp(M)
+disp(<span class="string">'动能 K ='</span>), disp(K)
+</pre>
         </div>
       </div>
     </div>
@@ -3447,6 +2927,28 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
         <div class="callout callout-warning">
           <div class="callout-title">⚠️ 坐标系与重力方向</div>
           <p>势能计算中重力方向的约定要与运动学一致。若基坐标系 z 轴竖直向上，则 g 向量沿 −z 方向；若 z 轴水平（如 SCARA 机器人），则重力沿 −y 或 −x 方向。约定不一致会导致重力项符号错误，这是动力学推导中最常见的错误之一。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型重力项推导</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；y轴向上</span>
+syms q1 q2 real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心高度（y坐标，重力沿-y方向）</span>
+hc1 = lc1*sin(q1);
+hc2 = l1*sin(q1) + lc2*sin(q1+q2);
+<span class="comment">% 各连杆势能 Vi = mi * g * hci</span>
+V1 = m1*g*hc1;  V2 = m2*g*hc2;
+<span class="comment">% 系统总势能</span>
+V = simplify(V1 + V2);
+disp(<span class="string">'总势能 V ='</span>), disp(V)
+<span class="comment">% 重力项 G(q) = dV/dq （拉格朗日方程中 -dV/dq 来源）</span>
+G = [diff(V,q1); diff(V,q2)];
+G = simplify(G);
+disp(<span class="string">'重力项 G(q) ='</span>), disp(G)
+<span class="comment">% 验证：势能仅依赖q，与速度qd无关</span>
+fprintf(<span class="string">'V仅依赖q1,q2，与qd无关\n'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -3498,12 +3000,36 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
 
         <div class="callout callout-info">
           <div class="callout-title">💡 牛顿-欧拉法的核心优势</div>
-          <p>牛顿-欧拉法采用递推结构，<span class="highlight">计算复杂度为 O(n)</span>（与自由度成线性关系），远优于拉格朗日法符号推导的 O(n⁴) 复杂度。这使得它特别适合实时控制中的在线动力学计算（如计算力矩控制）。其代价是物理直观性较弱，且需要处理大量矢量叉乘与坐标系变换。</p>
+          <p>递归牛顿—欧拉逆动力学在常见串联链实现中可达到随关节数线性增长的计算量，因此适合实时力矩计算。拉格朗日法若直接进行符号展开，表达式会随自由度迅速膨胀，但其复杂度取决于具体算法与实现，不能统一写成固定的O(n⁴)。两种方法在模型和约定一致时应得到相同的关节力矩结果。</p>
         </div>
 
         <div class="callout callout-success">
           <div class="callout-title">✅ 局部坐标系表示技巧</div>
           <p>为简化计算，牛顿-欧拉法通常在各连杆局部坐标系中表示速度、加速度和惯性张量。这样惯性张量 <sup>i</sup>I<sub>i</sub> 为常数矩阵（不随位形变化），避免了拉格朗日法中惯性张量随位形变化的复杂性。坐标系间的变换通过旋转矩阵 R 完成。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型牛顿—欧拉递推</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；参数为教学设定</span>
+function tau = ne_two_link(q, qd, qdd)
+  m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;I1=<span class="number">0.5</span>;I2=<span class="number">0.2</span>;g=<span class="number">9.81</span>;
+  s1=sin(q(1));c1=cos(q(1));s12=sin(q(1)+q(2));c12=cos(q(1)+q(2));
+  <span class="comment">% ===== 正向递推：基座→末端，计算速度与加速度 =====</span>
+  w1=qd(1); wd1=qdd(1);                     <span class="comment">% 连杆1角速度/角加速度</span>
+  w2=qd(1)+qd(2); wd2=qdd(1)+qdd(2);        <span class="comment">% 连杆2角速度/角加速度</span>
+  ac1=[-lc1*s1*wd1-lc1*c1*w1^<span class="number">2</span>;            <span class="comment">% 连杆1质心加速度(含重力)</span>
+        lc1*c1*wd1-lc1*s1*w1^<span class="number">2</span>-g];
+  a2=[-l1*s1*wd1-l1*c1*w1^<span class="number">2</span>; l1*c1*wd1-l1*s1*w1^<span class="number">2</span>-g]; <span class="comment">% 关节2原点加速度</span>
+  ac2=[a2(1)-lc2*s12*wd2-lc2*c12*w2^<span class="number">2</span>;    <span class="comment">% 连杆2质心加速度</span>
+        a2(2)+lc2*c12*wd2-lc2*s12*w2^<span class="number">2</span>];
+  <span class="comment">% ===== 反向递推：末端→基座，计算力与力矩 =====</span>
+  F2=m2*ac2; N2=I2*wd2;  tau2=N2;          <span class="comment">% 连杆2(末端无外力)</span>
+  F1=m1*ac1; N1=I1*wd1;                     <span class="comment">% 连杆1牛顿-欧拉方程</span>
+  <span class="comment">% 力矩递推：r×F的z分量(平面叉乘=标量)</span>
+  tau1=N1+N2+(lc1*c1*F1(<span class="number">2</span>)-lc1*s1*F1(<span class="number">1</span>))+(l1*c1*F2(<span class="number">2</span>)-l1*s1*F2(<span class="number">1</span>));
+  tau=[tau1; tau2];
+end
+</pre>
         </div>
       </div>
     </div>
@@ -3556,6 +3082,30 @@ fprintf(<span class="string">'条件数 κ(J) = %.2f (越大越接近奇异)\n'<
         <div class="callout callout-success">
           <div class="callout-title">✅ 局部坐标系下的高效计算</div>
           <p>正向递推在连杆局部坐标系中执行，使得惯性张量 <sup>i</sup>I<sub>i</sub> 为常量（不随位形变化），无需每步重新计算。所有矢量运算（叉乘、矩阵乘）均在 3×3 维度进行，计算量小且稳定。旋转矩阵 <sup>i</sup>R<sub>i−1</sub> 由 D-H 参数预先确定，递推过程只需矩阵乘法与加法，非常适合嵌入式实时实现。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型正向递推</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型：速度与加速度</span>
+function [w, wd, ac] = forward_recursion(q, qd, qdd)
+  m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;g=<span class="number">9.81</span>;
+  s1=sin(q(1));c1=cos(q(1));s12=sin(q(1)+q(2));c12=cos(q(1)+q(2));
+  <span class="comment">% 基座初始条件（静止，重力等效为基座加速度a0=[0;-g]）</span>
+  w0=<span class="number">0</span>; wd0=<span class="number">0</span>; a0=[<span class="number">0</span>; -g];
+  <span class="comment">% --- 连杆1正向递推 ---</span>
+  w(<span class="number">1</span>)=w0+qd(<span class="number">1</span>);                    <span class="comment">% 角速度递推</span>
+  wd(<span class="number">1</span>)=wd0+qdd(<span class="number">1</span>);                 <span class="comment">% 角加速度递推</span>
+  ac(:,<span class="number">1</span>)=[a0(<span class="number">1</span>)-lc1*s1*wd(<span class="number">1</span>)-lc1*c1*w(<span class="number">1</span>)^<span class="number">2</span>;  <span class="comment">% 质心线加速度</span>
+            a0(<span class="number">2</span>)+lc1*c1*wd(<span class="number">1</span>)-lc1*s1*w(<span class="number">1</span>)^<span class="number">2</span>];
+  <span class="comment">% --- 连杆2正向递推 ---</span>
+  w(<span class="number">2</span>)=w(<span class="number">1</span>)+qd(<span class="number">2</span>);                  <span class="comment">% 角速度递推（累加父连杆）</span>
+  wd(<span class="number">2</span>)=wd(<span class="number">1</span>)+qdd(<span class="number">2</span>);               <span class="comment">% 角加速度递推</span>
+  a2=[a0(<span class="number">1</span>)-l1*s1*wd(<span class="number">1</span>)-l1*c1*w(<span class="number">1</span>)^<span class="number">2</span>;  <span class="comment">% 关节2原点加速度</span>
+      a0(<span class="number">2</span>)+l1*c1*wd(<span class="number">1</span>)-l1*s1*w(<span class="number">1</span>)^<span class="number">2</span>];
+  ac(:,<span class="number">2</span>)=[a2(<span class="number">1</span>)-lc2*s12*wd(<span class="number">2</span>)-lc2*c12*w(<span class="number">2</span>)^<span class="number">2</span>;  <span class="comment">% 连杆2质心加速度</span>
+            a2(<span class="number">2</span>)+lc2*c12*wd(<span class="number">2</span>)-lc2*s12*w(<span class="number">2</span>)^<span class="number">2</span>];
+end
+</pre>
         </div>
       </div>
     </div>
@@ -3765,6 +3315,31 @@ end</pre>
           <div class="callout-title">✅ 扩展方程的工程意义</div>
           <p>摩擦项 F(q̇) 在低速运动时影响显著（库仑摩擦引起"粘滞-滑动"现象），是高精度位置控制的难点。外部扰动 τ<sub>ext</sub> 在接触作业中不可忽略。鲁棒控制（如滑模控制）与自适应控制的设计目标，正是在存在 F 和 τ<sub>ext</sub> 不确定性的情况下保证控制性能，这正是第7章控制系统的核心议题。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型动力学方程</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3教学子模型 M(q)qdd+C(q,qd)qd+G(q)=tau</span>
+syms q1 q2 qd1 qd2 qdd1 qdd2 real
+m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;I1=<span class="number">0.5</span>;I2=<span class="number">0.2</span>;g=<span class="number">9.81</span>;
+<span class="comment">% 惯性矩阵 M(q)（由动能二次型导出）</span>
+M11=m1*lc1^<span class="number">2</span>+I1+m2*(l1^<span class="number">2</span>+lc2^<span class="number">2</span>+<span class="number">2</span>*l1*lc2*cos(q2))+I2;
+M12=m2*(lc2^<span class="number">2</span>+l1*lc2*cos(q2))+I2;  M22=m2*lc2^<span class="number">2</span>+I2;
+M=[M11 M12; M12 M22];
+<span class="comment">% 科氏力矩阵 C(q,qd)（由克里斯托弗尔符号导出）</span>
+h=m2*l1*lc2*sin(q2);  <span class="comment">% 公共因子</span>
+C=[-h*qd2, -h*(qd1+qd2); h*qd1, <span class="number">0</span>];
+<span class="comment">% 重力向量 G(q)</span>
+G=[(m1*lc1+m2*l1)*g*cos(q1)+m2*lc2*g*cos(q1+q2);
+    m2*lc2*g*cos(q1+q2)];
+<span class="comment">% 组装动力学方程：tau = M*qdd + C*qd + G</span>
+qdd=[qdd1;qdd2]; qd=[qd1;qd2];
+tau=simplify(M*qdd+C*qd+G);
+disp(<span class="string">'tau1='</span>), disp(tau(<span class="number">1</span>)), disp(<span class="string">'tau2='</span>), disp(tau(<span class="number">2</span>))
+<span class="comment">% 正向动力学：已知tau求qdd，qdd = M^{-1}(tau - C*qd - G)</span>
+qdd_sol=simplify(M\(-C*qd-G));
+disp(<span class="string">'零力矩下加速度 qdd ='</span>), disp(qdd_sol)
+</pre>
+        </div>
       </div>
     </div>
 
@@ -3880,7 +3455,7 @@ end</pre>
     <h2 class="section-title" id="sec-matlab"><span class="section-num">5.5</span>MATLAB仿真：二连杆动力学推导</h2>
 
 
-    <p>下面以平面二连杆机器人为例，用 MATLAB 符号工具箱推导其完整动力学方程。二连杆是研究机器人动力学的经典模型，其方程兼具典型性与可推导性，能够清晰展示 M、C、G 三项的结构。</p>
+    <p>下面把ABB IRB 1200的A2–A3定位部分抽象为平面教学子模型，用MATLAB符号工具箱推导M、C、G三项。质量、惯量和质心位置均为教学符号，不代表ABB厂家参数；该算例用于掌握推导与代码核对方法。</p>
 
     <div class="svg-diagram">
       <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
@@ -3922,12 +3497,12 @@ end</pre>
         
         <text x="240" y="305" text-anchor="middle" fill="#64748b" font-size="11">m₁,m₂: 连杆质量 | l₁,l₂: 连杆长度 | q₁,q₂: 关节角</text>
       </svg>
-      <div class="diagram-caption">图5-2 平面二连杆机器人模型及参数定义</div>
+      <div class="diagram-caption">图5-2 ABB A2–A3平面教学子模型及符号参数</div>
     </div>
 
     <div class="code-block">
-      <div class="code-label"><span class="lang">MATLAB</span> 二连杆机器人拉格朗日动力学方程推导</div>
-      <pre>% ===== 平面二连杆机器人动力学方程推导（拉格朗日法） =====
+      <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型拉格朗日推导</div>
+      <pre>% ===== ABB A2-A3平面教学子模型；非厂家动力学参数 =====
 syms q1 q2 qd1 qd2 qdd1 qdd2 real
 syms m1 m2 l1 l2 lc1 lc2 I1 I2 g real
 % 假设连杆为均匀细杆：质心在 lc = l/2，绕质心转动惯量 I = m*l^2/12
@@ -4102,7 +3677,7 @@ disp('重力项 G(q):');   disp(G);
     <div class="callout callout-info">
       <div class="callout-title">📘 章节导读</div>
       <p>机器人要完成"从 A 点运动到 B 点"这一看似简单的任务，背后需要解决一个核心问题：<span class="highlight">如何在时间轴上规划一组光滑的运动轨迹</span>，使机器人既到达目标位姿，又满足速度、加速度、力矩等物理约束，同时避免冲击与奇异。这就是轨迹规划（Trajectory Planning）。</p>
-      <p>轨迹规划分为两大空间：<span class="highlight">关节空间规划</span>（直接规划关节变量，无奇异问题）与<span class="highlight">笛卡尔空间规划</span>（规划末端位姿，轨迹直观但需逆运动学转换）。本章系统讲解三次/五次多项式插值、LSPB 直线抛物线混合、笛卡尔直线与圆弧插补、B 样条与轨迹优化等方法，是连接动力学建模与控制系统的桥梁。</p>
+      <p>轨迹规划分为两大空间：<span class="highlight">关节空间规划</span>直接规划各轴变量，不需要逐点求逆解，但末端路径仍可能经过奇异附近；<span class="highlight">笛卡尔空间规划</span>直接约束末端路径，但需进行逆运动学、构型连续性与约束检查。本章统一以ABB IRB 1200任务验证各类插值方法。</p>
     </div>
 
 
@@ -4138,7 +3713,7 @@ disp('重力项 G(q):');   disp(G);
         </div>
         <p>关节空间规划的核心优势：</p>
         <ul>
-          <li><strong>无奇异问题</strong>：直接在关节空间操作，不涉及雅可比求逆，避免奇异位形；</li>
+            <li><strong>不直接求雅可比逆</strong>：关节插值本身不会因雅可比求逆而数值发散，但生成的运动仍可能经过运动学奇异附近，必须结合任务路径、速度放大和后续控制要求检查；</li>
           <li><strong>计算简单</strong>：每个关节独立规划，无需复杂的逆运动学求解；</li>
           <li><strong>约束直接</strong>：关节速度、加速度、力矩约束可直观施加。</li>
         </ul>
@@ -4151,6 +3726,26 @@ disp('重力项 G(q):');   disp(G);
         <div class="callout callout-info">
           <div class="callout-title">💡 规划的连续性要求</div>
           <p>轨迹规划需满足不同阶的连续性要求：<strong>位置连续</strong>（C⁰）保证轨迹不跳跃；<strong>速度连续</strong>（C¹）避免无限加速度冲击；<strong>加速度连续</strong>（C²）避免加加速度（jerk）突变引起的机械振动。三次多项式满足 C¹，五次多项式满足 C²，这是选择插值阶数的基本依据。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 使用jtraj进行关节空间轨迹规划</div>
+<pre><span class="comment">% 关节空间轨迹规划：jtraj五次多项式插值</span>
+L1 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L2 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.4</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L3 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.3</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+robot = SerialLink([L1 L2 L3], <span class="string">'name'</span>, <span class="string">'3DOF'</span>);
+q0 = [<span class="number">0</span> <span class="number">0</span> <span class="number">0</span>];            <span class="comment">% 起始关节角</span>
+q1 = [pi/<span class="number">2</span> pi/<span class="number">3</span> pi/<span class="number">4</span>];     <span class="comment">% 终止关节角</span>
+t  = <span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>;            <span class="comment">% 时间序列(0~2s)</span>
+<span class="comment">% jtraj: 五次多项式插值，返回位置/速度/加速度</span>
+[q, qd, qdd] = jtraj(q0, q1, t);
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t, q);   title(<span class="string">'关节位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t, qd);  title(<span class="string">'关节速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t, qdd); title(<span class="string">'关节加速度'</span>);
+robot.plot(q);  <span class="comment">% 动画演示关节运动</span>
+</pre>
         </div>
       </div>
     </div>
@@ -4192,6 +3787,28 @@ disp('重力项 G(q):');   disp(G);
         <div class="callout callout-success">
           <div class="callout-title">✅ 三次多项式的特性</div>
           <p>当起止速度均为零（v₀ = v<sub>f</sub> = 0，即"停-停"轨迹）时，公式简化为 a₀ = q₀、a₁ = 0、a₂ = 3(q<sub>f</sub>−q₀)/t<sub>f</sub>²、a₃ = −2(q<sub>f</sub>−q₀)/t<sub>f</sub>³。此时位置、速度连续，但<strong>加速度在端点不连续</strong>（从 0 跳变到 6(q<sub>f</sub>−q₀)/t<sub>f</sub>²），可能引起机械冲击。这是三次多项式的主要不足。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 三次多项式系数计算与轨迹绘制</div>
+<pre><span class="comment">% 三次多项式插值：解析法求系数并绘图</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;    <span class="comment">% 起止位置</span>
+v0 = <span class="number">0</span>;  vf = <span class="number">0</span>;        <span class="comment">% 起止速度(停-停)</span>
+tf = <span class="number">2</span>;                 <span class="comment">% 运动时间</span>
+<span class="comment">% 解析法求系数 a0+a1*t+a2*t^2+a3*t^3</span>
+a0 = q0;
+a1 = v0;
+a2 = (<span class="number">3</span>*(qf-q0) - (<span class="number">2</span>*v0+vf)*tf) / tf^<span class="number">2</span>;
+a3 = (-<span class="number">2</span>*(qf-q0) + (v0+vf)*tf) / tf^<span class="number">3</span>;
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+q   = a0 + a1*t + a2*t.<span class="number">2</span> + a3*t.<span class="number">3</span>;   <span class="comment">% 位置</span>
+qd  = a1 + <span class="number">2</span>*a2*t + <span class="number">3</span>*a3*t.<span class="number">2</span>;       <span class="comment">% 速度</span>
+qdd = <span class="number">2</span>*a2 + <span class="number">6</span>*a3*t;                <span class="comment">% 加速度</span>
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -4293,6 +3910,32 @@ disp('重力项 G(q):');   disp(G);
         <div class="callout callout-success">
           <div class="callout-title">✅ 五次多项式的优势</div>
           <p>当起止速度与加速度均为零时（典型"停-停"轨迹），五次多项式的加速度在端点平滑过渡为零，<span class="highlight">全程加速度连续（C²）</span>，有效消除机械冲击与振动。代价是最大速度与加速度峰值略高于三次多项式，需要更大的驱动能力。在要求平稳运行的工业机器人中，五次多项式是优先选择。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 五次多项式系数矩阵求解与绘图</div>
+<pre><span class="comment">% 五次多项式插值：6个边界条件求解6个系数</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;     <span class="comment">% 起止位置</span>
+v0 = <span class="number">0</span>;  vf = <span class="number">0</span>;         <span class="comment">% 起止速度</span>
+ac0 = <span class="number">0</span>; acf = <span class="number">0</span>;        <span class="comment">% 起止加速度(停-停)</span>
+tf = <span class="number">2</span>;
+<span class="comment">% 构建6x6方程组 M*A = B</span>
+M = [<span class="number">1</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;  <span class="number">0</span> <span class="number">1</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;
+     <span class="number">0</span> <span class="number">0</span> <span class="number">2</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;  <span class="number">1</span> tf tf^<span class="number">2</span> tf^<span class="number">3</span> tf^<span class="number">4</span> tf^<span class="number">5</span>;
+     <span class="number">0</span> <span class="number">1</span> <span class="number">2</span>*tf <span class="number">3</span>*tf^<span class="number">2</span> <span class="number">4</span>*tf^<span class="number">3</span> <span class="number">5</span>*tf^<span class="number">4</span>;
+     <span class="number">0</span> <span class="number">0</span> <span class="number">2</span> <span class="number">6</span>*tf <span class="number">12</span>*tf^<span class="number">2</span> <span class="number">20</span>*tf^<span class="number">3</span>];
+B = [q0; v0; ac0; qf; vf; acf];
+A = M \ B;   <span class="comment">% 求解系数[a0~a5]</span>
+t = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+<span class="comment">% 计算位置/速度/加速度</span>
+q   = A(<span class="number">1</span>)+A(<span class="number">2</span>)*t+A(<span class="number">3</span>)*t.<span class="number">2</span>+A(<span class="number">4</span>)*t.<span class="number">3</span>+A(<span class="number">5</span>)*t.<span class="number">4</span>+A(<span class="number">6</span>)*t.<span class="number">5</span>;
+qd  = A(<span class="number">2</span>)+<span class="number">2</span>*A(<span class="number">3</span>)*t+<span class="number">3</span>*A(<span class="number">4</span>)*t.<span class="number">2</span>+<span class="number">4</span>*A(<span class="number">5</span>)*t.<span class="number">3</span>+<span class="number">5</span>*A(<span class="number">6</span>)*t.<span class="number">4</span>;
+qdd = <span class="number">2</span>*A(<span class="number">3</span>)+<span class="number">6</span>*A(<span class="number">4</span>)*t+<span class="number">12</span>*A(<span class="number">5</span>)*t.<span class="number">2</span>+<span class="number">20</span>*A(<span class="number">6</span>)*t.<span class="number">3</span>;
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -4404,6 +4047,35 @@ disp('重力项 G(q):');   disp(G);
           </div>
           <p>实际中需在速度上限与加速度上限之间折中选择 v。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> LSPB轨迹计算与绘图</div>
+<pre><span class="comment">% LSPB直线抛物线混合轨迹规划</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;    <span class="comment">% 起止位置</span>
+tf = <span class="number">2</span>;                 <span class="comment">% 总时间</span>
+v  = <span class="number">0.7</span>*(qf-q0)/tf;     <span class="comment">% 匀速(需满足约束)</span>
+tb = (q0 - qf + v*tf) / v;  <span class="comment">% 过渡时间</span>
+a  = v / tb;                <span class="comment">% 加速度</span>
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+q  = zeros(size(t));
+<span class="comment">% 三段轨迹：加速段-匀速段-减速段</span>
+for i = <span class="number">1</span>:length(t)
+    if t(i) &lt;= tb
+        q(i) = q0 + <span class="number">0.5</span>*a*t(i)^<span class="number">2</span>;         <span class="comment">% 抛物线加速</span>
+    elseif t(i) &lt;= tf - tb
+        q(i) = q0 + <span class="number">0.5</span>*a*tb^<span class="number">2</span> + v*(t(i)-tb);  <span class="comment">% 直线匀速</span>
+    else
+        q(i) = qf - <span class="number">0.5</span>*a*(tf-t(i))^<span class="number">2</span>;    <span class="comment">% 抛物线减速</span>
+    end
+end
+qd  = gradient(q, t);    <span class="comment">% 数值求导: 速度</span>
+qdd = gradient(qd, t);   <span class="comment">% 加速度</span>
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
+        </div>
       </div>
     </div>
 
@@ -4462,6 +4134,30 @@ disp('重力项 G(q):');   disp(G);
           <div class="callout-title">⚠️ 笛卡尔空间规划的挑战</div>
           <p>笛卡尔空间规划虽然轨迹直观，但存在三大挑战：① <strong>计算量大</strong>——每个插补点都需求解逆运动学；② <strong>奇异问题</strong>——路径经过奇异位形时逆解不存在或趋于无穷；③ <strong>不可达问题</strong>——部分笛卡尔路径点可能超出工作空间或关节限位。因此实际系统需进行奇异检测与可达性预判。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 笛卡尔空间轨迹规划(ctraj+逆运动学)</div>
+<pre><span class="comment">% 笛卡尔空间规划：ctraj直线插补 + 逆运动学</span>
+L1 = Link(<span class="string">'d'</span>, <span class="number">0.5</span>, <span class="string">'a'</span>, <span class="number">0</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L2 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.4</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L3 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.3</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+robot = SerialLink([L1 L2 L3], <span class="string">'name'</span>, <span class="string">'3R'</span>);
+T0 = robot.fkine([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span>]);         <span class="comment">% 起点位姿</span>
+T1 = robot.fkine([pi/<span class="number">4</span> pi/<span class="number">3</span> pi/<span class="number">4</span>]);  <span class="comment">% 终点位姿</span>
+t  = <span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>;
+Ts = ctraj(T0, T1, length(t));  <span class="comment">% 笛卡尔直线插值</span>
+q  = zeros(length(t), <span class="number">3</span>);
+<span class="comment">% 逐点逆运动学求解关节角</span>
+for i = <span class="number">1</span>:length(t)
+    q(i,:) = robot.ikine(Ts(i));
+end
+p = transl(Ts);  <span class="comment">% 提取末端位置</span>
+figure; plot(t, q); title(<span class="string">'关节角轨迹'</span>);
+figure; plot3(p(:,<span class="number">1</span>),p(:,<span class="number">2</span>),p(:,<span class="number">3</span>),<span class="string">'b-o'</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>);
+title(<span class="string">'末端笛卡尔空间轨迹'</span>);
+</pre>
+        </div>
       </div>
     </div>
 
@@ -4493,6 +4189,29 @@ disp('重力项 G(q):');   disp(G);
         <div class="callout callout-info">
           <div class="callout-title">💡 姿态插值的选择</div>
           <p>直线插补中"直线"仅指位置轨迹，<span class="highlight">姿态变化并非沿直线</span>。姿态变化路径取决于插值方法：四元数 SLERP 给出姿态空间的最短路径（大圆弧），而 RPY 线性插值可能绕远路。对姿态精度要求高的任务（如焊接、装配），推荐使用四元数 SLERP。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 笛卡尔空间直线插补</div>
+<pre><span class="comment">% 笛卡尔空间直线插补</span>
+p0 = [<span class="number">0.4</span>; <span class="number">0.0</span>; <span class="number">0.5</span>];   <span class="comment">% 起点</span>
+pf = [<span class="number">0.6</span>; <span class="number">0.2</span>; <span class="number">0.3</span>];   <span class="comment">% 终点</span>
+tf = <span class="number">2</span>;                   <span class="comment">% 运动时间</span>
+N  = <span class="number">50</span>;                 <span class="comment">% 插补点数</span>
+t  = linspace(<span class="number">0</span>, tf, N);
+s  = t / tf;               <span class="comment">% 归一化路径参数(匀速)</span>
+<span class="comment">% 位置直线插值: p(t) = p0 + s*(pf-p0)</span>
+P = p0 + s' .* (pf - p0)';
+<span class="comment">% 绘制三维直线轨迹</span>
+figure;
+plot3(P(:,<span class="number">1</span>), P(:,<span class="number">2</span>), P(:,<span class="number">3</span>), <span class="string">'b-o'</span>, <span class="string">'LineWidth'</span>, <span class="number">1.5</span>);
+hold on;
+plot3(p0(<span class="number">1</span>), p0(<span class="number">2</span>), p0(<span class="number">3</span>), <span class="string">'rs'</span>, <span class="string">'MarkerSize'</span>, <span class="number">10</span>);
+plot3(pf(<span class="number">1</span>), pf(<span class="number">2</span>), pf(<span class="number">3</span>), <span class="string">'gs'</span>, <span class="string">'MarkerSize'</span>, <span class="number">10</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>);
+title(<span class="string">'笛卡尔空间直线插补轨迹'</span>);
+legend(<span class="string">'轨迹'</span>, <span class="string">'起点'</span>, <span class="string">'终点'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -4552,7 +4271,33 @@ disp('重力项 G(q):');   disp(G);
 
         <div class="callout callout-info">
           <div class="callout-title">💡 空间圆弧 vs 平面圆弧</div>
-          <p>工业机器人常需空间任意位姿的圆弧运动。空间圆弧需先将三点确定平面，在平面内完成圆弧插值后，再映射回三维空间。姿态变化通常与位置圆弧解耦，单独用 SLERP 插值。这种"位置圆弧 + 姿态球面插值"的组合是 ABB、KUKA 等工业控制器的标准做法。</p>
+          <p>ABB IRB 1200常需完成空间圆弧任务。课程先由三点确定圆弧平面，在平面内插值位置，再独立插值姿态；进入RobotStudio时还要比较课程插值结果与RAPID <code>MoveC</code>的路径和配置选择。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 空间三点圆弧插补</div>
+<pre><span class="comment">% 空间三点圆弧插补</span>
+P1 = [<span class="number">0.4</span>; <span class="number">0.0</span>; <span class="number">0.5</span>];   <span class="comment">% 起点</span>
+P2 = [<span class="number">0.5</span>; <span class="number">0.1</span>; <span class="number">0.4</span>];   <span class="comment">% 中间点</span>
+P3 = [<span class="number">0.6</span>; <span class="number">0.0</span>; <span class="number">0.3</span>];   <span class="comment">% 终点</span>
+<span class="comment">% 求圆弧平面法向量</span>
+n = cross(P2-P1, P3-P1);  n = n / norm(n);
+<span class="comment">% 求圆心C(中垂面交点)</span>
+A = [<span class="number">2</span>*(P2-P1)'; <span class="number">2</span>*(P3-P1)'; n'];
+b = [norm(P2)^<span class="number">2</span>-norm(P1)^<span class="number">2</span>; norm(P3)^<span class="number">2</span>-norm(P1)^<span class="number">2</span>; n'*P1];
+C = A \ b;              <span class="comment">% 圆心</span>
+r = norm(P1 - C);       <span class="comment">% 半径</span>
+u = (P1 - C) / r;       <span class="comment">% 平面正交基u</span>
+v = cross(n, u);         <span class="comment">% 正交基v</span>
+th1 = atan2(v'*(P1-C), u'*(P1-C));
+th3 = atan2(v'*(P3-C), u'*(P3-C));
+s  = linspace(<span class="number">0</span>, <span class="number">1</span>, <span class="number">50</span>);
+th = th1 + s*(th3-th1);  <span class="comment">% 圆心角插值</span>
+P  = C + r*(cos(th)*u + sin(th)*v);
+figure; plot3(P(<span class="number">1</span>,:),P(<span class="number">2</span>,:),P(<span class="number">3</span>,:),<span class="string">'b-'</span>,<span class="string">'LineWidth'</span>,<span class="number">2</span>);
+hold on; plot3(P1(<span class="number">1</span>),P1(<span class="number">2</span>),P1(<span class="number">3</span>),<span class="string">'rs'</span>,P3(<span class="number">1</span>),P3(<span class="number">2</span>),P3(<span class="number">3</span>),<span class="string">'gs'</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>); title(<span class="string">'空间圆弧插补'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -4614,6 +4359,30 @@ disp('重力项 G(q):');   disp(G);
           <div class="callout-title">✅ 多点轨迹的规划策略</div>
           <p>当轨迹需经过多个中间路径点时，有三种常见策略：① <strong>分段三次多项式</strong>——每段独立三次多项式，节点处匹配速度保证 C¹，但加速度不连续；② <strong>三次 B 样条</strong>——整体 C² 连续，光滑性最佳，但不一定精确经过路径点（需用插值型 B 样条）；③ <strong>LSPB 串联</strong>——每段用 LSPB，节点速度匹配，兼顾匀速与连续性。工业控制器多采用 B 样条或分段多项式方案。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> B样条轨迹生成(多点轨迹)</div>
+<pre><span class="comment">% B样条轨迹生成：三次B样条(多点轨迹规划)</span>
+<span class="comment">% 定义路径点(waypoints)</span>
+wp = [<span class="number">0</span> <span class="number">0.5</span> <span class="number">1.0</span> <span class="number">1.5</span> <span class="number">2.0</span> <span class="number">1.5</span> <span class="number">1.0</span>;
+      <span class="number">0</span> <span class="number">0.8</span> <span class="number">0.5</span> <span class="number">0.3</span> <span class="number">0.0</span> <span class="number">0.4</span> <span class="number">0.7</span>]';
+N = <span class="number">100</span>;   <span class="comment">% 采样点数</span>
+t_wp   = linspace(<span class="number">0</span>, <span class="number">1</span>, size(wp,<span class="number">1</span>));
+t_fine = linspace(<span class="number">0</span>, <span class="number">1</span>, N);
+<span class="comment">% 三次样条插值(等价于C2连续的插值型B样条)</span>
+q1 = spline(t_wp, wp(:,<span class="number">1</span>), t_fine);
+q2 = spline(t_wp, wp(:,<span class="number">2</span>), t_fine);
+<span class="comment">% 数值微分求速度</span>
+qd1 = gradient(q1, t_fine);
+qd2 = gradient(q2, t_fine);
+figure;
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>);
+plot(t_fine, q1, <span class="string">'b-'</span>, t_wp, wp(:,<span class="number">1</span>), <span class="string">'ro'</span>);
+ylabel(<span class="string">'位置'</span>); legend(<span class="string">'B样条轨迹'</span>, <span class="string">'路径点'</span>);
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>);
+plot(t_fine, qd1, <span class="string">'r-'</span>); ylabel(<span class="string">'速度'</span>);
+</pre>
+        </div>
       </div>
     </div>
 
@@ -4658,7 +4427,7 @@ disp('重力项 G(q):');   disp(G);
 
         <div class="callout callout-success">
           <div class="callout-title">✅ 轨迹优化的工程价值</div>
-          <p>轨迹优化能充分利用机器人驱动能力。以时间最优为例，相比固定时间律的轨迹，时间最优轨迹可缩短 20%~40% 运动时间，在批量生产中显著提升节拍效率。现代工业机器人控制器（如 ABB 的 TrueMove、KUKA 的 KRC）均内置了轨迹优化功能。</p>
+          <p>轨迹优化用于在工作范围、速度、加速度、奇异和碰撞约束下改善ABB IRB 1200任务节拍。优化收益必须由同一工位、同一工具负载和同一控制器设置下的前后记录计算，不预设固定百分比；课程结果需在RobotStudio或实体系统复核。</p>
         </div>
 
         <div class="callout callout-info">
@@ -4670,6 +4439,29 @@ disp('重力项 G(q):');   disp(G);
           <div class="callout-title">💡 现代轨迹优化方法：TOPP-RA 与 MPC 实时规划</div>
           <p><strong>TOPP-RA（Time-Optimal Path Parameterization via Reachability Analysis）</strong>是基于可达性分析的时间最优路径参数化方法。给定一条几何路径（如 B 样条），TOPP-RA 在路径参数-路径参数速度的相平面内，通过前向与后向可达性传播确定最大可行速度曲线，在关节速度、加速度、力矩等多重约束下求得严格时间最优解。与传统切换曲线法相比，TOPP-RA 数值稳定性更好、能统一处理多种约束，是当前时间最优轨迹规划的主流算法，已集成于 OpenSoT、TrajectoryOptimization 等开源库中。</p>
           <p><strong>MPC 实时轨迹规划（Model Predictive Control）</strong>将轨迹规划与反馈控制融合为在线滚动优化问题：在每个控制周期内，基于当前状态预测未来有限时域内的运动，以最优控制序列的第一步作为实际输入，不断滚动更新。MPC 可显式处理关节限位、速度/加速度约束、障碍物避碰等不等式约束，且具备对模型误差与外部扰动的闭环修正能力。随着嵌入式算力提升与快速 QP 求解器的成熟，MPC 已在协作机器人安全运动规划、自主驾驶轨迹决策等领域得到广泛工程应用，代表了实时轨迹规划的发展方向。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 最小Jerk轨迹优化与代价计算</div>
+<pre><span class="comment">% 最小Jerk轨迹优化(解析解实现)</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;   <span class="comment">% 起止位置</span>
+tf = <span class="number">2</span>;               <span class="comment">% 运动时间</span>
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+s  = t / tf;            <span class="comment">% 归一化时间 s in [0,1]</span>
+<span class="comment">% 最小Jerk解析解: 10s^3 - 15s^4 + 6s^5</span>
+q  = q0 + (qf-q0)*(<span class="number">10</span>*s.<span class="number">3</span> - <span class="number">15</span>*s.<span class="number">4</span> + <span class="number">6</span>*s.<span class="number">5</span>);
+<span class="comment">% 速度/加速度/加加速度(jerk)</span>
+qd   = (qf-q0)*(<span class="number">30</span>*s.<span class="number">2</span> - <span class="number">60</span>*s.<span class="number">3</span> + <span class="number">30</span>*s.<span class="number">4</span>) / tf;
+qdd  = (qf-q0)*(<span class="number">60</span>*s - <span class="number">180</span>*s.<span class="number">2</span> + <span class="number">120</span>*s.<span class="number">3</span>) / tf^<span class="number">2</span>;
+qddd = (qf-q0)*(<span class="number">60</span> - <span class="number">360</span>*s + <span class="number">360</span>*s.<span class="number">2</span>) / tf^<span class="number">3</span>;
+<span class="comment">% 计算Jerk代价积分</span>
+jerk_cost = trapz(t, qddd.<span class="number">2</span>);
+fprintf(<span class="string">'最小Jerk代价 J = %.6f\n'</span>, jerk_cost);
+figure;
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q,<span class="string">'b'</span>); ylabel(<span class="string">'位置'</span>);
+title(<span class="string">'最小Jerk轨迹'</span>);
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qddd,<span class="string">'r'</span>); ylabel(<span class="string">'Jerk'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -4853,7 +4645,7 @@ fprintf('LSPB: tb=%.3f, a=%.4f, 匀速段 v=%.4f\n', tb, a, v);
       <div class="kp-body">
         <p>本章系统讲授了机器人轨迹规划的两大空间、多种插值方法与优化策略，核心要点归纳如下：</p>
         <ul>
-          <li><strong>关节空间规划</strong>直接规划关节变量，无奇异问题、计算简单，适合点到点运动；但末端路径形状不可控。代表方法有三次多项式（C¹）、五次多项式（C²）、LSPB（C¹，含匀速段）。</li>
+          <li><strong>关节空间规划</strong>无需逐点求逆解、计算较直接，适合ABB点到点运动；但末端路径不可控，且仍需沿轨迹检查雅可比奇异、限位、速度和碰撞。</li>
           <li><strong>笛卡尔空间规划</strong>在末端位姿空间规划，轨迹几何形状可控（直线/圆弧/样条），适合轮廓作业；但需逐点逆运动学求解，存在奇异与可达性问题。</li>
           <li><strong>连续性阶数</strong>是选择插值方法的关键：C⁰ 保证位置连续、C¹ 保证速度连续（消除无限加速度）、C² 保证加速度连续（消除加加速度冲击）。阶数越高越平滑，但峰值速度/加速度越大。</li>
           <li><strong>LSPB</strong>兼顾匀速作业与速度连续，三段结构（抛物线-直线-抛物线）在工业中广泛使用，但加速度在过渡点跳变。</li>
@@ -5363,13 +5155,13 @@ title(<span class="string">'计算力矩法跟踪误差'</span>);
 legend(<span class="string">'关节1误差'</span>, <span class="string">'关节2误差'</span>); grid on;</pre>
         </div>
 
-        <p>以下是仿真中使用的<strong>真实模型</strong>与<strong>标称模型</strong>函数定义。真实模型使用精确参数，标称模型参数带有10%偏差（质量增大10%），用于模拟控制器中模型不精确的情形：</p>
+        <p>以下函数定义用于ABB A2–A3平面教学子模型的<strong>课程被控模型</strong>与<strong>标称模型</strong>。参数均为教学设定，标称模型人为加入10%质量偏差以观察鲁棒性；不得把仿真数值解释为ABB整机控制性能。</p>
 
         <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> 二连杆机器人动力学模型函数定义</div>
-<pre><span class="comment">% ========== 真实模型函数（被控对象）==========</span>
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型函数定义</div>
+<pre><span class="comment">% ========== 课程被控模型（非ABB厂家参数）==========</span>
 <span class="keyword">function</span> M = inertia_matrix(q)
-    <span class="comment">% 二连杆机器人惯性矩阵（真实模型）</span>
+    <span class="comment">% ABB A2–A3教学子模型惯性矩阵</span>
     m1 = <span class="number">5</span>; m2 = <span class="number">3</span>; l1 = <span class="number">1</span>; l2 = <span class="number">0.8</span>;
     lc1 = l1/<span class="number">2</span>; lc2 = l2/<span class="number">2</span>;
     I1 = m1*l1^<span class="number">2</span>/<span class="number">12</span>; I2 = m2*l2^<span class="number">2</span>/<span class="number">12</span>;
@@ -5381,14 +5173,14 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
 <span class="keyword">end</span>
 
 <span class="keyword">function</span> C = coriolis_matrix(q, qd)
-    <span class="comment">% 二连杆机器人科氏力矩阵（真实模型）</span>
+    <span class="comment">% ABB A2–A3教学子模型科氏力矩阵</span>
     m2 = <span class="number">3</span>; l1 = <span class="number">1</span>; l2 = <span class="number">0.8</span>; lc2 = l2/<span class="number">2</span>;
     h = m2*l1*lc2*sin(q(<span class="number">2</span>));
     C = [-h*qd(<span class="number">2</span>) -h*(qd(<span class="number">1</span>)+qd(<span class="number">2</span>)); h*qd(<span class="number">1</span>) <span class="number">0</span>];
 <span class="keyword">end</span>
 
 <span class="keyword">function</span> G = gravity_vector(q)
-    <span class="comment">% 二连杆机器人重力向量（真实模型）</span>
+    <span class="comment">% ABB A2–A3教学子模型重力向量</span>
     m1 = <span class="number">5</span>; m2 = <span class="number">3</span>; l1 = <span class="number">1</span>; l2 = <span class="number">0.8</span>;
     lc1 = l1/<span class="number">2</span>; lc2 = l2/<span class="number">2</span>; g = <span class="number">9.81</span>;
     G1 = (m1*lc1 + m2*l1)*g*cos(q(<span class="number">1</span>)) + m2*lc2*g*cos(q(<span class="number">1</span>)+q(<span class="number">2</span>));
@@ -5523,8 +5315,8 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
               </tr>
               <tr>
                 <td>传感器需求</td>
-                <td>位置编码器</td>
-                <td>力/力矩传感器</td>
+                <td>位置/速度反馈；可结合力传感或力估计</td>
+                <td>通常需要外力测量或可靠的外力估计</td>
               </tr>
               <tr>
                 <td>内层环路</td>
@@ -5564,7 +5356,7 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
           <div class="formula-label" style="text-align:center;">x<sub>c</sub>: 导纳模型输出的修正位置指令，送入内层位置控制器跟踪</div>
         </div>
 
-        <p>导纳控制与阻抗控制的目标方程形式相同，区别在于实现方式：阻抗控制直接输出力矩（需位置编码器测量实际位置），导纳控制输出修正位置指令（需力传感器测量 F<sub>ext</sub>，由内层位置环跟踪）。</p>
+          <p>导纳与阻抗描述的是不同的因果实现关系。力矩控制机器人常直接实现阻抗律；位置接口机器人常根据测得或估计的外力通过导纳模型生成运动指令，再由内层位置环跟踪。传感器需求取决于控制架构，不能简单理解为阻抗控制“不需要力信息”。</p>
 
         <div class="callout callout-success">
           <div class="callout-title">✓ 协作机器人的核心</div>
@@ -5696,7 +5488,7 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
 
         <p>近年来，随着大模型与具身智能的快速发展，机器人控制领域涌现出多种<strong>前沿方向</strong>：</p>
         <ul>
-          <li><strong>模型预测控制（MPC, Model Predictive Control）</strong>：在每个控制周期内，基于系统动力学模型在线求解有限时域最优控制问题，预测未来状态轨迹并最小化代价函数，仅执行第一个控制输入后滚动优化。MPC天然处理输入/状态约束，能够在安全边界内实现最优轨迹跟踪，已广泛应用于双足机器人步态控制、自动驾驶和机械臂轨迹优化。</li>
+            <li><strong>模型预测控制（MPC, Model Predictive Control）</strong>：MPC本质上属于基于模型的优化控制，而不是人工智能方法。它在每个控制周期求解有限时域约束优化问题，只执行第一个控制输入并滚动更新；当预测模型、代价或约束由学习方法获得时，才构成学习与MPC的融合。</li>
           <li><strong>扩散策略（Diffusion Policy）</strong>：将图像生成领域的扩散模型引入机器人动作生成。以视觉观测和任务目标为条件，通过去噪扩散过程生成多模态的动作序列。相比传统回归策略，扩散策略能更好地表达多模态动作分布，在复杂操作任务（如物体重新排列、精密装配）中表现出更强的泛化能力。</li>
           <li><strong>视觉-语言-动作大模型（VLA, Vision-Language-Action）</strong>：以大规模预训练视觉-语言模型（如PaLI、PaLM-E）为基础，融合机器人本体感知和动作输出，实现<strong>"看图-听指令-做动作"</strong>的端到端控制。代表性工作包括Google的<strong>RT-2</strong>（将机器人动作离散化为token，纳入大语言模型输出空间）和开源的<strong>OpenVLA</strong>（基于Llama架构，支持自然语言指令到机器人动作的直接映射）。VLA大模型具备跨任务泛化和常识推理能力，是通向通用机器人操控的重要方向。</li>
         </ul>
@@ -5899,97 +5691,29 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
       <p>理论的价值最终要通过工程实践来体现。本章是全课程的实践收官章，将前七章的理论知识落地为可运行、可验证的工程系统。我们将通过<span class="highlight">MATLAB Robotics Toolbox</span>验证运动学与控制算法，通过<strong>ABB RAPID编程</strong>掌握工业机器人的实际操作，通过<strong>ROS</strong>理解机器人软件生态，并通过<strong>视觉伺服</strong>与<strong>课程项目</strong>将所有知识融会贯通。本章强调动手实践，每个知识点都配有可运行的代码示例。</p>
     </div>
 
-    <h2 class="section-title" id="sec-1"><span class="section-num">8.1</span>MATLAB仿真</h2>
+    <h2 class="section-title" id="sec-1"><span class="section-num">8.1</span> MATLAB仿真</h2>
 
 
     <div class="kp-card" id="kp-8-1">
-      <div class="kp-header">
-        <div class="kp-title">
-          <span class="kp-id">KP 8.1</span>
-          MATLAB仿真
-        </div>
-        <div class="kp-tags">
-          <span class="kp-tag 重点">重点</span>
-          <span class="kp-tag 考点">考点</span>
-        
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">MATLAB Robotics Toolbox</span>是机器人学教学与研究中最重要的仿真工具之一，由Peter Corke开发维护。它提供了机器人<strong>建模、运动学求解、轨迹规划、动力学仿真和控制验证</strong>的完整功能链，是连接理论公式与工程实践的关键桥梁。</p>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 8.1</span>ABB MATLAB复算与仿真</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>本课程MATLAB实践统一使用 <span class="term">ABB IRB 1200-5/0.9</span>。提供的参考脚本不依赖第三方机器人模型，直接实现关节链正运动学、课程等价D-H复算、阻尼最小二乘逆解、几何雅可比、五次轨迹和约束检查，便于逐行对应数学模型。</p>
+    <div class="callout callout-info"><div class="callout-title">一份脚本生成五类可核验证据</div><p>①参考关节链与D-H链多构型误差；②正解—逆解—再正解误差；③六轴角度、速度、加速度曲线；④工作范围和最大速度检查；⑤A5穿越0°反例与最小奇异值。RobotStudio碰撞和控制器日志明确保留为待验证项。</p></div>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> 运行ABB复算脚本</div><pre>outputDirectory = fullfile(pwd,"abb_results");
+results = ABB_IRB1200_5_90_trajectory_validation(outputDirectory);
 
-        <div class="callout callout-info">
-          <div class="callout-title">💡 Robotics Toolbox核心功能</div>
-          <p><strong>Link类</strong>：定义机器人连杆参数（D-H参数）；<strong>SerialLink类</strong>：构建串联机器人模型；<strong>fkine</strong>：正运动学求解；<strong>ikine</strong>：逆运动学求解；<strong>jtraj</strong>：关节空间轨迹规划；<strong>plot</strong>：三维动画可视化。</p>
-        </div>
+disp(results.dhMaximumPositionDifferenceMeters);
+disp(results.inversePositionErrorMeters);
+disp(results.peakSpeedDegPerSecond);
+disp(results.collisionAndRobotStudioStatus);</pre></div>
+    <p>脚本默认起点为[0, −30, 20, 0, 30, 0]°，目标为[60, 40, −70, 100, 45, 180]°，运行时间3 s，使用五次时间标度。学生应先预测哪一轴速度利用率最高，再运行复算；修改时间或A5目标时，每次只改变一个条件并保留修正前后输出。</p>
+    <div class="formula-block"><div class="formula-label">五次时间标度</div><div class="formula">s(τ)=10τ³−15τ⁴+6τ⁵，τ=t/T；max(ds/dt)=1.875/T</div></div>
+    <div class="callout callout-warning"><div class="callout-title">仿真不能替代现场放行</div><p>脚本中的速度检查采用产品规格上限，尚未包含控制器加速度限制、负载、工具、工件、碰撞几何和安全区域。结果只能支持“课程模型预检”，实体运行前必须在RobotStudio完整站点和现场流程中复核。</p></div>
+    <div class="callout callout-success"><div class="callout-title">下载与提交</div><p><a href="../abb/ABB_IRB1200_5_90_trajectory_validation.m">下载ABB IRB 1200完整复算脚本</a>。提交时附脚本版本、输入参数、JSON结果、曲线图和AI使用记录；不得只提交动画截图。</p></div>
+  </div>
+</div>
 
-        <p><strong>1. 建立PUMA560机器人模型</strong>：使用D-H参数定义六轴机器人的连杆参数，构建SerialLink串联机器人对象。</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> 建立PUMA560机器人模型与正运动学</div>
-<pre><span class="comment">% === 建立PUMA560机器人模型 ===</span>
-<span class="comment">% 使用标准D-H参数法定义6个连杆</span>
-<span class="comment">% 适用于 RTB 10.x+</span>
-<span class="comment">% Link([theta d a alpha], 'standard') — 数组语法</span>
-
-L(1) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(2) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0.4318</span> <span class="number">0</span>], <span class="string">'standard'</span>);
-L(3) = Link([<span class="number">0</span> <span class="number">0.15</span> <span class="number">0.0203</span> -pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(4) = Link([<span class="number">0</span> <span class="number">0.4318</span> <span class="number">0</span> pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(5) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(6) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>], <span class="string">'standard'</span>);
-
-<span class="comment">% 构建串联机器人对象</span>
-puma = SerialLink(L, <span class="string">'name'</span>, <span class="string">'PUMA560'</span>);
-
-<span class="comment">% 正运动学求解：给定关节角求末端位姿</span>
-q = [<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>];  <span class="comment">% 关节角（弧度）</span>
-T = puma.fkine(q);        <span class="comment">% 4x4齐次变换矩阵</span>
-disp(<span class="string">'末端位姿矩阵 T ='</span>); disp(T);
-
-<span class="comment">% 三维可视化</span>
-puma.plot(q);
-title(<span class="string">'PUMA560 机器人模型（初始位姿）'</span>);</pre>
-        </div>
-
-        <p><strong>2. 逆运动学与轨迹规划仿真</strong>：给定末端目标位姿，求解关节角，并规划从初始位姿到目标位姿的平滑轨迹。</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> 逆运动学与轨迹规划仿真</div>
-<pre><span class="comment">% === 逆运动学与轨迹规划 ===</span>
-
-<span class="comment">% 定义起始位姿和目标位姿（关节空间）</span>
-q_start = [<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>];
-q_end   = [<span class="number">0</span> -pi/<span class="number">4</span> pi/<span class="number">2</span> <span class="number">0</span> pi/<span class="number">4</span> <span class="number">0</span>];
-
-<span class="comment">% 关节空间五次多项式插值轨迹规划</span>
-t = [<span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>];  <span class="comment">% 时间序列，2秒完成</span>
-[q_traj, qd_traj, qdd_traj] = jtraj(q_start, q_end, t);
-
-<span class="comment">% 轨迹动画播放</span>
-puma.plot(q_traj, <span class="string">'trajectory'</span>, <span class="number">true</span>);
-
-<span class="comment">% 绘制关节角轨迹曲线</span>
-figure;
-subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t, q_traj); title(<span class="string">'关节角度'</span>);
-subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t, qd_traj); title(<span class="string">'关节角速度'</span>);
-subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t, qdd_traj); title(<span class="string">'关节角加速度'</span>);
-xlabel(<span class="string">'时间 (s)'</span>);
-
-<span class="comment">% 逆运动学验证：从末端位姿反解关节角</span>
-T_target = transl(<span class="number">0.5</span>, <span class="number">0.2</span>, <span class="number">0.6</span>) * trotx(pi);
-q_sol = puma.ikine(T_target, q_start);
-disp(<span class="string">'逆解关节角: '</span>); disp(q_sol);</pre>
-        </div>
-
-        <div class="callout callout-success">
-          <div class="callout-title">✓ 仿真验证的意义</div>
-          <p>通过MATLAB仿真，我们可以在不依赖真实硬件的情况下<strong>验证理论公式的正确性</strong>、<strong>可视化机器人的运动过程</strong>、<strong>评估控制算法的性能</strong>。这种"先仿真后实物"的开发流程是现代机器人工程的标配。</p>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="section-title" id="sec-2"><span class="section-num">8.2</span>工业机器人编程</h2>
+    <h2 class="section-title" id="sec-2"><span class="section-num">8.2</span> ABB机器人编程</h2>
 
 
     <div class="kp-card" id="kp-8-2">
@@ -6089,7 +5813,7 @@ ENDMODULE</pre>
         <p>robtarget由四个分量组构成，共包含位置、姿态、轴配置和外部轴信息：</p>
         <ul>
           <li><strong>pos [x, y, z]</strong>：末端工具在工件坐标系下的三维位置，单位为毫米（mm）。例如 [800, 0, 900] 表示X=800mm, Y=0mm, Z=900mm。</li>
-          <li><strong>orient [q1, q2, q3, q4]</strong>：末端姿态的<strong>四元数</strong>表示（单位四元数），描述工具坐标系相对于工件坐标系的旋转。四元数相比欧拉角无奇异点、无万向锁问题。例如 [1, 0, 0, 0] 表示无旋转（与基坐标系对齐）。</li>
+          <li><strong>orient [q1, q2, q3, q4]</strong>：末端姿态的<strong>单位四元数</strong>表示，描述工具坐标系相对于工件坐标系的旋转。它没有欧拉角万向锁，但 q 与 −q 表示同一姿态；例如 [1, 0, 0, 0] 表示单位旋转。</li>
           <li><strong>confdata [cf1, cf4, cf6, cfx]</strong>：轴配置数据，指定机器人到达目标位姿时各关节所在的<strong>象限区间</strong>。cf1、cf4、cf6分别对应关节1、4、6的转角象限（0/1/-1），cfx为附加配置。同一末端位姿可能对应多个关节解（逆运动学多解），confdata用于指定使用哪个解。9E9表示不限制该轴配置。</li>
           <li><strong>extax [eax1~eax6]</strong>：外部轴位置值，最多支持6个外部轴（如导轨、变位机）。若无外部轴，所有值设为9E9。</li>
         </ul>
@@ -6135,7 +5859,7 @@ ENDMODULE</pre>
       </div>
     </div>
 
-    <h2 class="section-title" id="sec-3"><span class="section-num">8.3</span>ROS机器人</h2>
+    <h2 class="section-title" id="sec-3"><span class="section-num">8.3</span> ROS基础</h2>
 
 
     <div class="kp-card" id="kp-8-3">
@@ -6325,7 +6049,7 @@ ENDMODULE</pre>
       </div>
     </div>
 
-    <h2 class="section-title" id="sec-4"><span class="section-num">8.4</span>视觉与项目</h2>
+    <h2 class="section-title" id="sec-4"><span class="section-num">8.4</span> 视觉伺服与课程项目</h2>
 
 
     <div class="kp-card" id="kp-8-4">
@@ -6736,7 +6460,7 @@ ENDMODULE</pre>
           <li><strong>RAPID条件与循环</strong>：RAPID程序中如何实现条件判断（IF...THEN）和循环（FOR/WHILE）？请编写一个简单的物料检测分拣程序框架：当检测到物料到位时（WaitDI信号），机器人抓取物料并根据颜色（IF条件）放置到不同位置。</li>
           <li><strong>ROS通信机制</strong>：ROS中Publisher和Subscriber的通信机制是什么？请画出一个简单的消息流图，说明消息从发布到订阅的完整过程，并解释ROS Master在其中扮演的角色。</li>
           <li><strong>视觉伺服系统设计</strong>：设计一个视觉伺服抓取系统的总体方案，包括硬件选型（相机类型、机器人型号、计算平台）和软件架构（图像处理模块、位姿估计模块、运动规划模块、控制模块），并说明各模块之间的数据流。</li>
-          <li><strong>D-H参数约定</strong>：MATLAB Robotics Toolbox中Link的'standard'（标准D-H）和'modified'（改进D-H）参数约定有何区别？在建立同一个机器人模型时，两种约定下的参数表是否相同？请以一个简单二连杆机器人为例说明。</li>
+          <li><strong>D-H参数约定</strong>：标准D-H和改进D-H的变换次序有何区别？以ABB IRB 1200参考链为对象，说明为何参数表不同但经固定坐标对齐后末端位姿应一致。</li>
           <li><strong>示教编程与离线编程</strong>：比较示教编程和离线编程（如RobotStudio）的优缺点，各适用于什么场景？在实际工业产线中，如何选择合适的编程方式？</li>
           <li><strong>ROS 2与ROS 1对比</strong>：ROS 2相比ROS 1有哪些主要改进？为什么ROS 2更适合工业级实时应用？（提示：考虑DDS中间件、实时性支持、多机通信、生命周期管理等方面）</li>
           <li><strong>相机配置选择</strong>：在视觉伺服系统中，眼在手内（Eye-in-Hand）和眼在手外（Eye-to-Hand）两种相机配置各有什么优缺点？在什么应用场景下应选择哪种配置？</li>

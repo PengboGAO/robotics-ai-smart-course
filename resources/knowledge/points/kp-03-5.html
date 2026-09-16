@@ -1,0 +1,143 @@
+<!--META {"kp_id": "kp-3-5", "kp_label": "KP 3.5", "title": "正运动学方程", "tags": ["重点", "考点"], "difficulty": 3, "chapter": 3, "order": 5, "file": "kp-03-5.html"}-->
+<div class="kp-card" id="kp-3-5">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 3.5</span>正运动学方程</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>正运动学的核心任务是将各连杆变换矩阵依次连乘，得到末端坐标系 {n} 相对于基坐标系 {0} 的齐次变换矩阵。设各连杆变换矩阵为 A<sub>i</sub> = <sup>i-1</sup><sub>i</sub>T，则 n 自由度机器人的正运动学方程为：</p>
+
+        <p>正运动学求解的完整流程可归纳为以下五个阶段：</p>
+
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">建立坐标系</div>
+            <div class="step-desc">按 KP 3.4 六步法为每个连杆固连坐标系，确定 z<sub>i</sub>、x<sub>i</sub> 轴与原点。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">列参数表</div>
+            <div class="step-desc">逐关节量取 a、α、d、θ，填入 D-H 参数表，校验关节变量位置。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-title">写 A<sub>i</sub> 矩阵</div>
+            <div class="step-desc">将每行参数代入通式（3-1）或（3-2），写出 n 个 4×4 连杆变换矩阵。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-title">矩阵连乘</div>
+            <div class="step-desc">计算 T<sub>0n</sub>=A<sub>1</sub>·A<sub>2</sub>·…·A<sub>n</sub>，化简三角函数表达。</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-title">提取位姿</div>
+            <div class="step-desc">从 T<sub>0n</sub> 左上 3×3 子块读姿态 R，从第四列读位置 p，必要时转换欧拉角。</div>
+          </div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">正运动学方程（3-3）</div>
+          <div class="formula"><sup>0</sup><sub>n</sub>T = A<sub>1</sub> · A<sub>2</sub> · A<sub>3</sub> · ⋯ · A<sub>n</sub> = ∏<sub>i=1</sub><sup>n</sup> A<sub>i</sub></div>
+        </div>
+
+        <p>对于 6 自由度机器人，正运动学方程具体写作：</p>
+        <div class="formula-block">
+          <div class="formula-label">6 自由度机器人正运动学方程（3-4）</div>
+          <div class="formula">T<sub>06</sub> = A<sub>1</sub>(θ<sub>1</sub>) · A<sub>2</sub>(θ<sub>2</sub>) · A<sub>3</sub>(θ<sub>3</sub>) · A<sub>4</sub>(θ<sub>4</sub>) · A<sub>5</sub>(θ<sub>5</sub>) · A<sub>6</sub>(θ<sub>6</sub>)</div>
+        </div>
+
+        <p>其中每个 A<sub>i</sub> 都是 4×4 齐次变换矩阵，由该关节的 D-H 参数代入通式（3-1）或（3-2）得到。结果 T<sub>06</sub> 可分块为：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">正运动学结果分块（3-5）</div>
+          <div class="formula">
+            T<sub>06</sub> = ⎡ R<sub>3×3</sub> &nbsp; p<sub>3×1</sub> ⎤<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎣ 0<sub>1×3</sub> &nbsp; 1 ⎦
+          </div>
+        </div>
+
+        <p>左上角 R<sub>3×3</sub> 为末端姿态旋转矩阵，右上角 p<sub>3×1</sub> 为末端位置向量。正运动学具有两个重要性质：</p>
+        <ul>
+          <li><span class="term">解的唯一性</span>：给定一组关节变量 (θ<sub>1</sub>,…,θ<sub>n</sub>)，末端位姿 T<sub>0n</sub> 唯一确定——这是与逆运动学多解性相对的关键差异。</li>
+          <li><span class="term">连续性</span>：T<sub>0n</sub> 是关节变量的连续可微函数，这一性质是后续雅可比矩阵（速度级运动学）的理论基础。</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <div class="callout-title">分解技巧：腕部前移与腕部分离</div>
+          <p>对 6 自由度工业机器人，常将前 3 个关节（手臂）与后 3 个关节（腕部）分开处理：T<sub>06</sub> = T<sub>03</sub> · T<sub>36</sub>。其中 T<sub>03</sub> 决定腕部中心的位置，T<sub>36</sub> 决定末端相对腕部中心的姿态。这种"<strong>位置-姿态解耦</strong>"是球腕构型机器人逆运动学可解析的根本原因。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">例题：ABB IRB 1200 A2–A3平面教学子链</div>
+          <p>为单独观察肩、肘角对腕心位置的影响，先把ABB IRB 1200的A2–A3定位部分投影为RR平面教学子链。设两段等效长度为l<sub>1</sub>、l<sub>2</sub>，该简化仅用于推导与查错，不替代第3.6节的六轴参考链。</p>
+          <p>按经典 D-H 约定，ABB A2–A3平面教学子链的参数为：</p>
+          <ul>
+            <li>关节 1：a<sub>1</sub>=l<sub>1</sub>，α<sub>1</sub>=0，d<sub>1</sub>=0，θ<sub>1</sub>（变量）</li>
+            <li>关节 2：a<sub>2</sub>=l<sub>2</sub>，α<sub>2</sub>=0，d<sub>2</sub>=0，θ<sub>2</sub>（变量）</li>
+          </ul>
+          <p>代入通式（3-1）得 A<sub>1</sub>、A<sub>2</sub>，连乘后末端位姿为：</p>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">ABB A2–A3平面教学子链末端位姿（3-8）</div>
+          <div class="formula">
+            T<sub>02</sub> = ⎡ c<sub>12</sub> &nbsp; −s<sub>12</sub> &nbsp; 0 &nbsp; l<sub>1</sub>c<sub>1</sub>+l<sub>2</sub>c<sub>12</sub> ⎤<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ s<sub>12</sub> &nbsp; c<sub>12</sub> &nbsp;&nbsp; 0 &nbsp; l<sub>1</sub>s<sub>1</sub>+l<sub>2</sub>s<sub>12</sub> ⎥<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ 0 &nbsp;&nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp; 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 ⎥<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎣ 0 &nbsp;&nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 ⎦
+          </div>
+        </div>
+
+        <p>其中 c<sub>1</sub>=cos θ<sub>1</sub>，s<sub>1</sub>=sin θ<sub>1</sub>，c<sub>12</sub>=cos(θ<sub>1</sub>+θ<sub>2</sub>)，s<sub>12</sub>=sin(θ<sub>1</sub>+θ<sub>2</sub>)。末端位置 (x, y) = (l<sub>1</sub>c<sub>1</sub>+l<sub>2</sub>c<sub>12</sub>, l<sub>1</sub>s<sub>1</sub>+l<sub>2</sub>s<sub>12</sub>)，末端姿态角 φ = θ<sub>1</sub>+θ<sub>2</sub>。这一结果几何意义明确：末端位置是两连杆向量首尾相接的矢量和，姿态角为两关节角的累加——正是平面几何的直观结论，但通过 D-H 法可严格推导得出。</p>
+
+        <div class="svg-diagram">
+          <svg viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
+            <defs>
+              <marker id="arr3_b2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#2563eb"/></marker>
+              <marker id="arr3_r2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#dc2626"/></marker>
+            </defs>
+            <!-- ground/base -->
+            <rect x="70" y="220" width="40" height="60" fill="#94a3b8" opacity="0.5"/>
+            <line x1="60" y1="280" x2="240" y2="280" stroke="#64748b" stroke-width="2"/>
+            <!-- link 1 -->
+            <line x1="100" y1="220" x2="300" y2="120" stroke="#1a202c" stroke-width="5"/>
+            <text x="180" y="160" font-size="13" fill="#1a202c" font-weight="700">连杆1 (l₁)</text>
+            <!-- link 2 -->
+            <line x1="300" y1="120" x2="500" y2="180" stroke="#1a202c" stroke-width="5"/>
+            <text x="380" y="135" font-size="13" fill="#1a202c" font-weight="700">连杆2 (l₂)</text>
+            <!-- joints -->
+            <circle cx="100" cy="220" r="7" fill="#2563eb"/>
+            <circle cx="300" cy="120" r="7" fill="#2563eb"/>
+            <circle cx="500" cy="180" r="7" fill="#dc2626"/>
+            <text x="80" y="245" font-size="11" fill="#2563eb">关节1 (O₀)</text>
+            <text x="280" y="108" font-size="11" fill="#2563eb">关节2 (O₁)</text>
+            <text x="508" y="185" font-size="11" fill="#dc2626">末端 (O₂)</text>
+            <!-- theta1 angle -->
+            <path d="M 150 220 A 50 50 0 0 0 138 213" fill="none" stroke="#d97706" stroke-width="2"/>
+            <text x="155" y="208" font-size="13" fill="#d97706" font-weight="700">θ₁</text>
+            <line x1="100" y1="220" x2="160" y2="220" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <!-- theta2 angle at joint2 -->
+            <path d="M 340 120 A 40 40 0 0 0 327 109" fill="none" stroke="#d97706" stroke-width="2"/>
+            <text x="335" y="100" font-size="13" fill="#d97706" font-weight="700">θ₂</text>
+            <line x1="300" y1="120" x2="355" y2="120" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+            <!-- end effector position dashed -->
+            <line x1="100" y1="220" x2="500" y2="220" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="500" y1="180" x2="500" y2="220" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="510" y="205" font-size="11" fill="#64748b">x</text>
+            <text x="475" y="245" font-size="11" fill="#64748b">y</text>
+            <!-- coords x0,y0 -->
+            <line x1="100" y1="220" x2="140" y2="220" stroke="#dc2626" stroke-width="2" marker-end="url(#arr3_r2)"/>
+            <text x="142" y="225" font-size="11" fill="#dc2626">x₀</text>
+            <line x1="100" y1="220" x2="100" y2="190" stroke="#059669" stroke-width="2" marker-end="url(#arr3_b2)"/>
+            <text x="78" y="188" font-size="11" fill="#059669">y₀</text>
+          </svg>
+          <div class="diagram-caption">图 3-2 ABB A2–A3平面教学子链的D-H坐标系与几何关系</div>
+        </div>
+      </div>
+    </div>

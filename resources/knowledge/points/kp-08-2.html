@@ -1,0 +1,143 @@
+<!--META {"kp_id": "kp-8-2", "kp_label": "KP 8.2", "title": "ABB机器人编程", "tags": ["考点"], "difficulty": 2, "chapter": 8, "order": 2, "file": "kp-08-2.html"}-->
+<div class="kp-card" id="kp-8-2">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 8.2</span>
+          ABB机器人编程
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 考点">考点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">ABB机器人</span>是全球工业机器人市场的领导品牌，其编程语言<strong>RAPID</strong>是工业机器人领域最广泛使用的编程语言之一。掌握RAPID编程和示教器操作，是机器人工程师的核心技能。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 RAPID编程核心概念</div>
+          <p><strong>Module（模块）</strong>：程序的组织单元；<strong>Routine（例行程序）</strong>：相当于函数；<strong>robtarget</strong>：机器人目标位姿数据类型，包含位置、姿态、轴配置；<strong>MoveJ/MoveL</strong>：关节运动/线性运动指令。</p>
+        </div>
+
+        <p><strong>关键运动指令对比：</strong></p>
+        <ul>
+          <li><strong>MoveJ（关节运动）</strong>：各关节同时插值，末端轨迹不可预测但速度最快。适合空中点到点移动（避障段）。</li>
+          <li><strong>MoveL（线性运动）</strong>：末端在笛卡尔空间做直线运动，轨迹精确可控。适合焊接、涂胶等需要精确路径的任务。</li>
+          <li><strong>MoveC（圆弧运动）</strong>：末端走圆弧轨迹，通过起点、辅助点和终点确定圆弧。</li>
+        </ul>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">RAPID</span> ABB机器人基本运动程序</div>
+<pre>MODULE MainModule
+  <span class="comment">! 定义目标点（位置 + 姿态 + 轴配置）</span>
+  <span class="keyword">CONST</span> robtarget p10 := [[<span class="number">800</span>,<span class="number">0</span>,<span class="number">900</span>],[<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>]];
+  <span class="keyword">CONST</span> robtarget p20 := [[<span class="number">800</span>,<span class="number">200</span>,<span class="number">900</span>],[<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>]];
+
+  <span class="keyword">PROC</span> main()
+    <span class="comment">! MoveJ: 关节运动到p10，速度v1000，精度fine</span>
+    MoveJ p10, v1000, fine, tool0;
+
+    <span class="comment">! MoveL: 线性运动到p20，速度v500，精度fine</span>
+    MoveL p20, v500, fine, tool0;
+
+    <span class="comment">! 返回起点</span>
+    MoveJ p10, v1000, fine, tool0;
+  <span class="keyword">ENDPROC</span>
+ENDMODULE</pre>
+        </div>
+
+        <p><strong>3. MoveC圆弧运动与I/O控制</strong>：以下示例展示圆弧运动指令和数字I/O控制指令的用法。MoveC通过圆心点（cirpoint）和目标点（topoint）确定一段圆弧；SetDO用于输出数字信号控制外部设备（如夹爪、传送带），WaitDI用于等待外部输入信号（如传感器触发）。</p>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">RAPID</span> MoveC圆弧运动与I/O控制示例</div>
+<pre>MODULE MoveC_IO_Module
+  <span class="comment">! 定义圆弧起点、辅助点和终点</span>
+  <span class="keyword">CONST</span> robtarget p_start := [[<span class="number">800</span>,<span class="number">0</span>,<span class="number">900</span>],[<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>]];
+  <span class="keyword">CONST</span> robtarget p_circle := [[<span class="number">900</span>,<span class="number">100</span>,<span class="number">900</span>],[<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>]];
+  <span class="keyword">CONST</span> robtarget p_end   := [[<span class="number">800</span>,<span class="number">200</span>,<span class="number">900</span>],[<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>,<span class="number">9E9</span>]];
+
+  <span class="keyword">PROC</span> main()
+    <span class="comment">! MoveJ运动到圆弧起点</span>
+    MoveJ p_start, v1000, fine, tool0;
+
+    <span class="comment">! 打开夹爪（数字输出信号doGripper = 1）</span>
+    SetDO doGripper, <span class="number">1</span>;
+
+    <span class="comment">! MoveC: 圆弧运动，p_circle为辅助点，p_end为终点</span>
+    MoveC p_circle, p_end, v500, fine, tool0;
+
+    <span class="comment">! 关闭夹爪（抓取物体）</span>
+    SetDO doGripper, <span class="number">0</span>;
+
+    <span class="comment">! 等待外部传感器信号（数字输入diSensor = 1），超时10秒</span>
+    WaitDI diSensor, <span class="number">1</span> \MaxTime:=<span class="number">10</span>;
+
+    <span class="comment">! 条件判断：若传感器到位则放置，否则报警</span>
+    <span class="keyword">IF</span> DInput(diSensor) = <span class="number">1</span> <span class="keyword">THEN</span>
+      MoveJ p_end, v500, fine, tool0;
+      SetDO doGripper, <span class="number">1</span>;  <span class="comment">! 释放物体</span>
+    <span class="keyword">ELSE</span>
+      TPWrite <span class="string">"传感器未触发，放弃放置"</span>;
+    <span class="keyword">ENDIF</span>
+  <span class="keyword">ENDPROC</span>
+ENDMODULE</pre>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 I/O指令要点</div>
+          <p><strong>SetDO</strong>（Set Digital Output）设置数字输出信号，常用于控制夹爪开闭、气缸伸缩、传送带启停等外部设备。<strong>WaitDI</strong>（Wait Digital Input）等待数字输入信号到达指定状态，常用于同步外部设备（如等待物料到位、等待安全门关闭）。配合<strong>IF条件判断</strong>和<strong>FOR/WHILE循环</strong>，可以实现完整的物料检测分拣逻辑。</p>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">robtarget数据结构（完整定义）</div>
+          <div class="formula">robtarget := [ [x, y, z], [q1, q2, q3, q4], [cf1, cf4, cf6, cfx], [eax1, eax2, eax3, eax4, eax5, eax6] ]</div>
+        </div>
+
+        <p>robtarget由四个分量组构成，共包含位置、姿态、轴配置和外部轴信息：</p>
+        <ul>
+          <li><strong>pos [x, y, z]</strong>：末端工具在工件坐标系下的三维位置，单位为毫米（mm）。例如 [800, 0, 900] 表示X=800mm, Y=0mm, Z=900mm。</li>
+          <li><strong>orient [q1, q2, q3, q4]</strong>：末端姿态的<strong>单位四元数</strong>表示，描述工具坐标系相对于工件坐标系的旋转。它没有欧拉角万向锁，但 q 与 −q 表示同一姿态；例如 [1, 0, 0, 0] 表示单位旋转。</li>
+          <li><strong>confdata [cf1, cf4, cf6, cfx]</strong>：轴配置数据，指定机器人到达目标位姿时各关节所在的<strong>象限区间</strong>。cf1、cf4、cf6分别对应关节1、4、6的转角象限（0/1/-1），cfx为附加配置。同一末端位姿可能对应多个关节解（逆运动学多解），confdata用于指定使用哪个解。9E9表示不限制该轴配置。</li>
+          <li><strong>extax [eax1~eax6]</strong>：外部轴位置值，最多支持6个外部轴（如导轨、变位机）。若无外部轴，所有值设为9E9。</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 robtarget示例解读</div>
+          <p>以 <code>[[800,0,900],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]]</code> 为例：位置为(800,0,900)mm，姿态四元数为(1,0,0,0)表示无旋转，轴配置全为0表示使用默认象限，外部轴全为9E9表示无外部轴。在示教器中手动移动机器人到目标位置后，可直接读取当前robtarget值，无需手动计算四元数。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠ 坐标系标定的重要性</div>
+          <p>ABB机器人编程前必须完成<strong>坐标系标定</strong>：包括基坐标系（Base）、工具坐标系（TCP）和工作坐标系（Wobj）。标定精度直接影响机器人的定位精度。常用四点法标定TCP，三点法标定工作坐标系。</p>
+        </div>
+
+        <p><strong>示教器操作流程</strong>是ABB机器人编程的基础：</p>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">开机回零</div>
+            <div class="step-desc">启动控制器，手动操纵机器人回到机械零点</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">手动示教</div>
+            <div class="step-desc">用手动模式将机器人移动到目标位置，记录点位</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-title">编辑程序</div>
+            <div class="step-desc">在示教器或RobotStudio中编写RAPID程序</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-title">测试运行</div>
+            <div class="step-desc">低速单步执行程序，检查轨迹和碰撞</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-title">自动运行</div>
+            <div class="step-desc">切换到自动模式，全速运行程序</div>
+          </div>
+        </div>
+      </div>
+    </div>

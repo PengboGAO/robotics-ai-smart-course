@@ -1,0 +1,38 @@
+<!--META {"kp_id": "kp-3-2", "kp_label": "KP 3.2", "title": "经典D-H法", "tags": ["难点"], "difficulty": 3, "chapter": 3, "order": 2, "file": "kp-03-2.html"}-->
+<div class="kp-card" id="kp-3-2">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 3.2</span>经典D-H法</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">经典 D-H 法</span>（Standard / Classical D-H）由 Denavit 与 Hartenberg 最初提出，又称标准 D-H 约定。其坐标系建立规则为：<strong>坐标系 {i} 固连于连杆 i，z<sub>i</sub> 轴沿关节 i+1 的轴线方向</strong>（等价地，z<sub>i-1</sub> 轴沿关节 i 的轴线方向），x<sub>i</sub> 轴沿 z<sub>i-1</sub> 与 z<sub>i</sub> 的公垂线方向。在这一约定下，从坐标系 {i-1} 到 {i} 的变换由参数 a<sub>i</sub>、α<sub>i</sub>、d<sub>i</sub>、θ<sub>i</sub> 描述。</p>
+        <p>经典 D-H 法将坐标系变换分解为四次基本变换的乘积，顺序为：先绕 z<sub>i-1</sub> 转 θ<sub>i</sub>，再沿 z<sub>i-1</sub> 平移 d<sub>i</sub>，再沿 x<sub>i</sub> 平移 a<sub>i</sub>，最后绕 x<sub>i</sub> 转 α<sub>i</sub>。</p>
+        <div class="formula-block">
+          <div class="formula-label">经典 D-H 变换矩阵分解</div>
+          <div class="formula"><sup>i-1</sup><sub>i</sub>T = Rot(z, θ<sub>i</sub>) · Trans(z, d<sub>i</sub>) · Trans(x, a<sub>i</sub>) · Rot(x, α<sub>i</sub>)</div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-label">经典 D-H 连杆变换矩阵通式（3-1）</div>
+          <div class="formula">
+            <sup>i-1</sup><sub>i</sub>T = ⎡ cθ<sub>i</sub> &nbsp; −sθ<sub>i</sub>cα<sub>i</sub> &nbsp; sθ<sub>i</sub>sα<sub>i</sub> &nbsp; a<sub>i</sub>cθ<sub>i</sub> ⎤<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ sθ<sub>i</sub> &nbsp; cθ<sub>i</sub>cα<sub>i</sub> &nbsp; −cθ<sub>i</sub>sα<sub>i</sub> &nbsp; a<sub>i</sub>sθ<sub>i</sub> ⎥<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ 0 &nbsp;&nbsp;&nbsp; sα<sub>i</sub> &nbsp;&nbsp;&nbsp; cα<sub>i</sub> &nbsp;&nbsp;&nbsp; d<sub>i</sub> ⎥<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎣ 0 &nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 ⎦
+          </div>
+        </div>
+        <p>其中 cθ<sub>i</sub> = cos θ<sub>i</sub>，sθ<sub>i</sub> = sin θ<sub>i</sub>，cα<sub>i</sub>、sα<sub>i</sub> 同理。该矩阵左上角 3×3 子块为旋转矩阵，第四列前三行为平移分量。经典 D-H 法的优点是概念直观，缺点是在处理平行关节或存在连杆偏置的构型时，参数表可能出现<span class="highlight">下标不一致</span>的困惑。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">变换分解的几何直觉</div>
+          <p>经典 D-H 变换的四个基本变换可理解为从坐标系 {i-1} "走"到坐标系 {i} 的四步路径：先绕 z<sub>i-1</sub> 转 θ<sub>i</sub>（对齐 x 轴方向），再沿 z<sub>i-1</sub> 平移 d<sub>i</sub>（到达公垂线垂足），再沿 x 平移 a<sub>i</sub>（到达 z<sub>i</sub> 垂足），最后绕 x 转 α<sub>i</sub>（对齐 z 轴方向）。每一步对应明确的几何操作，四步乘积即为完整的坐标系变换。理解这一"四步走"的物理图像，是记忆变换矩阵通式的有效方法。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">学习建议</div>
+          <p>不要死记通式（3-1），而应掌握"四步分解"的推导过程。考场上若遗忘通式，可从四个基本变换矩阵 Rot(z,θ)、Trans(z,d)、Trans(x,a)、Rot(x,α) 出发重新连乘推导。这种"从原理推导"的能力比记忆公式更重要，也是机器人学工程师的基本素养。</p>
+        </div>
+      </div>
+    </div>

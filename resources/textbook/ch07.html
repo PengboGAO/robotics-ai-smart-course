@@ -508,13 +508,13 @@ title(<span class="string">'计算力矩法跟踪误差'</span>);
 legend(<span class="string">'关节1误差'</span>, <span class="string">'关节2误差'</span>); grid on;</pre>
         </div>
 
-        <p>以下是仿真中使用的<strong>真实模型</strong>与<strong>标称模型</strong>函数定义。真实模型使用精确参数，标称模型参数带有10%偏差（质量增大10%），用于模拟控制器中模型不精确的情形：</p>
+        <p>以下函数定义用于ABB A2–A3平面教学子模型的<strong>课程被控模型</strong>与<strong>标称模型</strong>。参数均为教学设定，标称模型人为加入10%质量偏差以观察鲁棒性；不得把仿真数值解释为ABB整机控制性能。</p>
 
         <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> 二连杆机器人动力学模型函数定义</div>
-<pre><span class="comment">% ========== 真实模型函数（被控对象）==========</span>
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型函数定义</div>
+<pre><span class="comment">% ========== 课程被控模型（非ABB厂家参数）==========</span>
 <span class="keyword">function</span> M = inertia_matrix(q)
-    <span class="comment">% 二连杆机器人惯性矩阵（真实模型）</span>
+    <span class="comment">% ABB A2–A3教学子模型惯性矩阵</span>
     m1 = <span class="number">5</span>; m2 = <span class="number">3</span>; l1 = <span class="number">1</span>; l2 = <span class="number">0.8</span>;
     lc1 = l1/<span class="number">2</span>; lc2 = l2/<span class="number">2</span>;
     I1 = m1*l1^<span class="number">2</span>/<span class="number">12</span>; I2 = m2*l2^<span class="number">2</span>/<span class="number">12</span>;
@@ -526,14 +526,14 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
 <span class="keyword">end</span>
 
 <span class="keyword">function</span> C = coriolis_matrix(q, qd)
-    <span class="comment">% 二连杆机器人科氏力矩阵（真实模型）</span>
+    <span class="comment">% ABB A2–A3教学子模型科氏力矩阵</span>
     m2 = <span class="number">3</span>; l1 = <span class="number">1</span>; l2 = <span class="number">0.8</span>; lc2 = l2/<span class="number">2</span>;
     h = m2*l1*lc2*sin(q(<span class="number">2</span>));
     C = [-h*qd(<span class="number">2</span>) -h*(qd(<span class="number">1</span>)+qd(<span class="number">2</span>)); h*qd(<span class="number">1</span>) <span class="number">0</span>];
 <span class="keyword">end</span>
 
 <span class="keyword">function</span> G = gravity_vector(q)
-    <span class="comment">% 二连杆机器人重力向量（真实模型）</span>
+    <span class="comment">% ABB A2–A3教学子模型重力向量</span>
     m1 = <span class="number">5</span>; m2 = <span class="number">3</span>; l1 = <span class="number">1</span>; l2 = <span class="number">0.8</span>;
     lc1 = l1/<span class="number">2</span>; lc2 = l2/<span class="number">2</span>; g = <span class="number">9.81</span>;
     G1 = (m1*lc1 + m2*l1)*g*cos(q(<span class="number">1</span>)) + m2*lc2*g*cos(q(<span class="number">1</span>)+q(<span class="number">2</span>));
@@ -668,8 +668,8 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
               </tr>
               <tr>
                 <td>传感器需求</td>
-                <td>位置编码器</td>
-                <td>力/力矩传感器</td>
+                <td>位置/速度反馈；可结合力传感或力估计</td>
+                <td>通常需要外力测量或可靠的外力估计</td>
               </tr>
               <tr>
                 <td>内层环路</td>
@@ -709,7 +709,7 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
           <div class="formula-label" style="text-align:center;">x<sub>c</sub>: 导纳模型输出的修正位置指令，送入内层位置控制器跟踪</div>
         </div>
 
-        <p>导纳控制与阻抗控制的目标方程形式相同，区别在于实现方式：阻抗控制直接输出力矩（需位置编码器测量实际位置），导纳控制输出修正位置指令（需力传感器测量 F<sub>ext</sub>，由内层位置环跟踪）。</p>
+          <p>导纳与阻抗描述的是不同的因果实现关系。力矩控制机器人常直接实现阻抗律；位置接口机器人常根据测得或估计的外力通过导纳模型生成运动指令，再由内层位置环跟踪。传感器需求取决于控制架构，不能简单理解为阻抗控制“不需要力信息”。</p>
 
         <div class="callout callout-success">
           <div class="callout-title">✓ 协作机器人的核心</div>
@@ -841,7 +841,7 @@ legend(<span class="string">'关节1误差'</span>, <span class="string">'关节
 
         <p>近年来，随着大模型与具身智能的快速发展，机器人控制领域涌现出多种<strong>前沿方向</strong>：</p>
         <ul>
-          <li><strong>模型预测控制（MPC, Model Predictive Control）</strong>：在每个控制周期内，基于系统动力学模型在线求解有限时域最优控制问题，预测未来状态轨迹并最小化代价函数，仅执行第一个控制输入后滚动优化。MPC天然处理输入/状态约束，能够在安全边界内实现最优轨迹跟踪，已广泛应用于双足机器人步态控制、自动驾驶和机械臂轨迹优化。</li>
+            <li><strong>模型预测控制（MPC, Model Predictive Control）</strong>：MPC本质上属于基于模型的优化控制，而不是人工智能方法。它在每个控制周期求解有限时域约束优化问题，只执行第一个控制输入并滚动更新；当预测模型、代价或约束由学习方法获得时，才构成学习与MPC的融合。</li>
           <li><strong>扩散策略（Diffusion Policy）</strong>：将图像生成领域的扩散模型引入机器人动作生成。以视觉观测和任务目标为条件，通过去噪扩散过程生成多模态的动作序列。相比传统回归策略，扩散策略能更好地表达多模态动作分布，在复杂操作任务（如物体重新排列、精密装配）中表现出更强的泛化能力。</li>
           <li><strong>视觉-语言-动作大模型（VLA, Vision-Language-Action）</strong>：以大规模预训练视觉-语言模型（如PaLI、PaLM-E）为基础，融合机器人本体感知和动作输出，实现<strong>"看图-听指令-做动作"</strong>的端到端控制。代表性工作包括Google的<strong>RT-2</strong>（将机器人动作离散化为token，纳入大语言模型输出空间）和开源的<strong>OpenVLA</strong>（基于Llama架构，支持自然语言指令到机器人动作的直接映射）。VLA大模型具备跨任务泛化和常识推理能力，是通向通用机器人操控的重要方向。</li>
         </ul>

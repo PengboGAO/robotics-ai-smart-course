@@ -1,0 +1,37 @@
+{
+  "model": "ABB IRB 1200-5/0.9",
+  "source": "https://github.com/ros-industrial/abb/blob/noetic-devel/abb_irb1200_support/urdf/irb1200_5_90_macro.xacro",
+  "representation": "ROS-Industrial collision STL meshes rendered as teaching animation frames",
+  "trajectory": {
+    "start_deg": [
+      0.0,
+      -30.0,
+      20.0,
+      0.0,
+      30.0,
+      0.0
+    ],
+    "goal_deg": [
+      60.0,
+      40.0,
+      -70.0,
+      100.0,
+      45.0,
+      180.0
+    ],
+    "duration_s": 3.0,
+    "time_scaling": "s(tau)=10tau^3-15tau^4+6tau^5",
+    "frame_count": 31
+  },
+  "flange_start_m": [
+    0.2899098680509393,
+    0.0,
+    0.8787109828970221
+  ],
+  "flange_goal_m": [
+    0.30191160496819597,
+    0.6371299746120627,
+    1.0418720188208839
+  ],
+  "boundary": "教学用离线网格帧，不代表RobotStudio虚拟控制器、碰撞检测或实体机器人运行结果。"
+}

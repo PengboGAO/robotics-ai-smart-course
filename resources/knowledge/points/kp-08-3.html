@@ -1,0 +1,187 @@
+<!--META {"kp_id": "kp-8-3", "kp_label": "KP 8.3", "title": "ROS基础", "tags": ["重点"], "difficulty": 2, "chapter": 8, "order": 3, "file": "kp-08-3.html"}-->
+<div class="kp-card" id="kp-8-3">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 8.3</span>
+          ROS基础
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">ROS</span>（Robot Operating System，机器人操作系统）是当今最主流的机器人软件开发框架。它不是一个真正的操作系统，而是运行在Linux之上的<strong>中间件</strong>，提供了硬件抽象、消息传递、包管理等功能，使机器人软件开发更加模块化和可复用。当前ROS已发展到<strong>ROS 2</strong>版本，本节代码示例基于ROS 2（rclpy）编写。</p>
+
+        <p>ROS的三大核心通信机制：</p>
+        <ul>
+          <li><strong>话题（Topic）</strong>：异步发布/订阅通信模式。Publisher发布消息到话题，Subscriber订阅话题接收消息。适合传感器数据流等持续数据传输。</li>
+          <li><strong>服务（Service）</strong>：同步请求/响应通信模式。Client发送请求，Server处理并返回响应。适合一次性查询（如获取机器人状态）。</li>
+          <li><strong>动作（Action）</strong>：支持反馈的异步通信模式。适合长时间执行任务（如导航到目标点），可中途取消并获取进度。</li>
+        </ul>
+
+        <!-- ROS节点-话题通信模型 SVG -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <defs>
+              <marker id="arr-ros1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+              </marker>
+              <marker id="arr-ros2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#0891b2"/>
+              </marker>
+              <marker id="arr-ros3" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/>
+              </marker>
+            </defs>
+
+            <!-- Publisher节点 -->
+            <rect x="30" y="40" width="150" height="80" rx="10" fill="#2563eb"/>
+            <text x="105" y="65" text-anchor="middle" fill="white" font-size="13" font-weight="700">Publisher节点</text>
+            <text x="105" y="85" text-anchor="middle" fill="#dbeafe" font-size="11">camera_driver</text>
+            <text x="105" y="105" text-anchor="middle" fill="#dbeafe" font-size="10">发布图像数据</text>
+
+            <!-- Topic（话题总线） -->
+            <rect x="300" y="25" width="300" height="110" rx="8" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="6,4"/>
+            <text x="450" y="48" text-anchor="middle" fill="#64748b" font-size="12" font-weight="700">Topic: /camera/image</text>
+            <text x="450" y="68" text-anchor="middle" fill="#94a3b8" font-size="10">消息类型: sensor_msgs/Image</text>
+
+            <line x1="180" y1="80" x2="295" y2="80" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arr-ros1)"/>
+            <text x="237" y="72" text-anchor="middle" fill="#2563eb" font-size="10" font-weight="600">publish()</text>
+
+            <!-- Subscriber节点1 -->
+            <rect x="680" y="30" width="160" height="70" rx="10" fill="#0891b2"/>
+            <text x="760" y="55" text-anchor="middle" fill="white" font-size="12" font-weight="700">Subscriber 1</text>
+            <text x="760" y="73" text-anchor="middle" fill="#cffafe" font-size="10">image_processor</text>
+            <text x="760" y="88" text-anchor="middle" fill="#cffafe" font-size="9">目标检测</text>
+
+            <line x1="605" y1="65" x2="675" y2="65" stroke="#0891b2" stroke-width="2.5" marker-end="url(#arr-ros2)"/>
+            <text x="640" y="57" text-anchor="middle" fill="#0891b2" font-size="10" font-weight="600">subscribe</text>
+
+            <!-- Subscriber节点2 -->
+            <rect x="680" y="115" width="160" height="70" rx="10" fill="#059669"/>
+            <text x="760" y="140" text-anchor="middle" fill="white" font-size="12" font-weight="700">Subscriber 2</text>
+            <text x="760" y="158" text-anchor="middle" fill="#a7f3d0" font-size="10">image_viewer</text>
+            <text x="760" y="173" text-anchor="middle" fill="#a7f3d0" font-size="9">图像显示</text>
+
+            <line x1="605" y1="100" x2="675" y2="140" stroke="#059669" stroke-width="2.5" marker-end="url(#arr-ros3)"/>
+
+            <!-- DDS Discovery（ROS 2 去中心化发现） -->
+            <rect x="320" y="160" width="260" height="60" rx="10" fill="#7c3aed"/>
+            <text x="450" y="185" text-anchor="middle" fill="white" font-size="13" font-weight="700">DDS Discovery</text>
+            <text x="450" y="205" text-anchor="middle" fill="#e9d5ff" font-size="10">去中心化发现 · 无需 Master 节点</text>
+
+            <line x1="105" y1="120" x2="320" y2="175" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="760" y1="100" x2="580" y2="170" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="760" y1="115" x2="580" y2="185" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="200" y="150" fill="#7c3aed" font-size="9">自动发现</text>
+            <text x="660" y="140" fill="#7c3aed" font-size="9">自动发现</text>
+
+            <!-- 底部说明 -->
+            <rect x="30" y="245" width="810" height="60" rx="6" fill="#f0f4f8" stroke="#cbd5e1"/>
+            <text x="435" y="265" text-anchor="middle" fill="#1a202c" font-size="11" font-weight="600">ROS 2 通信模型：Publisher 发布消息 → Topic 总线传输 → Subscriber 订阅接收</text>
+            <text x="435" y="285" text-anchor="middle" fill="#64748b" font-size="10">DDS 中间件提供去中心化节点发现，Publisher 与 Subscriber 直接通过 DDS 传输数据，无需 Master</text>
+          </svg>
+          <div class="diagram-caption">图8-1 ROS 2节点-话题通信模型：Publisher → Topic → Subscriber，DDS提供去中心化节点发现</div>
+        </div>
+
+        <p>ROS常用的仿真与可视化工具：</p>
+        <ul>
+          <li><strong>rviz</strong>：三维可视化工具，可显示机器人模型、传感器数据、TF坐标变换树。是调试机器人状态的首选工具。</li>
+          <li><strong>Gazebo</strong>：物理仿真器，可模拟机器人的动力学、传感器（激光雷达、相机）、环境碰撞。支持在虚拟环境中测试算法。</li>
+        </ul>
+
+        <p>下面通过ROS 2的Python示例展示话题通信的编程实现：<strong>Publisher节点</strong>发布关节角速度指令，<strong>Subscriber节点</strong>订阅并打印接收到的消息。ROS 2采用面向对象的节点类（继承自Node），通过回调函数处理订阅消息。</p>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">Python</span> ROS 2 Publisher节点（rclpy）</div>
+<pre><span class="comment">#!/usr/bin/env python3</span>
+<span class="comment"># ROS 2 Publisher节点：发布关节速度指令</span>
+<span class="keyword">import</span> rclpy
+<span class="keyword">from</span> rclpy.node <span class="keyword">import</span> Node
+<span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> Float64MultiArray
+
+<span class="keyword">class</span> JointCommander(Node):
+    <span class="keyword">def</span> __init__(self):
+        super().__init__(<span class="string">'joint_commander'</span>)
+        <span class="comment"># 创建Publisher，话题名/joint_vel，消息类型Float64MultiArray</span>
+        self.publisher_ = self.create_publisher(Float64MultiArray, <span class="string">'/joint_vel'</span>, <span class="number">10</span>)
+        <span class="comment"># 10Hz定时器回调发布消息</span>
+        self.timer = self.create_timer(<span class="number">0.1</span>, self.timer_callback)
+
+    <span class="keyword">def</span> timer_callback(self):
+        msg = Float64MultiArray()
+        msg.data = [<span class="number">0.1</span>, <span class="number">0.0</span>, <span class="number">0.05</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>]
+        self.publisher_.publish(msg)
+        self.get_logger().info(<span class="string">f'发布关节速度: {msg.data}'</span>)
+
+<span class="keyword">def</span> main(args=None):
+    rclpy.init(args=args)
+    node = JointCommander()
+    <span class="keyword">try</span>:
+        rclpy.spin(node)
+    <span class="keyword">except</span> KeyboardInterrupt:
+        <span class="keyword">pass</span>
+    node.destroy_node()
+    rclpy.shutdown()
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    main()</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">Python</span> ROS 2 Subscriber节点（rclpy）</div>
+<pre><span class="comment">#!/usr/bin/env python3</span>
+<span class="comment"># ROS 2 Subscriber节点：订阅关节速度并打印</span>
+<span class="keyword">import</span> rclpy
+<span class="keyword">from</span> rclpy.node <span class="keyword">import</span> Node
+<span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> Float64MultiArray
+
+<span class="keyword">class</span> JointListener(Node):
+    <span class="keyword">def</span> __init__(self):
+        super().__init__(<span class="string">'joint_listener'</span>)
+        <span class="comment"># 创建Subscriber，订阅/joint_vel话题</span>
+        self.subscription = self.create_subscription(
+            Float64MultiArray, <span class="string">'/joint_vel'</span>, self.listener_callback, <span class="number">10</span>)
+
+    <span class="keyword">def</span> listener_callback(self, msg):
+        self.get_logger().info(<span class="string">f'接收到关节速度: {list(msg.data)}'</span>)
+
+<span class="keyword">def</span> main(args=None):
+    rclpy.init(args=args)
+    node = JointListener()
+    <span class="keyword">try</span>:
+        rclpy.spin(node)
+    <span class="keyword">except</span> KeyboardInterrupt:
+        <span class="keyword">pass</span>
+    node.destroy_node()
+    rclpy.shutdown()
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    main()</pre>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 ROS 2 与 ROS 1 对比</div>
+          <p>ROS 2是ROS 1的下一代版本，主要改进包括：</p>
+          <ul>
+            <li><strong>中间件</strong>：ROS 1使用自研的TCPROS协议，依赖ROS Master中心节点；ROS 2采用<strong>DDS</strong>（Data Distribution Service）工业标准中间件，去中心化，无需Master，节点可直接发现彼此。</li>
+            <li><strong>实时性</strong>：ROS 2支持实时优先级调度和QoS（服务质量）配置，满足工业控制的实时性需求；ROS 1无实时性保障。</li>
+            <li><strong>多机通信</strong>：ROS 2原生支持跨网段、跨平台（Linux/Windows/macOS）分布式部署；ROS 1仅限同一局域网且需配置ROS_MASTER_URI。</li>
+            <li><strong>生命周期管理</strong>：ROS 2引入节点生命周期（Lifecycle Node）机制，支持节点的受控启动、配置、激活、停用等状态转换，便于构建高可靠系统。</li>
+            <li><strong>安全性</strong>：ROS 2支持DDS Security层，提供认证、加密、访问控制等安全机制，适合工业和商用部署。</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✓ ROS的工程价值</div>
+          <p>ROS的最大价值在于<strong>软件复用</strong>：导航、SLAM、运动规划等成熟算法以"包"的形式共享，开发者无需从零实现。ROS 2进一步引入了DDS中间件，提升了实时性和分布式部署能力，成为新一代机器人软件标准。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 rviz与Gazebo协作</div>
+          <p>在实际开发中，<strong>rviz</strong>和<strong>Gazebo</strong>通常配合使用：Gazebo提供物理仿真环境（机器人模型、传感器、碰撞），rviz订阅Gazebo发布的传感器话题进行可视化。开发者可以在rviz中查看激光雷达点云、相机图像、TF坐标树，同时在Gazebo中观察机器人在虚拟世界中的运动。这种"仿真+可视化"的组合是ROS开发的标准工作流。</p>
+        </div>
+      </div>
+    </div>

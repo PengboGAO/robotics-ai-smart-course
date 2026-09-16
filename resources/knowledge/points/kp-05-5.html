@@ -1,0 +1,75 @@
+<!--META {"kp_id": "kp-5-5", "kp_label": "KP 5.5", "title": "正向递推", "tags": ["难点"], "difficulty": 3, "chapter": 5, "order": 5, "file": "kp-05-5.html"}-->
+<div class="kp-card" id="kp-5-5">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 5.5</span>正向递推</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>正向递推从基座（连杆 0）出发，沿运动链向末端依次计算各连杆的角速度、角加速度和质心加速度。已知基座速度 ω₀、角加速度 α₀（通常静止基座下均为 0），递推关系如下：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">角速度递推（旋转关节 i）</div>
+          <div class="formula"><sup>i</sup>ω<sub>i</sub> = <sup>i</sup>R<sub>i−1</sub> (<sup>i−1</sup>ω<sub>i−1</sub> + <sup>i−1</sup>α ẑ q̇<sub>i</sub>)</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">角加速度递推（旋转关节 i）</div>
+          <div class="formula"><sup>i</sup>α<sub>i</sub> = <sup>i</sup>R<sub>i−1</sub> [<sup>i−1</sup>α<sub>i−1</sub> + <sup>i−1</sup>ω<sub>i−1</sub> × (<sup>i−1</sup>ẑ q̇<sub>i</sub>) + <sup>i−1</sup>ẑ q̈<sub>i</sub>]</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">质心线加速度递推</div>
+          <div class="formula"><sup>i</sup>a<sub>ci</sub> = <sup>i</sup>α<sub>i</sub> × <sup>i</sup>P<sub>ci</sub> + <sup>i</sup>ω<sub>i</sub> × (<sup>i</sup>ω<sub>i</sub> × <sup>i</sup>P<sub>ci</sub>) + <sup>i</sup>a<sub>i</sub></div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">原点加速度递推</div>
+          <div class="formula"><sup>i</sup>a<sub>i</sub> = <sup>i</sup>R<sub>i−1</sub> · <sup>i−1</sup>a<sub>i−1</sub> + <sup>i</sup>α<sub>i</sub> × <sup>i</sup>P<sub>i−1→i</sub> + <sup>i</sup>ω<sub>i</sub> × (<sup>i</sup>ω<sub>i</sub> × <sup>i</sup>P<sub>i−1→i</sub>)</div>
+        </div>
+
+        <p>其中 <span class="inline-formula"><sup>i</sup>R<sub>i−1</sub></span> 为连杆 i−1 到连杆 i 的旋转矩阵（记法规则：左上标 i 为表达坐标系即参考系，右下标 i−1 为被描述坐标系即源坐标系，该矩阵将 {i−1} 系中的向量变换到 {i} 系中表示），<span class="inline-formula"><sup>i</sup>P<sub>ci</sub></span> 为连杆 i 坐标系原点到其质心的位置向量（在 {i} 系中表示），<span class="inline-formula"><sup>i</sup>P<sub>i−1→i</sub></span> 为从坐标系 {i−1} 原点指向坐标系 {i} 原点的位置向量（在 {i} 系中表示，即 <sup>i</sup>R<sub>i−1</sub>·<sup>i−1</sup>P<sub>i</sub>），<span class="inline-formula">ẑ</span> 为关节轴单位向量 [0,0,1]ᵀ。该公式是刚体加速度传递关系 a<sub>B</sub> = a<sub>A</sub> + α×r<sub>A→B</sub> + ω×(ω×r<sub>A→B</sub>) 的直接应用，其中 r<sub>A→B</sub> = <sup>i</sup>P<sub>i−1→i</sub> 为从父连杆原点指向子连杆原点的向量。</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 科氏加速度项</div>
+          <p>角加速度递推式中 <span class="inline-formula"><sup>i−1</sup>ω<sub>i−1</sub> × (<sup>i−1</sup>ẑ q̇<sub>i</sub>)</span> 是科氏加速度项，它源于牵连运动与相对运动的耦合。这一项正是动力学方程中科氏力/离心力项 C(q,q̇)q̇ 的物理来源。漏掉该项会导致动力学方程错误。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 正向递推的输入与输出</div>
+          <p><strong>输入</strong>：关节变量 q、关节速度 q̇、关节加速度 q̈，以及基座运动状态（通常静止）。<strong>输出</strong>：每个连杆的角速度 <sup>i</sup>ω<sub>i</sub>、角加速度 <sup>i</sup>α<sub>i</sub> 和质心加速度 <sup>i</sup>a<sub>ci</sub>。这些输出将作为反向递推的输入。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 局部坐标系下的高效计算</div>
+          <p>正向递推在连杆局部坐标系中执行，使得惯性张量 <sup>i</sup>I<sub>i</sub> 为常量（不随位形变化），无需每步重新计算。所有矢量运算（叉乘、矩阵乘）均在 3×3 维度进行，计算量小且稳定。旋转矩阵 <sup>i</sup>R<sub>i−1</sub> 由 D-H 参数预先确定，递推过程只需矩阵乘法与加法，非常适合嵌入式实时实现。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型正向递推</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型：速度与加速度</span>
+function [w, wd, ac] = forward_recursion(q, qd, qdd)
+  m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;g=<span class="number">9.81</span>;
+  s1=sin(q(1));c1=cos(q(1));s12=sin(q(1)+q(2));c12=cos(q(1)+q(2));
+  <span class="comment">% 基座初始条件（静止，重力等效为基座加速度a0=[0;-g]）</span>
+  w0=<span class="number">0</span>; wd0=<span class="number">0</span>; a0=[<span class="number">0</span>; -g];
+  <span class="comment">% --- 连杆1正向递推 ---</span>
+  w(<span class="number">1</span>)=w0+qd(<span class="number">1</span>);                    <span class="comment">% 角速度递推</span>
+  wd(<span class="number">1</span>)=wd0+qdd(<span class="number">1</span>);                 <span class="comment">% 角加速度递推</span>
+  ac(:,<span class="number">1</span>)=[a0(<span class="number">1</span>)-lc1*s1*wd(<span class="number">1</span>)-lc1*c1*w(<span class="number">1</span>)^<span class="number">2</span>;  <span class="comment">% 质心线加速度</span>
+            a0(<span class="number">2</span>)+lc1*c1*wd(<span class="number">1</span>)-lc1*s1*w(<span class="number">1</span>)^<span class="number">2</span>];
+  <span class="comment">% --- 连杆2正向递推 ---</span>
+  w(<span class="number">2</span>)=w(<span class="number">1</span>)+qd(<span class="number">2</span>);                  <span class="comment">% 角速度递推（累加父连杆）</span>
+  wd(<span class="number">2</span>)=wd(<span class="number">1</span>)+qdd(<span class="number">2</span>);               <span class="comment">% 角加速度递推</span>
+  a2=[a0(<span class="number">1</span>)-l1*s1*wd(<span class="number">1</span>)-l1*c1*w(<span class="number">1</span>)^<span class="number">2</span>;  <span class="comment">% 关节2原点加速度</span>
+      a0(<span class="number">2</span>)+l1*c1*wd(<span class="number">1</span>)-l1*s1*w(<span class="number">1</span>)^<span class="number">2</span>];
+  ac(:,<span class="number">2</span>)=[a2(<span class="number">1</span>)-lc2*s12*wd(<span class="number">2</span>)-lc2*c12*w(<span class="number">2</span>)^<span class="number">2</span>;  <span class="comment">% 连杆2质心加速度</span>
+            a2(<span class="number">2</span>)+lc2*c12*wd(<span class="number">2</span>)-lc2*s12*w(<span class="number">2</span>)^<span class="number">2</span>];
+end
+</pre>
+        </div>
+      </div>
+    </div>

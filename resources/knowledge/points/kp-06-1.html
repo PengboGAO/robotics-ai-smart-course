@@ -1,0 +1,55 @@
+<!--META {"kp_id": "kp-6-1", "kp_label": "KP 6.1", "title": "关节空间规划", "tags": ["重点", "考点"], "difficulty": 2, "chapter": 6, "order": 1, "file": "kp-06-1.html"}-->
+<div class="kp-card" id="kp-6-1">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.1</span>关节空间规划</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">关节空间规划</span>（Joint-Space Planning）是直接在关节变量空间中规划各关节角度随时间的变化 q(t)。规划时只需给定起止点的关节位置（及速度、加速度），通过插值函数生成各关节的时间轨迹，无需考虑末端在笛卡尔空间的具体路径形状。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 路径与轨迹的区别</div>
+          <p><strong>路径</strong>（Path）是末端执行器在空间中走过的几何曲线，仅含位置信息，不含时间信息；<strong>轨迹</strong>（Trajectory）= 路径 + 时间律，不仅规定"走到哪里"，还规定"何时走到、以多快速度走到"。同一条路径可以用不同的时间律（匀速、加速、减速）走完，产生不同的轨迹。轨迹规划的核心任务就是为给定的路径施加合适的时间律。</p>
+        </div>
+        <p>关节空间规划的核心优势：</p>
+        <ul>
+            <li><strong>不直接求雅可比逆</strong>：关节插值本身不会因雅可比求逆而数值发散，但生成的运动仍可能经过运动学奇异附近，必须结合任务路径、速度放大和后续控制要求检查；</li>
+          <li><strong>计算简单</strong>：每个关节独立规划，无需复杂的逆运动学求解；</li>
+          <li><strong>约束直接</strong>：关节速度、加速度、力矩约束可直观施加。</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 关节空间规划的局限</div>
+          <p>关节空间规划的<span class="highlight">缺点是末端轨迹形状不可控</span>：各关节独立插值时，末端执行器在笛卡尔空间中走出的是一条复杂的曲线（而非直线），且无法保证中途不与障碍物碰撞。因此，当任务要求末端走特定几何路径（如焊接直线焊缝、装配圆弧轨迹）时，必须采用笛卡尔空间规划。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 规划的连续性要求</div>
+          <p>轨迹规划需满足不同阶的连续性要求：<strong>位置连续</strong>（C⁰）保证轨迹不跳跃；<strong>速度连续</strong>（C¹）避免无限加速度冲击；<strong>加速度连续</strong>（C²）避免加加速度（jerk）突变引起的机械振动。三次多项式满足 C¹，五次多项式满足 C²，这是选择插值阶数的基本依据。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 使用jtraj进行关节空间轨迹规划</div>
+<pre><span class="comment">% 关节空间轨迹规划：jtraj五次多项式插值</span>
+L1 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L2 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.4</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L3 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.3</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+robot = SerialLink([L1 L2 L3], <span class="string">'name'</span>, <span class="string">'3DOF'</span>);
+q0 = [<span class="number">0</span> <span class="number">0</span> <span class="number">0</span>];            <span class="comment">% 起始关节角</span>
+q1 = [pi/<span class="number">2</span> pi/<span class="number">3</span> pi/<span class="number">4</span>];     <span class="comment">% 终止关节角</span>
+t  = <span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>;            <span class="comment">% 时间序列(0~2s)</span>
+<span class="comment">% jtraj: 五次多项式插值，返回位置/速度/加速度</span>
+[q, qd, qdd] = jtraj(q0, q1, t);
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t, q);   title(<span class="string">'关节位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t, qd);  title(<span class="string">'关节速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t, qdd); title(<span class="string">'关节加速度'</span>);
+robot.plot(q);  <span class="comment">% 动画演示关节运动</span>
+</pre>
+        </div>
+      </div>
+    </div>

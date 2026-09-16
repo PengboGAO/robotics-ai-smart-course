@@ -1,0 +1,86 @@
+<!--META {"kp_id": "kp-4-2", "kp_label": "KP 4.2", "title": "解析法", "tags": ["重点", "考点"], "difficulty": 3, "chapter": 4, "order": 2, "file": "kp-04-2.html"}-->
+<div class="kp-card" id="kp-4-2">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 4.2</span>解析法</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">解析法</span>（Closed-form / Analytical Method）利用机构几何关系或代数消元得到有限步骤的关节变量表达。其优点是计算快、结果可重复，并可针对给定结构枚举候选分支；缺点是依赖具体构型，推导和分支处理复杂。工业机器人控制器可能采用解析、数值或混合求解策略，厂商内部实现通常不公开，不能仅凭品牌推断算法。</p>
+
+        <p>解析法的基本思路是：将正运动学方程 T<sub>0n</sub>=A<sub>1</sub>A<sub>2</sub>…A<sub>n</sub> 两边左乘 A<sub>1</sub><sup>-1</sup>，分离出第一个关节变量；再依次左乘 A<sub>2</sub><sup>-1</sup>、A<sub>3</sub><sup>-1</sup> 等，逐个解出各关节角。核心技巧是利用<strong>等式两边对应元素相等</strong>构造方程，并通过平方和消元去除多变量耦合。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">解析法基本流程</div>
+          <div class="formula">
+            A<sub>1</sub><sup>-1</sup> · T<sub>0n</sub> = A<sub>2</sub> · A<sub>3</sub> · ⋯ · A<sub>n</sub><br>
+            ⇒ 比较两端元素，解出 θ<sub>1</sub>；再左乘 A<sub>2</sub><sup>-1</sup> 解 θ<sub>2</sub>，依此类推
+          </div>
+        </div>
+
+        <p>并非所有构型都存在便于实现的封闭形式解。Pieper条件（见KP 4.3）给出一类重要的充分条件，例如三个相邻转动关节轴线相交于一点时可实现位置—姿态解耦。实际工业机器人结构多样，应根据关节轴几何关系、厂商接口和任务实时性选择解析法、数值法或二者结合。下表对比两类方法：</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>比较维度</th>
+                <th>解析法</th>
+                <th>数值法</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>求解方式</td>
+                <td>对正运动学方程符号求逆</td>
+                <td>迭代逼近目标位姿</td>
+              </tr>
+              <tr>
+                <td>解的形式</td>
+                <td>关节角显式表达式</td>
+                <td>数值近似解</td>
+              </tr>
+              <tr>
+                <td>多解枚举</td>
+                <td>能列出全部解</td>
+                <td>仅给出一组（依赖初值）</td>
+              </tr>
+              <tr>
+                <td>计算速度</td>
+                <td>快（微秒级）</td>
+                <td>较慢（毫秒级，依赖迭代次数）</td>
+              </tr>
+              <tr>
+                <td>适用构型</td>
+                <td>需满足可解析条件（如 Pieper 准则）</td>
+                <td>任意构型</td>
+              </tr>
+              <tr>
+                <td>奇异附近行为</td>
+                <td>解表达式分母可能为零</td>
+                <td>迭代发散或收敛慢</td>
+              </tr>
+              <tr>
+                <td>典型应用</td>
+                <td>工业机器人控制器</td>
+                <td>冗余机器人、科研仿真</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.85rem;color:#64748b;">表 4-1 解析法与数值法对比</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">解的存在性</div>
+          <p>逆运动学是否有解取决于目标位姿是否在机器人<strong>工作空间</strong>内。若目标点超出工作空间，则无解；若在工作空间边界，解可能退化；若在工作空间内部，通常有解且多解。解析法能精确判断"无解"情形，而数值法只能通过迭代不收敛间接判断。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">工程实现要点</div>
+          <p>工业机器人控制器实现解析逆解时，需特别注意：（1）<strong>atan2 的象限处理</strong>——确保所有解落在正确象限，避免解丢失；（2）<strong>关节极限裁剪</strong>——求解后立即检查各关节角是否在允许范围 [θ<sub>min</sub>, θ<sub>max</sub>] 内，超出则舍弃该解；（3）<strong>解的连续性维护</strong>——在轨迹跟踪中，需选择与上一时刻解最接近的分支，避免构型跳变；（4）<strong>奇异检测</strong>——实时监控分母是否接近零，触发降速或报警。这些工程细节决定了逆解算法的鲁棒性。</p>
+        </div>
+      </div>
+    </div>

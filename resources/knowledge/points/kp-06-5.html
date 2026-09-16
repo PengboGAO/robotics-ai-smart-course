@@ -1,0 +1,67 @@
+<!--META {"kp_id": "kp-6-5", "kp_label": "KP 6.5", "title": "笛卡尔空间规划", "tags": ["重点", "考点"], "difficulty": 2, "chapter": 6, "order": 5, "file": "kp-06-5.html"}-->
+<div class="kp-card" id="kp-6-5">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.5</span>笛卡尔空间规划</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">笛卡尔空间规划</span>（Cartesian-Space Planning）是在末端执行器的位姿空间（位置 + 姿态）中直接规划轨迹。规划结果是一条末端在笛卡尔坐标系中的几何路径（如直线、圆弧），再通过逆运动学实时转换为各关节角。</p>
+        <p>笛卡尔空间规划的典型流程：</p>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">路径定义</div>
+            <div class="step-desc">在笛卡尔空间定义几何路径（直线/圆弧）</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">时间标度</div>
+            <div class="step-desc">对路径参数施加时间律（匀速/多项式）</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-title">逆运动学</div>
+            <div class="step-desc">逐点求逆运动学得关节角 q(t)</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-title">约束校验</div>
+            <div class="step-desc">校验关节限位、速度、奇异与碰撞</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 笛卡尔空间规划的挑战</div>
+          <p>笛卡尔空间规划虽然轨迹直观，但存在三大挑战：① <strong>计算量大</strong>——每个插补点都需求解逆运动学；② <strong>奇异问题</strong>——路径经过奇异位形时逆解不存在或趋于无穷；③ <strong>不可达问题</strong>——部分笛卡尔路径点可能超出工作空间或关节限位。因此实际系统需进行奇异检测与可达性预判。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 笛卡尔空间轨迹规划(ctraj+逆运动学)</div>
+<pre><span class="comment">% 笛卡尔空间规划：ctraj直线插补 + 逆运动学</span>
+L1 = Link(<span class="string">'d'</span>, <span class="number">0.5</span>, <span class="string">'a'</span>, <span class="number">0</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L2 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.4</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L3 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.3</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+robot = SerialLink([L1 L2 L3], <span class="string">'name'</span>, <span class="string">'3R'</span>);
+T0 = robot.fkine([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span>]);         <span class="comment">% 起点位姿</span>
+T1 = robot.fkine([pi/<span class="number">4</span> pi/<span class="number">3</span> pi/<span class="number">4</span>]);  <span class="comment">% 终点位姿</span>
+t  = <span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>;
+Ts = ctraj(T0, T1, length(t));  <span class="comment">% 笛卡尔直线插值</span>
+q  = zeros(length(t), <span class="number">3</span>);
+<span class="comment">% 逐点逆运动学求解关节角</span>
+for i = <span class="number">1</span>:length(t)
+    q(i,:) = robot.ikine(Ts(i));
+end
+p = transl(Ts);  <span class="comment">% 提取末端位置</span>
+figure; plot(t, q); title(<span class="string">'关节角轨迹'</span>);
+figure; plot3(p(:,<span class="number">1</span>),p(:,<span class="number">2</span>),p(:,<span class="number">3</span>),<span class="string">'b-o'</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>);
+title(<span class="string">'末端笛卡尔空间轨迹'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

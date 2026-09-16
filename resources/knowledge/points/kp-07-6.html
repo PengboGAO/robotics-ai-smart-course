@@ -1,0 +1,45 @@
+<!--META {"kp_id": "kp-7-6", "kp_label": "KP 7.6", "title": "阻抗控制", "tags": ["难点"], "difficulty": 3, "chapter": 7, "order": 6, "file": "kp-07-6.html"}-->
+<div class="kp-card" id="kp-7-6">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 7.6</span>
+          阻抗控制
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">阻抗控制</span>是柔顺控制的核心方法之一，目标是使机器人末端呈现出类似<strong>质量-阻尼-弹簧</strong>二阶系统的动力学行为。当外力作用于末端时，机器人不是刚性抵抗，而是按照预设的阻抗参数产生加速度、速度和位移。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">阻抗控制目标动力学方程</div>
+          <div class="formula">M·ẍ + B·ẋ + K·x = F<sub>ext</sub></div>
+          <div class="formula-label" style="text-align:center;">M: 目标惯量 | B: 目标阻尼 | K: 目标刚度 | F<sub>ext</sub>: 外力</div>
+        </div>
+
+        <p>阻抗控制的三个参数具有明确的物理意义和调参直觉：</p>
+        <ul>
+          <li><strong>目标惯量 M</strong>：决定机器人的"虚拟质量"。M越大，机器人越"沉重"，对外力响应越慢；M越小，越灵敏。</li>
+          <li><strong>目标阻尼 B</strong>：决定运动衰减速度。B越大，运动越平稳无振荡；B过小会产生振荡。</li>
+          <li><strong>目标刚度 K</strong>：决定位置保持能力。K越大，机器人越"硬"，偏离平衡位置后的回弹力越强。</li>
+        </ul>
+
+        <div class="formula-block">
+          <div class="formula-label">阻抗控制律（基于动力学补偿，操作空间形式）</div>
+          <div class="formula">τ = M(q)·q̈ + C(q,q̇)·q̇ + G(q) + J<sup>T</sup>·[Λ·(ẍ<sub>d</sub> − ẍ) + B·(ẋ<sub>d</sub> − ẋ) + K·(x<sub>d</sub> − x) − F<sub>ext</sub>]</div>
+          <div class="formula-label" style="text-align:center;">M(q): 机器人惯性矩阵 | C(q,q̇): 科氏力矩阵 | G(q): 重力项 | J: 雅可比矩阵</div>
+          <div class="formula-label" style="text-align:center;">Λ: 目标阻抗惯量矩阵（与M(q)不同，由设计者设定） | B: 目标阻尼矩阵 | K: 目标刚度矩阵</div>
+          <div class="formula-label" style="text-align:center;">x<sub>d</sub>, x: 期望/实际末端位置 | ẍ<sub>d</sub>, ẍ: 期望/实际末端加速度 | F<sub>ext</sub>: 外部接触力</div>
+        </div>
+
+        <p>该控制律的物理含义为：前三项 M(q)q̈ + C(q,q̇)q̇ + G(q) 为<strong>非线性前馈补偿</strong>，抵消机器人自身动力学；方括号内为<strong>目标阻抗误差反馈</strong>，通过雅可比转置 J<sup>T</sup> 映射到关节力矩。其中 Λ 乘加速度误差（对应惯性力）、B 乘速度误差（对应阻尼力）、K 乘位置误差（对应弹性力），三者共同使末端呈现出 Λ-B-K 二阶阻抗特性，与目标动力学方程 M·ẍ+B·ẋ+K·x=F<sub>ext</sub> 各项一一对应。注意 Λ 是<strong>目标阻抗惯量矩阵</strong>，由设计者根据期望的柔顺行为设定，与机器人本身的惯性矩阵 M(q) 是不同的物理量。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 参数调节经验</div>
+          <p>实际应用中，通常先设定 M 为机器人末端等效惯量的估计值，再调节 B 和 K。增大 B 可抑制振荡但降低响应速度；增大 K 可提高位置精度但降低柔顺性。需在<strong>安全性</strong>与<strong>精确性</strong>之间权衡。</p>
+        </div>
+      </div>
+    </div>

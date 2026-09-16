@@ -1,0 +1,51 @@
+<!--META {"kp_id": "kp-7-7", "kp_label": "KP 7.7", "title": "自适应控制", "tags": ["难点"], "difficulty": 5, "chapter": 7, "order": 7, "file": "kp-07-7.html"}-->
+<div class="kp-card" id="kp-7-7">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 7.7</span>
+          自适应控制
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">自适应控制</span>是针对<strong>模型参数不确定性</strong>问题的高级控制方法。当机器人负载变化（如抓取不同重量物体）、连杆参数不精确或环境特性未知时，固定参数控制器性能会退化。自适应控制通过<strong>在线参数估计</strong>实时更新控制器参数，使系统始终保持良好性能。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 自适应控制 vs 计算力矩法</div>
+          <p>计算力矩法假设模型参数已知且固定，属于"确定性模型基控制"。自适应控制则承认"模型参数未知或时变"，通过在线辨识逐步逼近真实参数，是计算力矩法的自然推广。</p>
+        </div>
+
+        <p>自适应控制的核心结构包含两个关键部分：</p>
+        <ul>
+          <li><strong>参数估计器</strong>：基于Lyapunov稳定性理论或最小二乘法，利用跟踪误差实时估计未知参数 θ̂（如连杆质量、惯量）。</li>
+          <li><strong>可调控制器</strong>：将估计参数 θ̂ 代入计算力矩律，生成控制力矩 τ。</li>
+        </ul>
+
+        <div class="formula-block">
+          <div class="formula-label">自适应控制律（Slotine-Li形式）</div>
+          <div class="formula">τ = Y(q, q̇, q̇<sub>r</sub>, q̈<sub>r</sub>)·θ̂ + K<sub>d</sub>·s</div>
+          <div class="formula-label" style="text-align:center;">Y: 回归矩阵（已知函数） | θ̂: 在线估计的参数向量 | s = ė + Λ·e 为滑动变量</div>
+          <div class="formula-label" style="text-align:center;">q̇<sub>r</sub> = q̇<sub>d</sub> + Λ·e 为参考速度 | q̈<sub>r</sub> = q̈<sub>d</sub> + Λ·ė 为参考加速度 | Λ: 正定矩阵 | K<sub>d</sub>: 反馈增益</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">参数更新律（标准Slotine-Li梯度型）</div>
+          <div class="formula">θ̂̇ = +Γ·Y<sup>T</sup>(q, q̇, q̇<sub>r</sub>, q̈<sub>r</sub>)·s</div>
+          <div class="formula-label" style="text-align:center;">Γ: 正定对角增益矩阵，控制参数收敛速度 | s = ė + Λ·e 为滑动变量</div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✓ Lyapunov稳定性证明概要（Slotine-Li自适应控制）</div>
+          <p>定义参数估计误差 θ̃ = θ̂ − θ（θ为真实参数），构造Lyapunov函数：</p>
+          <p>V = ½s<sup>T</sup>M(q)s + ½θ̃<sup>T</sup>Γ<sup>−1</sup>θ̃</p>
+          <p>对V求导，代入闭环动力学方程并利用<strong>斜对称性</strong> Ṁ(q) − 2C(q,q̇) 为反对称矩阵（即 s<sup>T</sup>[Ṁ − 2C]s = 0），消去交叉项后得：</p>
+          <p>V̇ = −s<sup>T</sup>K<sub>d</sub>s − s<sup>T</sup>Yθ̃ + θ̃<sup>T</sup>Γ<sup>−1</sup>θ̂̇</p>
+          <p>代入参数更新律 θ̂̇ = +Γ·Y<sup>T</sup>·s，第二、三项相消，得 V̇ = −s<sup>T</sup>K<sub>d</sub>s ≤ 0。由LaSalle不变集定理，s → 0，进而e → 0，跟踪误差渐近收敛。在<strong>持续激励（PE）条件</strong>下，参数估计误差 θ̃ 也收敛到零。</p>
+        </div>
+
+        <p>自适应控制的优势在于：<strong>无论初始参数估计多不准确，只要系统持续激励（PE条件满足），参数估计最终收敛到真实值，跟踪误差渐近趋于零</strong>。</p>
+      </div>
+    </div>

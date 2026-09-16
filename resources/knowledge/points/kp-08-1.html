@@ -1,0 +1,19 @@
+<!--META {"kp_id": "kp-8-1", "kp_label": "KP 8.1", "title": "ABB MATLAB复算与仿真", "tags": ["重点", "考点"], "difficulty": 3, "chapter": 8, "order": 1, "file": "kp-08-1.html"}-->
+<div class="kp-card" id="kp-8-1">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 8.1</span>ABB MATLAB复算与仿真</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>本课程MATLAB实践统一使用 <span class="term">ABB IRB 1200-5/0.9</span>。提供的参考脚本不依赖第三方机器人模型，直接实现关节链正运动学、课程等价D-H复算、阻尼最小二乘逆解、几何雅可比、五次轨迹和约束检查，便于逐行对应数学模型。</p>
+    <div class="callout callout-info"><div class="callout-title">一份脚本生成五类可核验证据</div><p>①参考关节链与D-H链多构型误差；②正解—逆解—再正解误差；③六轴角度、速度、加速度曲线；④工作范围和最大速度检查；⑤A5穿越0°反例与最小奇异值。RobotStudio碰撞和控制器日志明确保留为待验证项。</p></div>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> 运行ABB复算脚本</div><pre>outputDirectory = fullfile(pwd,"abb_results");
+results = ABB_IRB1200_5_90_trajectory_validation(outputDirectory);
+
+disp(results.dhMaximumPositionDifferenceMeters);
+disp(results.inversePositionErrorMeters);
+disp(results.peakSpeedDegPerSecond);
+disp(results.collisionAndRobotStudioStatus);</pre></div>
+    <p>脚本默认起点为[0, −30, 20, 0, 30, 0]°，目标为[60, 40, −70, 100, 45, 180]°，运行时间3 s，使用五次时间标度。学生应先预测哪一轴速度利用率最高，再运行复算；修改时间或A5目标时，每次只改变一个条件并保留修正前后输出。</p>
+    <div class="formula-block"><div class="formula-label">五次时间标度</div><div class="formula">s(τ)=10τ³−15τ⁴+6τ⁵，τ=t/T；max(ds/dt)=1.875/T</div></div>
+    <div class="callout callout-warning"><div class="callout-title">仿真不能替代现场放行</div><p>脚本中的速度检查采用产品规格上限，尚未包含控制器加速度限制、负载、工具、工件、碰撞几何和安全区域。结果只能支持“课程模型预检”，实体运行前必须在RobotStudio完整站点和现场流程中复核。</p></div>
+    <div class="callout callout-success"><div class="callout-title">下载与提交</div><p><a href="../../abb/ABB_IRB1200_5_90_trajectory_validation.m">下载ABB IRB 1200完整复算脚本</a>。提交时附脚本版本、输入参数、JSON结果、曲线图和AI使用记录；不得只提交动画截图。</p></div>
+  </div>
+</div>

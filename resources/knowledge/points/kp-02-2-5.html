@@ -1,0 +1,42 @@
+<!--META {"kp_id":"kp-2-5","kp_label":"KP 2.5","title":"RPY角","tags":["重点","考点"],"difficulty":2,"chapter":2,"order":5,"file":"kp-02-2-5.html"}-->
+<div class="kp-card" id="kp-2-5">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 2.5</span>
+          RPY角
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star">★</span>
+          </span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">RPY 角</span>是另一种三参数姿态表示法，名称来源于航空航海领域：<strong>R</strong>oll（横滚，绕 X 轴）、<strong>P</strong>itch（俯仰，绕 Y 轴）、<strong>Y</strong>aw（偏航，绕 Z 轴）。</p>
+        <div class="formula-block">
+          <div class="formula-label">RPY 角合成（固定轴/外旋） <span class="formula-num">(2-7)</span></div>
+          <div class="formula">
+            R = R<sub>z</sub>(γ) · R<sub>y</sub>(β) · R<sub>x</sub>(α)
+          </div>
+        </div>
+        <p>RPY 角与欧拉角的关键区别在于<strong>旋转参考轴</strong>：</p>
+        <ul>
+          <li><strong>RPY 角（外旋）</strong>：三次旋转均绕<strong>固定参考系</strong>的轴进行，轴不随旋转改变；</li>
+          <li><strong>欧拉角（内旋）</strong>：每次旋转绕<strong>当前动坐标系</strong>的轴进行，轴随前次旋转而改变。</li>
+        </ul>
+        <p>有趣的是，绕固定轴按 X-Y-Z 顺序外旋，等价于绕动轴按 Z-Y-X 顺序内旋，两者旋转矩阵形式相同但物理解释不同。RPY 角在工业机器人示教与船舶姿态描述中应用广泛，因为其物理意义与人的直觉一致。</p>
+        <div class="callout callout-info">
+          <div class="callout-title">💡 内旋与外旋等价性</div>
+          <p>记忆法则：固定轴的 X→Y→Z 外旋 ≡ 动轴的 Z→Y→X 内旋。这一对偶关系使得 RPY 角与 ZYX 欧拉角的矩阵表达式相同，但理解其旋转过程时需注意参考轴的差异。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ RPY 角的万向锁</div>
+          <p>注意：RPY 角在俯仰角 β=±90° 时同样存在万向锁现象，此时滚转角 α 和偏航角 γ 无法区分。这是因为 RPY 角与 ZYX 欧拉角的矩阵形式相同，只是旋转参考轴不同（外旋 vs 内旋），因此奇异性出现的条件一致。工程上同样需要通过限制 β 范围或改用四元数来规避。</p>
+        </div>
+      </div>
+    </div>

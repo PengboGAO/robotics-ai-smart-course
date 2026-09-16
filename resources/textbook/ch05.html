@@ -85,7 +85,7 @@
       <p><strong>3.</strong> 理解牛顿-欧拉法的两趟递推结构，掌握正向递推（速度加速度）与反向递推（力与力矩）的计算流程。</p>
       <p><strong>4.</strong> 掌握机器人动力学方程的统一形式 M(q)q̈ + C(q,q̇)q̇ + G(q) = τ，理解惯性矩阵、科氏力矩阵、重力向量的物理意义。</p>
       <p><strong>5.</strong> 能够对比拉格朗日法与牛顿-欧拉法的适用场景、计算复杂度与工程价值，根据任务需求合理选择。</p>
-      <p><strong>6.</strong> 能够使用 MATLAB 符号工具箱推导二连杆机器人动力学方程，并用 Robotics Toolbox 进行验证。</p>
+      <p><strong>6.</strong> 能够使用MATLAB符号工具箱推导ABB A2–A3平面教学子模型的动力学方程，并说明其与整机模型的边界。</p>
     </div>
 
     <h2 class="section-title" id="sec-1"><span class="section-num">5.1</span>拉格朗日法</h2>
@@ -104,6 +104,7 @@
       </div>
       <div class="kp-body">
         <p><span class="term">拉格朗日法</span>（Lagrangian Formulation）是一种基于能量观点建立系统动力学方程的方法。它从系统的动能与势能出发，通过拉格朗日函数自动消去理想约束力，直接得到与广义坐标数目相同的运动微分方程。其核心优势在于<span class="highlight">只需标量运算（能量），无需分析约束力</span>，对多自由度串联机器人尤为便利。</p>
+        <div class="callout callout-warning"><div class="callout-title">ABB子模型边界</div><p>本章符号算例统一解释为ABB IRB 1200的A2–A3平面教学子模型。m、I、质心位置均为课程符号或教学设定值，不是ABB厂家动力学参数；完整六轴力矩预测必须使用可追溯的辨识参数并另行验证。</p></div>
         <p>对于 n 自由度机器人，定义广义坐标 <span class="inline-formula">q = [q₁, q₂, ..., qₙ]ᵀ</span>，拉格朗日函数 L 定义为系统动能 K 与势能 V 之差：</p>
 
         <div class="formula-block">
@@ -132,6 +133,33 @@
         <div class="callout callout-warning">
           <div class="callout-title">⚠️ 注意事项</div>
           <p>拉格朗日法虽然推导过程系统化，但能量表达式中包含复杂的偏导数运算，对于自由度较多的机器人，<span class="highlight">符号推导工作量随自由度呈非线性增长</span>。这也是工程中常借助 MATLAB Symbolic Math Toolbox 或递归牛顿-欧拉法的原因。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型拉格朗日推导</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；参数为教学设定</span>
+syms q1 q2 qd1 qd2 t real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>;
+I1=<span class="number">0.5</span>; I2=<span class="number">0.2</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心位置（广义坐标的函数）</span>
+xc1=lc1*cos(q1);  yc1=lc1*sin(q1);
+xc2=l1*cos(q1)+lc2*cos(q1+q2);  yc2=l1*sin(q1)+lc2*sin(q1+q2);
+<span class="comment">% 质心速度平方</span>
+vc1sq=(diff(xc1,q1)*qd1)^<span class="number">2</span>+(diff(yc1,q1)*qd1)^<span class="number">2</span>;
+vc2sq=(diff(xc2,q1)*qd1+diff(xc2,q2)*qd2)^<span class="number">2</span>+(diff(yc2,q1)*qd1+diff(yc2,q2)*qd2)^<span class="number">2</span>;
+<span class="comment">% 动能K、势能V、拉格朗日函数L=K-V</span>
+K=<span class="number">0.5</span>*m1*vc1sq+<span class="number">0.5</span>*I1*qd1^<span class="number">2</span>+<span class="number">0.5</span>*m2*vc2sq+<span class="number">0.5</span>*I2*(qd1+qd2)^<span class="number">2</span>;
+V=m1*g*yc1+m2*g*yc2;  L=K-V;
+<span class="comment">% 拉格朗日方程：tau_i = d/dt(dL/dqd_i) - dL/dq_i</span>
+<span class="comment">% 使用链式法则：d/dt(dL/dqd_i) = sum_j d2L/dqj_dqd_i * qd_j + d2L/dqdj_dqd_i * qdd_j</span>
+syms qdd1 qdd2 real
+dL_dqd1=diff(L,qd1);  dL_dqd2=diff(L,qd2);
+d_dt_dL_dqd1=jacobian(dL_dqd1,[q1,q2,qd1,qd2])*[qd1;qd2;qdd1;qdd2];
+d_dt_dL_dqd2=jacobian(dL_dqd2,[q1,q2,qd1,qd2])*[qd1;qd2;qdd1;qdd2];
+tau1=simplify(d_dt_dL_dqd1-diff(L,q1));
+tau2=simplify(d_dt_dL_dqd2-diff(L,q2));
+disp(<span class="string">'tau1='</span>), disp(tau1), disp(<span class="string">'tau2='</span>), disp(tau2)
+</pre>
         </div>
       </div>
     </div>
@@ -180,12 +208,34 @@
 
         <div class="callout callout-success">
           <div class="callout-title">✅ 惯性张量的平行轴定理</div>
-          <p>当已知连杆绕质心的惯性张量 <sup>c</sup>I<sub>i</sub>，而需计算绕非质心轴（如关节轴）的惯性张量时，应用平行轴定理：<sup>a</sup>I = <sup>c</sup>I + m·(r<sup>T</sup>r·I₃ − r·r<sup>T</sup>)，其中 r 为质心到参考点的位置向量。这在二连杆动力学推导中频繁使用。</p>
+          <p>当已知连杆绕质心的惯性张量 <sup>c</sup>I<sub>i</sub>，而需计算绕非质心轴（如关节轴）的惯性张量时，应用平行轴定理：<sup>a</sup>I = <sup>c</sup>I + m·(r<sup>T</sup>r·I₃ − r·r<sup>T</sup>)，其中 r 为质心到参考点的位置向量。本节在ABB A2–A3平面教学子模型中演示该步骤。</p>
         </div>
 
         <div class="callout callout-info">
           <div class="callout-title">💡 动能计算的实用技巧</div>
           <p>在实际推导中，计算质心速度雅可比 J<sub>v,i</sub> 可借助正运动学结果：先求各连杆质心位置 r<sub>ci</sub>(q)，再对 q 求偏导即得 J<sub>v,i</sub> = ∂r<sub>ci</sub>/∂q。对于平面机器人，角速度雅可比 J<sub>ω,i</sub> 退化为1×n行向量（转动惯量直接为常数），推导大幅简化。三维机器人的惯性张量则需通过旋转矩阵转换到统一坐标系后才能相加，这是三维动力学比平面复杂得多的根本原因。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型惯性矩阵M(q)</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；非厂家惯量</span>
+syms q1 q2 qd1 qd2 real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>;
+I1=<span class="number">0.5</span>; I2=<span class="number">0.2</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心线速度雅可比 Jv（行=x,y方向，列=关节1,2）</span>
+Jv1=[-lc1*sin(q1), <span class="number">0</span>; lc1*cos(q1), <span class="number">0</span>];
+Jv2=[-l1*sin(q1)-lc2*sin(q1+q2), -lc2*sin(q1+q2);
+      l1*cos(q1)+lc2*cos(q1+q2),  lc2*cos(q1+q2)];
+<span class="comment">% 角速度雅可比 Jw（平面机器人退化为列向量）</span>
+Jw1=[<span class="number">1</span>; <span class="number">0</span>];  Jw2=[<span class="number">1</span>; <span class="number">1</span>];
+<span class="comment">% 惯性矩阵 M(q) = sum(Jv'*m*Jv + Jw'*I*Jw)</span>
+M = m1*Jv1'*Jv1 + I1*Jw1'*Jw1 + m2*Jv2'*Jv2 + I2*Jw2'*Jw2;
+M = simplify(M)
+<span class="comment">% 动能 K = 0.5 * qd' * M * qd</span>
+qd=[qd1; qd2];  K=simplify(<span class="number">0.5</span>*qd'*M*qd);
+disp(<span class="string">'惯性矩阵 M(q) ='</span>), disp(M)
+disp(<span class="string">'动能 K ='</span>), disp(K)
+</pre>
         </div>
       </div>
     </div>
@@ -223,6 +273,28 @@
         <div class="callout callout-warning">
           <div class="callout-title">⚠️ 坐标系与重力方向</div>
           <p>势能计算中重力方向的约定要与运动学一致。若基坐标系 z 轴竖直向上，则 g 向量沿 −z 方向；若 z 轴水平（如 SCARA 机器人），则重力沿 −y 或 −x 方向。约定不一致会导致重力项符号错误，这是动力学推导中最常见的错误之一。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型重力项推导</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；y轴向上</span>
+syms q1 q2 real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心高度（y坐标，重力沿-y方向）</span>
+hc1 = lc1*sin(q1);
+hc2 = l1*sin(q1) + lc2*sin(q1+q2);
+<span class="comment">% 各连杆势能 Vi = mi * g * hci</span>
+V1 = m1*g*hc1;  V2 = m2*g*hc2;
+<span class="comment">% 系统总势能</span>
+V = simplify(V1 + V2);
+disp(<span class="string">'总势能 V ='</span>), disp(V)
+<span class="comment">% 重力项 G(q) = dV/dq （拉格朗日方程中 -dV/dq 来源）</span>
+G = [diff(V,q1); diff(V,q2)];
+G = simplify(G);
+disp(<span class="string">'重力项 G(q) ='</span>), disp(G)
+<span class="comment">% 验证：势能仅依赖q，与速度qd无关</span>
+fprintf(<span class="string">'V仅依赖q1,q2，与qd无关\n'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -274,12 +346,36 @@
 
         <div class="callout callout-info">
           <div class="callout-title">💡 牛顿-欧拉法的核心优势</div>
-          <p>牛顿-欧拉法采用递推结构，<span class="highlight">计算复杂度为 O(n)</span>（与自由度成线性关系），远优于拉格朗日法符号推导的 O(n⁴) 复杂度。这使得它特别适合实时控制中的在线动力学计算（如计算力矩控制）。其代价是物理直观性较弱，且需要处理大量矢量叉乘与坐标系变换。</p>
+          <p>递归牛顿—欧拉逆动力学在常见串联链实现中可达到随关节数线性增长的计算量，因此适合实时力矩计算。拉格朗日法若直接进行符号展开，表达式会随自由度迅速膨胀，但其复杂度取决于具体算法与实现，不能统一写成固定的O(n⁴)。两种方法在模型和约定一致时应得到相同的关节力矩结果。</p>
         </div>
 
         <div class="callout callout-success">
           <div class="callout-title">✅ 局部坐标系表示技巧</div>
           <p>为简化计算，牛顿-欧拉法通常在各连杆局部坐标系中表示速度、加速度和惯性张量。这样惯性张量 <sup>i</sup>I<sub>i</sub> 为常数矩阵（不随位形变化），避免了拉格朗日法中惯性张量随位形变化的复杂性。坐标系间的变换通过旋转矩阵 R 完成。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型牛顿—欧拉递推</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；参数为教学设定</span>
+function tau = ne_two_link(q, qd, qdd)
+  m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;I1=<span class="number">0.5</span>;I2=<span class="number">0.2</span>;g=<span class="number">9.81</span>;
+  s1=sin(q(1));c1=cos(q(1));s12=sin(q(1)+q(2));c12=cos(q(1)+q(2));
+  <span class="comment">% ===== 正向递推：基座→末端，计算速度与加速度 =====</span>
+  w1=qd(1); wd1=qdd(1);                     <span class="comment">% 连杆1角速度/角加速度</span>
+  w2=qd(1)+qd(2); wd2=qdd(1)+qdd(2);        <span class="comment">% 连杆2角速度/角加速度</span>
+  ac1=[-lc1*s1*wd1-lc1*c1*w1^<span class="number">2</span>;            <span class="comment">% 连杆1质心加速度(含重力)</span>
+        lc1*c1*wd1-lc1*s1*w1^<span class="number">2</span>-g];
+  a2=[-l1*s1*wd1-l1*c1*w1^<span class="number">2</span>; l1*c1*wd1-l1*s1*w1^<span class="number">2</span>-g]; <span class="comment">% 关节2原点加速度</span>
+  ac2=[a2(1)-lc2*s12*wd2-lc2*c12*w2^<span class="number">2</span>;    <span class="comment">% 连杆2质心加速度</span>
+        a2(2)+lc2*c12*wd2-lc2*s12*w2^<span class="number">2</span>];
+  <span class="comment">% ===== 反向递推：末端→基座，计算力与力矩 =====</span>
+  F2=m2*ac2; N2=I2*wd2;  tau2=N2;          <span class="comment">% 连杆2(末端无外力)</span>
+  F1=m1*ac1; N1=I1*wd1;                     <span class="comment">% 连杆1牛顿-欧拉方程</span>
+  <span class="comment">% 力矩递推：r×F的z分量(平面叉乘=标量)</span>
+  tau1=N1+N2+(lc1*c1*F1(<span class="number">2</span>)-lc1*s1*F1(<span class="number">1</span>))+(l1*c1*F2(<span class="number">2</span>)-l1*s1*F2(<span class="number">1</span>));
+  tau=[tau1; tau2];
+end
+</pre>
         </div>
       </div>
     </div>
@@ -332,6 +428,30 @@
         <div class="callout callout-success">
           <div class="callout-title">✅ 局部坐标系下的高效计算</div>
           <p>正向递推在连杆局部坐标系中执行，使得惯性张量 <sup>i</sup>I<sub>i</sub> 为常量（不随位形变化），无需每步重新计算。所有矢量运算（叉乘、矩阵乘）均在 3×3 维度进行，计算量小且稳定。旋转矩阵 <sup>i</sup>R<sub>i−1</sub> 由 D-H 参数预先确定，递推过程只需矩阵乘法与加法，非常适合嵌入式实时实现。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型正向递推</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型：速度与加速度</span>
+function [w, wd, ac] = forward_recursion(q, qd, qdd)
+  m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;g=<span class="number">9.81</span>;
+  s1=sin(q(1));c1=cos(q(1));s12=sin(q(1)+q(2));c12=cos(q(1)+q(2));
+  <span class="comment">% 基座初始条件（静止，重力等效为基座加速度a0=[0;-g]）</span>
+  w0=<span class="number">0</span>; wd0=<span class="number">0</span>; a0=[<span class="number">0</span>; -g];
+  <span class="comment">% --- 连杆1正向递推 ---</span>
+  w(<span class="number">1</span>)=w0+qd(<span class="number">1</span>);                    <span class="comment">% 角速度递推</span>
+  wd(<span class="number">1</span>)=wd0+qdd(<span class="number">1</span>);                 <span class="comment">% 角加速度递推</span>
+  ac(:,<span class="number">1</span>)=[a0(<span class="number">1</span>)-lc1*s1*wd(<span class="number">1</span>)-lc1*c1*w(<span class="number">1</span>)^<span class="number">2</span>;  <span class="comment">% 质心线加速度</span>
+            a0(<span class="number">2</span>)+lc1*c1*wd(<span class="number">1</span>)-lc1*s1*w(<span class="number">1</span>)^<span class="number">2</span>];
+  <span class="comment">% --- 连杆2正向递推 ---</span>
+  w(<span class="number">2</span>)=w(<span class="number">1</span>)+qd(<span class="number">2</span>);                  <span class="comment">% 角速度递推（累加父连杆）</span>
+  wd(<span class="number">2</span>)=wd(<span class="number">1</span>)+qdd(<span class="number">2</span>);               <span class="comment">% 角加速度递推</span>
+  a2=[a0(<span class="number">1</span>)-l1*s1*wd(<span class="number">1</span>)-l1*c1*w(<span class="number">1</span>)^<span class="number">2</span>;  <span class="comment">% 关节2原点加速度</span>
+      a0(<span class="number">2</span>)+l1*c1*wd(<span class="number">1</span>)-l1*s1*w(<span class="number">1</span>)^<span class="number">2</span>];
+  ac(:,<span class="number">2</span>)=[a2(<span class="number">1</span>)-lc2*s12*wd(<span class="number">2</span>)-lc2*c12*w(<span class="number">2</span>)^<span class="number">2</span>;  <span class="comment">% 连杆2质心加速度</span>
+            a2(<span class="number">2</span>)+lc2*c12*wd(<span class="number">2</span>)-lc2*s12*w(<span class="number">2</span>)^<span class="number">2</span>];
+end
+</pre>
         </div>
       </div>
     </div>
@@ -541,6 +661,31 @@ end</pre>
           <div class="callout-title">✅ 扩展方程的工程意义</div>
           <p>摩擦项 F(q̇) 在低速运动时影响显著（库仑摩擦引起"粘滞-滑动"现象），是高精度位置控制的难点。外部扰动 τ<sub>ext</sub> 在接触作业中不可忽略。鲁棒控制（如滑模控制）与自适应控制的设计目标，正是在存在 F 和 τ<sub>ext</sub> 不确定性的情况下保证控制性能，这正是第7章控制系统的核心议题。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型动力学方程</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3教学子模型 M(q)qdd+C(q,qd)qd+G(q)=tau</span>
+syms q1 q2 qd1 qd2 qdd1 qdd2 real
+m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;I1=<span class="number">0.5</span>;I2=<span class="number">0.2</span>;g=<span class="number">9.81</span>;
+<span class="comment">% 惯性矩阵 M(q)（由动能二次型导出）</span>
+M11=m1*lc1^<span class="number">2</span>+I1+m2*(l1^<span class="number">2</span>+lc2^<span class="number">2</span>+<span class="number">2</span>*l1*lc2*cos(q2))+I2;
+M12=m2*(lc2^<span class="number">2</span>+l1*lc2*cos(q2))+I2;  M22=m2*lc2^<span class="number">2</span>+I2;
+M=[M11 M12; M12 M22];
+<span class="comment">% 科氏力矩阵 C(q,qd)（由克里斯托弗尔符号导出）</span>
+h=m2*l1*lc2*sin(q2);  <span class="comment">% 公共因子</span>
+C=[-h*qd2, -h*(qd1+qd2); h*qd1, <span class="number">0</span>];
+<span class="comment">% 重力向量 G(q)</span>
+G=[(m1*lc1+m2*l1)*g*cos(q1)+m2*lc2*g*cos(q1+q2);
+    m2*lc2*g*cos(q1+q2)];
+<span class="comment">% 组装动力学方程：tau = M*qdd + C*qd + G</span>
+qdd=[qdd1;qdd2]; qd=[qd1;qd2];
+tau=simplify(M*qdd+C*qd+G);
+disp(<span class="string">'tau1='</span>), disp(tau(<span class="number">1</span>)), disp(<span class="string">'tau2='</span>), disp(tau(<span class="number">2</span>))
+<span class="comment">% 正向动力学：已知tau求qdd，qdd = M^{-1}(tau - C*qd - G)</span>
+qdd_sol=simplify(M\(-C*qd-G));
+disp(<span class="string">'零力矩下加速度 qdd ='</span>), disp(qdd_sol)
+</pre>
+        </div>
       </div>
     </div>
 
@@ -656,7 +801,7 @@ end</pre>
     <h2 class="section-title" id="sec-matlab"><span class="section-num">5.5</span>MATLAB仿真：二连杆动力学推导</h2>
 
 
-    <p>下面以平面二连杆机器人为例，用 MATLAB 符号工具箱推导其完整动力学方程。二连杆是研究机器人动力学的经典模型，其方程兼具典型性与可推导性，能够清晰展示 M、C、G 三项的结构。</p>
+    <p>下面把ABB IRB 1200的A2–A3定位部分抽象为平面教学子模型，用MATLAB符号工具箱推导M、C、G三项。质量、惯量和质心位置均为教学符号，不代表ABB厂家参数；该算例用于掌握推导与代码核对方法。</p>
 
     <div class="svg-diagram">
       <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
@@ -698,12 +843,12 @@ end</pre>
         
         <text x="240" y="305" text-anchor="middle" fill="#64748b" font-size="11">m₁,m₂: 连杆质量 | l₁,l₂: 连杆长度 | q₁,q₂: 关节角</text>
       </svg>
-      <div class="diagram-caption">图5-2 平面二连杆机器人模型及参数定义</div>
+      <div class="diagram-caption">图5-2 ABB A2–A3平面教学子模型及符号参数</div>
     </div>
 
     <div class="code-block">
-      <div class="code-label"><span class="lang">MATLAB</span> 二连杆机器人拉格朗日动力学方程推导</div>
-      <pre>% ===== 平面二连杆机器人动力学方程推导（拉格朗日法） =====
+      <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型拉格朗日推导</div>
+      <pre>% ===== ABB A2-A3平面教学子模型；非厂家动力学参数 =====
 syms q1 q2 qd1 qd2 qdd1 qdd2 real
 syms m1 m2 l1 l2 lc1 lc2 I1 I2 g real
 % 假设连杆为均匀细杆：质心在 lc = l/2，绕质心转动惯量 I = m*l^2/12

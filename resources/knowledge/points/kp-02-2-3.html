@@ -1,0 +1,79 @@
+<!--META {"kp_id":"kp-2-3","kp_label":"KP 2.3","title":"欧拉角","tags":["难点"],"difficulty":2,"chapter":2,"order":3,"file":"kp-02-2-3.html"}-->
+<div class="kp-card" id="kp-2-3">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 2.3</span>
+          欧拉角
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star">★</span>
+          </span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">欧拉角</span>（Euler Angles）用三个连续旋转角描述刚体姿态，是最直观的三参数姿态表示法。机器人学中常用 <span class="highlight">ZYX 顺序</span>（也称 Tait-Bryan 角）：先绕 Z 轴偏航 ψ（Yaw），再绕新 Y 轴俯仰 θ（Pitch），最后绕新 X 轴横滚 φ（Roll）。</p>
+        <p>三次旋转的合成旋转矩阵为：</p>
+        <div class="formula-block">
+          <div class="formula-label">ZYX 欧拉角合成 <span class="formula-num">(2-5)</span></div>
+          <div class="formula">
+            R = R<sub>z</sub>(ψ) · R<sub>y</sub>(θ) · R<sub>x</sub>(φ)
+          </div>
+        </div>
+        <p>将三个基本旋转矩阵代入并展开，可得合成矩阵各元素：</p>
+        <div class="formula-block">
+          <div class="formula-label">ZYX 欧拉角展开式 <span class="formula-num">(2-5a)</span></div>
+          <div class="formula">
+            R = [ cψcθ, &nbsp;cψsθsφ - sψcφ, &nbsp;cψsθcφ + sψsφ; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sψcθ, &nbsp;sψsθsφ + cψcφ, &nbsp;sψsθcφ - cψsφ; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-sθ, &nbsp;&nbsp;&nbsp;cθsφ, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cθcφ ]
+          </div>
+        </div>
+        <p>其中 cψ = cos(ψ)，sψ = sin(ψ)，以此类推。由展开式可见，当 θ = ±90° 时，sθ = ±1，cθ = 0，第一行与第二行仅含 ψ 与 φ 的三角函数组合（实际仅依赖 φ−ψ），二者耦合——这正是万向锁的代数体现。</p>
+
+        <!-- 万向锁SVG -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <!-- 正常情况 -->
+            <text x="170" y="25" text-anchor="middle" fill="#059669" font-size="13" font-weight="700">正常情况 (θ ≠ 90°)</text>
+            <!-- 三个环 -->
+            <circle cx="170" cy="130" r="85" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+            <circle cx="170" cy="130" r="60" fill="none" stroke="#d97706" stroke-width="2.5"/>
+            <circle cx="170" cy="130" r="35" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+            <text x="170" y="135" text-anchor="middle" fill="#1a202c" font-size="9" font-weight="600">Z</text>
+            <text x="195" y="110" fill="#d97706" font-size="9" font-weight="600">Y</text>
+            <text x="185" y="150" fill="#7c3aed" font-size="9" font-weight="600">X</text>
+            <text x="170" y="230" text-anchor="middle" fill="#059669" font-size="11">三轴独立，3 自由度</text>
+
+            <!-- 箭头 -->
+            <line x1="320" y1="130" x2="370" y2="130" stroke="#64748b" stroke-width="2" marker-end="url(#ax-arr)"/>
+            <text x="345" y="120" text-anchor="middle" fill="#dc2626" font-size="10" font-weight="700">θ→90°</text>
+
+            <!-- 万向锁情况 -->
+            <text x="510" y="25" text-anchor="middle" fill="#dc2626" font-size="13" font-weight="700">万向锁 (θ = 90°)</text>
+            <!-- Z环和X环在外环位置重合 -->
+            <circle cx="510" cy="130" r="85" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+            <circle cx="510" cy="130" r="85" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <!-- Y环保持中间位置 -->
+            <circle cx="510" cy="130" r="60" fill="none" stroke="#d97706" stroke-width="2.5"/>
+            <text x="510" y="135" text-anchor="middle" fill="#1a202c" font-size="9" font-weight="600">Z</text>
+            <text x="545" y="95" fill="#dc2626" font-size="9" font-weight="700">Z≡X</text>
+            <text x="540" y="115" fill="#d97706" font-size="9" font-weight="600">Y</text>
+            <text x="510" y="230" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="600">Z/X 轴共线，丢失 1 自由度</text>
+          </svg>
+          <div class="diagram-caption">图2-3 万向锁示意图：俯仰角 θ=90° 时 Z 轴与 X 轴共线，三自由度退化为二自由度</div>
+        </div>
+
+        <p>三个角的物理含义：<strong>偏航角 ψ</strong>（Yaw）描述绕铅垂轴的转向，如车辆左右转向；<strong>俯仰角 θ</strong>（Pitch）描述绕水平轴的抬头/低头，如飞机爬升俯冲；<strong>横滚角 φ</strong>（Roll）描述绕纵轴的滚转，如飞机侧倾。</p>
+        <p>欧拉角的优点是直观、参数少（仅 3 个）、易于人机交互；缺点是存在<strong>奇异性问题</strong>，即著名的万向锁。</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 万向锁问题（Gimbal Lock）</div>
+          <p>当俯仰角 <strong>θ = ±90°</strong> 时，第一次旋转（绕 Z 轴）与第三次旋转（绕 X 轴）的旋转轴共线对齐，<span class="highlight">丢失一个自由度</span>。此时无穷多组 (ψ, φ) 组合对应同一姿态，方程出现奇异，无法唯一求解。这是欧拉角固有的几何缺陷，在姿态控制中可能导致发散。</p>
+          <p>工程上常通过限制 θ 范围、或改用四元数来规避万向锁问题。这也是四元数在航空航天与机器人姿态控制中被广泛采用的根本原因。</p>
+        </div>
+      </div>
+    </div>

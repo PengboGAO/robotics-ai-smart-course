@@ -1,0 +1,85 @@
+<!--META {"kp_id": "kp-6-7", "kp_label": "KP 6.7", "title": "圆弧插补", "tags": ["难点"], "difficulty": 3, "chapter": 6, "order": 7, "file": "kp-06-7.html"}-->
+<div class="kp-card" id="kp-6-7">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.7</span>圆弧插补</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">圆弧插补</span>（Circular Interpolation）使末端沿空间圆弧运动。空间中不在同一直线上的三点确定唯一一个圆，圆弧插补的核心是<strong>由三点求圆心与半径</strong>，再沿圆弧参数化运动。</p>
+
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">输入三点</div>
+            <div class="step-desc">给定起点 P₁、中间点 P₂、终点 P₃</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">定平面</div>
+            <div class="step-desc">由 P₁P₂、P₁P₃ 叉积求平面法向量 n</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-title">求圆心</div>
+            <div class="step-desc">解 P₁P₂、P₁P₃ 中垂面与平面交点得圆心 C</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-title">算半径角</div>
+            <div class="step-desc">半径 r=|P₁C|，圆心角 θ=∠P₁CP₃</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-title">参数化</div>
+            <div class="step-desc">沿圆弧以角度参数 ψ(t) 插值得 P(t)</div>
+          </div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">圆弧参数方程（圆心 C，半径 r，起始角 ψ₀）</div>
+          <div class="formula">P(t) = C + r [ cos ψ(t) · u + sin ψ(t) · v ]</div>
+        </div>
+
+        <p>其中 u、v 为圆弧所在平面内两正交单位向量（由 P₁−C 归一化得 u，v = n × u），ψ(t) = ψ₀ + s(t)·θ 为随时间变化的圆心角，s(t) 为时间律。</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 三点共线判别</div>
+          <p>当 P₁、P₂、P₃ 三点共线时，叉积 (P₂−P₁)×(P₃−P₁) = 0，无法确定圆弧平面，圆弧退化为直线。实际插补前必须进行共线判别：若叉积模长小于阈值，则自动退化为直线插补，避免数值奇异。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 空间圆弧 vs 平面圆弧</div>
+          <p>ABB IRB 1200常需完成空间圆弧任务。课程先由三点确定圆弧平面，在平面内插值位置，再独立插值姿态；进入RobotStudio时还要比较课程插值结果与RAPID <code>MoveC</code>的路径和配置选择。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 空间三点圆弧插补</div>
+<pre><span class="comment">% 空间三点圆弧插补</span>
+P1 = [<span class="number">0.4</span>; <span class="number">0.0</span>; <span class="number">0.5</span>];   <span class="comment">% 起点</span>
+P2 = [<span class="number">0.5</span>; <span class="number">0.1</span>; <span class="number">0.4</span>];   <span class="comment">% 中间点</span>
+P3 = [<span class="number">0.6</span>; <span class="number">0.0</span>; <span class="number">0.3</span>];   <span class="comment">% 终点</span>
+<span class="comment">% 求圆弧平面法向量</span>
+n = cross(P2-P1, P3-P1);  n = n / norm(n);
+<span class="comment">% 求圆心C(中垂面交点)</span>
+A = [<span class="number">2</span>*(P2-P1)'; <span class="number">2</span>*(P3-P1)'; n'];
+b = [norm(P2)^<span class="number">2</span>-norm(P1)^<span class="number">2</span>; norm(P3)^<span class="number">2</span>-norm(P1)^<span class="number">2</span>; n'*P1];
+C = A \ b;              <span class="comment">% 圆心</span>
+r = norm(P1 - C);       <span class="comment">% 半径</span>
+u = (P1 - C) / r;       <span class="comment">% 平面正交基u</span>
+v = cross(n, u);         <span class="comment">% 正交基v</span>
+th1 = atan2(v'*(P1-C), u'*(P1-C));
+th3 = atan2(v'*(P3-C), u'*(P3-C));
+s  = linspace(<span class="number">0</span>, <span class="number">1</span>, <span class="number">50</span>);
+th = th1 + s*(th3-th1);  <span class="comment">% 圆心角插值</span>
+P  = C + r*(cos(th)*u + sin(th)*v);
+figure; plot3(P(<span class="number">1</span>,:),P(<span class="number">2</span>,:),P(<span class="number">3</span>,:),<span class="string">'b-'</span>,<span class="string">'LineWidth'</span>,<span class="number">2</span>);
+hold on; plot3(P1(<span class="number">1</span>),P1(<span class="number">2</span>),P1(<span class="number">3</span>),<span class="string">'rs'</span>,P3(<span class="number">1</span>),P3(<span class="number">2</span>),P3(<span class="number">3</span>),<span class="string">'gs'</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>); title(<span class="string">'空间圆弧插补'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

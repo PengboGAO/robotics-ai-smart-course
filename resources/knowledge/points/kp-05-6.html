@@ -1,0 +1,91 @@
+<!--META {"kp_id": "kp-5-6", "kp_label": "KP 5.6", "title": "反向递推", "tags": ["难点"], "difficulty": 3, "chapter": 5, "order": 6, "file": "kp-05-6.html"}-->
+<div class="kp-card" id="kp-5-6">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 5.6</span>反向递推</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>反向递推从末端连杆 n 出发，沿运动链向基座依次计算各连杆所受的合力与合力矩，最终提取出关节驱动力矩。对连杆 i，由牛顿-欧拉方程有：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">连杆合力（牛顿方程）</div>
+          <div class="formula"><sup>i</sup>F<sub>i</sub> = m<sub>i</sub> <sup>i</sup>a<sub>ci</sub></div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">连杆合力矩（欧拉方程）</div>
+          <div class="formula"><sup>i</sup>N<sub>i</sub> = <sup>i</sup>I<sub>i</sub> <sup>i</sup>α<sub>i</sub> + <sup>i</sup>ω<sub>i</sub> × (<sup>i</sup>I<sub>i</sub> <sup>i</sup>ω<sub>i</sub>)</div>
+        </div>
+
+        <p>考虑连杆 i 与相邻连杆 i+1 之间的相互作用力，得到力与力矩的反向递推关系：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">力递推（末端 → 基座）</div>
+          <div class="formula"><sup>i</sup>f<sub>i</sub> = <sup>i</sup>F<sub>i</sub> + <sup>i</sup>R<sub>i+1</sub> <sup>i+1</sup>f<sub>i+1</sub></div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">力矩递推（末端 → 基座）</div>
+          <div class="formula"><sup>i</sup>n<sub>i</sub> = <sup>i</sup>N<sub>i</sub> + <sup>i</sup>R<sub>i+1</sub> <sup>i+1</sup>n<sub>i+1</sub> + <sup>i</sup>P<sub>ci</sub> × <sup>i</sup>F<sub>i</sub> + <sup>i</sup>P<sub>i+1</sub> × <sup>i</sup>R<sub>i+1</sub> <sup>i+1</sup>f<sub>i+1</sub></div>
+        </div>
+
+        <p>关节驱动力矩 τ<sub>i</sub> 为连杆 i 所受力矩在关节轴方向的投影（旋转关节）：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">关节驱动力矩</div>
+          <div class="formula">τ<sub>i</sub> = <sup>i</sup>n<sub>i</sub><sup>T</sup> <sup>i</sup>ẑ　　（末端连杆 n 的 f<sub>n+1</sub>=0, n<sub>n+1</sub>=0）</div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 边界条件</div>
+          <p>反向递推的边界条件为末端无外力：<sup>n+1</sup>f = 0，<sup>n+1</sup>n = 0（即末端执行器自由）。若末端与环境有接触力 F<sub>ext</sub>，则需在末端连杆方程中加入该外力，这是力控制与接触动力学的基础。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 反向递推的本质</div>
+          <p>反向递推本质上是"由内向外传递运动，由外向内传递力"。先通过正向递推得到每个连杆的运动，再用牛顿-欧拉方程算出每个连杆"自身需要的"合力/合力矩，最后从末端向基座逐级累加相邻连杆的相互作用力，分离出关节轴方向的分量即为驱动力矩。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 牛顿-欧拉算法完整流程</div>
+          <p>完整的牛顿-欧拉算法可概括为以下伪代码，清晰展示两趟递推的执行顺序：</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">伪代码</span> 牛顿-欧拉递推算法</div>
+          <pre>% 初始化：基座静止
+ω0 = 0; α0 = 0; a0 = -g    % 注意：重力等效为基座加速度 -g
+
+% ===== 正向递推：i = 1, 2, ..., n（基座 → 末端） =====
+for i = 1 to n
+    % 速度递推（旋转关节）
+    iωi  = iR(i-1) * ((i-1)ω(i-1) + z * qd_i)
+    iαi  = iR(i-1) * ((i-1)α(i-1) + (i-1)ω(i-1)×(z*qd_i) + z*qdd_i)
+    iai  = iR(i-1)*((i-1)a(i-1)) + iαi×iP_prev + iωi×(iωi×iP_prev)   % iP_prev = ^iP_{i-1}
+    iaci = iai + iαi×iPci + iωi×(iωi×iPci)
+end
+
+% ===== 反向递推：i = n, n-1, ..., 1（末端 → 基座） =====
+% 边界条件：末端无外力 (n+1)f = 0, (n+1)n = 0
+for i = n downto 1
+    % 牛顿-欧拉方程：连杆自身所需合力/合力矩
+    iFi = mi * iaci
+    iNi = iIi * iαi + iωi × (iIi * iωi)
+    % 力与力矩递推（累加相邻连杆作用）
+    ifi   = iFi + iR(i+1) * (i+1)f(i+1)
+    ini   = iNi + iR(i+1)*(i+1)n(i+1) + iPci×iFi + iP_next×(iR(i+1)*(i+1)f(i+1))   % iP_next = ^iP_{i+1}
+    % 提取关节驱动力矩（投影到关节轴）
+    τi = ini' * iz
+end</pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 重力处理的等效加速度技巧</div>
+          <p>注意伪代码中初始化 a₀ = −g（而非 0）。这是牛顿-欧拉法处理重力的常用技巧：将重力等效为基座以加速度 −g 向上加速，这样在正向递推中重力效应自动传播到所有连杆，无需在反向递推中单独计算重力项。这种"等效重力加速度"方法简化了算法实现，是工业动力学库的标准做法。</p>
+        </div>
+      </div>
+    </div>

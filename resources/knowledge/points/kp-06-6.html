@@ -1,0 +1,54 @@
+<!--META {"kp_id": "kp-6-6", "kp_label": "KP 6.6", "title": "直线插补", "tags": ["重点"], "difficulty": 2, "chapter": 6, "order": 6, "file": "kp-06-6.html"}-->
+<div class="kp-card" id="kp-6-6">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.6</span>直线插补</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">直线插补</span>（Linear Interpolation）使末端执行器从起点 p₀ 到终点 p<sub>f</sub> 沿空间直线运动。位置与姿态分别插值：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">位置直线插值</div>
+          <div class="formula">p(t) = p₀ + s(t) · (p<sub>f</sub> − p₀)</div>
+        </div>
+
+        <p>其中 s(t) ∈ [0, 1] 为归一化路径参数，可施加匀速、三次或五次时间律。姿态插值通常采用以下方法：</p>
+        <ul>
+          <li><strong>轴角法（Axis-Angle Linear Interpolation）</strong>：将起止姿态转换为旋转轴-旋转角表示，对旋转角线性插值，姿态变化最短路径；</li>
+          <li><strong>四元数球面线性插值（Quaternion SLERP）</strong>：用单位四元数在四维球面上大圆弧插值，光滑无奇异，是工业主流方法；</li>
+          <li><strong>RPY 角线性插值</strong>：直接对欧拉角线性插值，简单但可能产生姿态非最短路径与万向锁问题。</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 姿态插值的选择</div>
+          <p>直线插补中"直线"仅指位置轨迹，<span class="highlight">姿态变化并非沿直线</span>。姿态变化路径取决于插值方法：四元数 SLERP 给出姿态空间的最短路径（大圆弧），而 RPY 线性插值可能绕远路。对姿态精度要求高的任务（如焊接、装配），推荐使用四元数 SLERP。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 笛卡尔空间直线插补</div>
+<pre><span class="comment">% 笛卡尔空间直线插补</span>
+p0 = [<span class="number">0.4</span>; <span class="number">0.0</span>; <span class="number">0.5</span>];   <span class="comment">% 起点</span>
+pf = [<span class="number">0.6</span>; <span class="number">0.2</span>; <span class="number">0.3</span>];   <span class="comment">% 终点</span>
+tf = <span class="number">2</span>;                   <span class="comment">% 运动时间</span>
+N  = <span class="number">50</span>;                 <span class="comment">% 插补点数</span>
+t  = linspace(<span class="number">0</span>, tf, N);
+s  = t / tf;               <span class="comment">% 归一化路径参数(匀速)</span>
+<span class="comment">% 位置直线插值: p(t) = p0 + s*(pf-p0)</span>
+P = p0 + s' .* (pf - p0)';
+<span class="comment">% 绘制三维直线轨迹</span>
+figure;
+plot3(P(:,<span class="number">1</span>), P(:,<span class="number">2</span>), P(:,<span class="number">3</span>), <span class="string">'b-o'</span>, <span class="string">'LineWidth'</span>, <span class="number">1.5</span>);
+hold on;
+plot3(p0(<span class="number">1</span>), p0(<span class="number">2</span>), p0(<span class="number">3</span>), <span class="string">'rs'</span>, <span class="string">'MarkerSize'</span>, <span class="number">10</span>);
+plot3(pf(<span class="number">1</span>), pf(<span class="number">2</span>), pf(<span class="number">3</span>), <span class="string">'gs'</span>, <span class="string">'MarkerSize'</span>, <span class="number">10</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>);
+title(<span class="string">'笛卡尔空间直线插补轨迹'</span>);
+legend(<span class="string">'轨迹'</span>, <span class="string">'起点'</span>, <span class="string">'终点'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

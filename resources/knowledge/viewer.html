@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071b2d">
+  <meta name="description" content="机器人学基础知识单元：学习产出、任务、证据、标准与AI分级提示。">
+  <title>知识单元 · 机器人学基础AI智慧课程</title>
+  <link rel="stylesheet" href="../textbook/_shared/css/style.css">
+  <link rel="stylesheet" href="./knowledge.css">
+</head>
+<body>
+  <header class="unit-topbar">
+    <a href="../../index.html#map">← 返回课程图谱</a>
+    <div><b>机器人学基础</b><span>知识单元 · 证据化学习</span></div>
+    <button id="theme-toggle" type="button">切换主题</button>
+  </header>
+  <main class="unit-shell">
+    <section class="unit-hero">
+      <div><span id="unit-label" class="unit-label">LOADING</span><h1 id="unit-title">正在加载知识单元</h1><p id="unit-description"></p></div>
+      <div id="unit-meta" class="unit-meta"></div>
+    </section>
+
+    <section class="obe-board" aria-label="OBE学习设计">
+      <article><span>预期学习产出</span><p id="unit-outcome"></p></article>
+      <article><span>学习任务</span><p id="unit-task"></p></article>
+      <article><span>直接证据</span><p id="unit-evidence"></p></article>
+      <article><span>评价标准</span><p id="unit-criteria"></p></article>
+      <article><span>补证改进</span><p id="unit-remediation"></p></article>
+    </section>
+
+    <div class="unit-grid">
+      <article class="content-panel">
+        <div id="core-content" class="core-content"><div class="loading">正在读取经审校内容……</div></div>
+      </article>
+      <aside class="learning-rail">
+        <section class="rail-card">
+          <span class="rail-kicker">先修要求</span><p id="unit-prerequisites"></p>
+        </section>
+        <section class="rail-card">
+          <span class="rail-kicker">验证方法</span><p id="unit-verification"></p>
+        </section>
+        <section class="rail-card warning">
+          <span class="rail-kicker">结论边界</span><p id="unit-boundary"></p>
+        </section>
+        <section class="rail-card">
+          <span class="rail-kicker">AI三级提示</span>
+          <p class="hint-policy">AI只帮助定位和检查，不代写模型、代码与结论。</p>
+          <div class="hint-buttons"><button data-hint="1">一级·定位</button><button data-hint="2">二级·路径</button><button data-hint="3">三级·局部支架</button></div>
+          <div id="hint-output" class="hint-output">先独立尝试，再按需要逐级请求提示。</div>
+        </section>
+        <section class="rail-card progress-card">
+          <span class="rail-kicker">学习证据进度</span>
+          <label><input type="checkbox" data-progress="understand"> 我能解释关键概念</label>
+          <label><input type="checkbox" data-progress="recalculate"> 我已独立复算或运行</label>
+          <label><input type="checkbox" data-progress="transfer"> 我已完成变式迁移</label>
+          <small>三项记录仅保存在本机，正式达成仍需教师核验直接证据。</small>
+        </section>
+      </aside>
+    </div>
+    <nav class="unit-nav"><a id="prev-unit" href="#">← 上一知识点</a><a href="../../index.html#assessment">进入智能测评</a><a id="next-unit" href="#">下一知识点 →</a></nav>
+  </main>
+  <script src="../../assets/knowledge-system.js"></script>
+  <script src="./viewer.js"></script>
+</body>
+</html>

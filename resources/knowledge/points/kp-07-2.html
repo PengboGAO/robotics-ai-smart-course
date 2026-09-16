@@ -1,0 +1,106 @@
+<!--META {"kp_id": "kp-7-2", "kp_label": "KP 7.2", "title": "位置PID控制", "tags": ["重点"], "difficulty": 2, "chapter": 7, "order": 2, "file": "kp-07-2.html"}-->
+<div class="kp-card" id="kp-7-2">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 7.2</span>
+          位置PID控制
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">位置PID控制</span>是将PID控制策略直接应用于机器人关节<strong>位置跟踪</strong>问题的方法。控制目标是使关节实际位置 q(t) 跟踪期望轨迹 q<sub>d</sub>(t)，位置误差定义为：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">位置误差</div>
+          <div class="formula">e(t) = q<sub>d</sub>(t) − q(t)</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">位置PID控制律</div>
+          <div class="formula">τ(t) = K<sub>p</sub>·e + K<sub>i</sub>·∫e dt + K<sub>d</sub>·ė</div>
+          <div class="formula-label" style="text-align:center;">τ 为关节驱动力矩，q<sub>d</sub> 为期望关节角，q 为实际关节角</div>
+        </div>
+
+        <p>在机器人控制中，位置PID控制通常以<strong>独立关节控制</strong>的形式实现：每个关节配备独立的PID控制器，忽略关节间的耦合动力学。这种简化在低速运动或关节耦合较弱时效果良好，但在高速、高加速度运动中，由于<strong>科里奥利力</strong>和<strong>离心力</strong>等非线性耦合项的影响，控制精度会显著下降。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 工程实现要点</div>
+          <p>实际机器人控制器中，位置PID常采用<strong>离散化</strong>实现（位置式或增量式），并加入积分限幅（anti-windup）机制防止积分饱和。微分项通常配合低通滤波器以抑制噪声放大。</p>
+        </div>
+
+        <!-- Ziegler-Nichols 参数整定步骤 -->
+        <p><strong>Ziegler-Nichols 参数整定方法</strong>是工程中最经典的PID参数整定法之一，其核心步骤如下：</p>
+
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">仅比例控制</div>
+            <div class="step-desc">设 K<sub>i</sub>=0, K<sub>d</sub>=0，仅用比例控制 K<sub>p</sub>，从小到大逐步增大</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">找临界增益</div>
+            <div class="step-desc">系统输出产生等幅振荡时的 K<sub>p</sub> 值记为临界增益 K<sub>u</sub></div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-title">测临界周期</div>
+            <div class="step-desc">记录等幅振荡的周期 T<sub>u</sub>（振荡一个完整周期的时间）</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-title">计算PID参数</div>
+            <div class="step-desc">K<sub>p</sub>=0.6K<sub>u</sub>, K<sub>i</sub>=2K<sub>p</sub>/T<sub>u</sub>, K<sub>d</sub>=K<sub>p</sub>·T<sub>u</sub>/8</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-title">微调优化</div>
+            <div class="step-desc">根据实际响应曲线，手动微调三个参数以获得最佳性能</div>
+          </div>
+        </div>
+
+        <!-- MATLAB PID 仿真代码 -->
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> PID控制仿真（二阶系统）</div>
+<pre><span class="comment">% === 二阶系统PID控制仿真 ===</span>
+<span class="comment">% 被控对象：G(s) = 1 / (s^2 + 2*s + 1)</span>
+<span class="comment">% 期望：跟踪阶跃信号，超调 &lt; 20%，调节时间 &lt; 3s</span>
+
+<span class="comment">% PID参数（Ziegler-Nichols整定后微调）</span>
+Kp = <span class="number">6.0</span>;
+Ki = <span class="number">4.0</span>;
+Kd = <span class="number">2.0</span>;
+
+<span class="comment">% 构建PID控制器传递函数</span>
+s = tf(<span class="string">'s'</span>);
+G_plant = <span class="number">1</span> / (s^<span class="number">2</span> + <span class="number">2</span>*s + <span class="number">1</span>);   <span class="comment">% 被控对象</span>
+C_pid = Kp + Ki/s + Kd*s;          <span class="comment">% PID控制器</span>
+
+<span class="comment">% 闭环系统</span>
+sys_cl = feedback(C_pid * G_plant, <span class="number">1</span>);
+
+<span class="comment">% 阶跃响应仿真</span>
+t = <span class="number">0</span>:<span class="number">0.01</span>:<span class="number">8</span>;
+[y, t] = step(sys_cl, t);
+
+<span class="comment">% 绘制响应曲线</span>
+figure;
+plot(t, y, <span class="string">'b-'</span>, <span class="string">'LineWidth'</span>, <span class="number">2</span>); hold on;
+yline(<span class="number">1</span>, <span class="string">'r--'</span>, <span class="string">'期望值'</span>);
+xlabel(<span class="string">'时间 (s)'</span>); ylabel(<span class="string">'输出'</span>);
+title(<span class="string">'PID控制阶跃响应'</span>);
+legend(<span class="string">'PID响应'</span>, <span class="string">'设定值'</span>);
+grid on;
+
+<span class="comment">% 性能指标分析</span>
+info = stepinfo(sys_cl);
+disp(<span class="string">'超调量: '</span>); disp(info.Overshoot);
+disp(<span class="string">'调节时间: '</span>); disp(info.SettlingTime);
+disp(<span class="string">'上升时间: '</span>); disp(info.RiseTime);</pre>
+        </div>
+      </div>
+    </div>

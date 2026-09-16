@@ -1,0 +1,70 @@
+<!--META {"kp_id": "kp-5-4", "kp_label": "KP 5.4", "title": "牛顿-欧拉法", "tags": ["难点", "考点"], "difficulty": 4, "chapter": 5, "order": 4, "file": "kp-05-4.html"}-->
+<div class="kp-card" id="kp-5-4">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 5.4</span>牛顿-欧拉法</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="kp-tag 考点">考点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">牛顿-欧拉法</span>（Newton-Euler Formulation）是一种基于矢量力学的递推方法。它直接应用牛顿第二定律（平动）和欧拉方程（转动），通过<strong>两趟递推</strong>完成动力学计算：先从基座向末端<span class="highlight">正向递推</span>速度与加速度，再从末端向基座<span class="highlight">反向递推</span>力与力矩。</p>
+
+        <p>牛顿-欧拉法的核心方程包括：</p>
+        <ul>
+          <li><strong>牛顿方程（平动）</strong>：F<sub>i</sub> = m<sub>i</sub> a<sub>ci</sub>，描述质心平动；</li>
+          <li><strong>欧拉方程（转动）</strong>：N<sub>i</sub> = <sup>c</sup>I<sub>i</sub> α<sub>i</sub> + ω<sub>i</sub> × (<sup>c</sup>I<sub>i</sub> ω<sub>i</sub>)，描述绕质心转动。</li>
+        </ul>
+
+        <p>整个算法分为<strong>正向递推</strong>与<strong>反向递推</strong>两个阶段，如下所示：</p>
+
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">正向递推</div>
+            <div class="step-desc">基座 → 末端<br>递推各连杆速度 ω、加速度 α 与质心加速度 a<sub>c</sub></div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">反向递推</div>
+            <div class="step-desc">末端 → 基座<br>递推各连杆受力 F 与力矩 N，得到关节驱动力矩 τ</div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 牛顿-欧拉法的核心优势</div>
+          <p>递归牛顿—欧拉逆动力学在常见串联链实现中可达到随关节数线性增长的计算量，因此适合实时力矩计算。拉格朗日法若直接进行符号展开，表达式会随自由度迅速膨胀，但其复杂度取决于具体算法与实现，不能统一写成固定的O(n⁴)。两种方法在模型和约定一致时应得到相同的关节力矩结果。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 局部坐标系表示技巧</div>
+          <p>为简化计算，牛顿-欧拉法通常在各连杆局部坐标系中表示速度、加速度和惯性张量。这样惯性张量 <sup>i</sup>I<sub>i</sub> 为常数矩阵（不随位形变化），避免了拉格朗日法中惯性张量随位形变化的复杂性。坐标系间的变换通过旋转矩阵 R 完成。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型牛顿—欧拉递推</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；参数为教学设定</span>
+function tau = ne_two_link(q, qd, qdd)
+  m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;I1=<span class="number">0.5</span>;I2=<span class="number">0.2</span>;g=<span class="number">9.81</span>;
+  s1=sin(q(1));c1=cos(q(1));s12=sin(q(1)+q(2));c12=cos(q(1)+q(2));
+  <span class="comment">% ===== 正向递推：基座→末端，计算速度与加速度 =====</span>
+  w1=qd(1); wd1=qdd(1);                     <span class="comment">% 连杆1角速度/角加速度</span>
+  w2=qd(1)+qd(2); wd2=qdd(1)+qdd(2);        <span class="comment">% 连杆2角速度/角加速度</span>
+  ac1=[-lc1*s1*wd1-lc1*c1*w1^<span class="number">2</span>;            <span class="comment">% 连杆1质心加速度(含重力)</span>
+        lc1*c1*wd1-lc1*s1*w1^<span class="number">2</span>-g];
+  a2=[-l1*s1*wd1-l1*c1*w1^<span class="number">2</span>; l1*c1*wd1-l1*s1*w1^<span class="number">2</span>-g]; <span class="comment">% 关节2原点加速度</span>
+  ac2=[a2(1)-lc2*s12*wd2-lc2*c12*w2^<span class="number">2</span>;    <span class="comment">% 连杆2质心加速度</span>
+        a2(2)+lc2*c12*wd2-lc2*s12*w2^<span class="number">2</span>];
+  <span class="comment">% ===== 反向递推：末端→基座，计算力与力矩 =====</span>
+  F2=m2*ac2; N2=I2*wd2;  tau2=N2;          <span class="comment">% 连杆2(末端无外力)</span>
+  F1=m1*ac1; N1=I1*wd1;                     <span class="comment">% 连杆1牛顿-欧拉方程</span>
+  <span class="comment">% 力矩递推：r×F的z分量(平面叉乘=标量)</span>
+  tau1=N1+N2+(lc1*c1*F1(<span class="number">2</span>)-lc1*s1*F1(<span class="number">1</span>))+(l1*c1*F2(<span class="number">2</span>)-l1*s1*F2(<span class="number">1</span>));
+  tau=[tau1; tau2];
+end
+</pre>
+        </div>
+      </div>
+    </div>

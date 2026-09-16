@@ -1,0 +1,157 @@
+<!--META {"kp_id":"kp-2-2","kp_label":"KP 2.2","title":"旋转矩阵","tags":["难点","考点"],"difficulty":3,"chapter":2,"order":2,"file":"kp-02-2-2.html"}-->
+<div class="kp-card" id="kp-2-2">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 2.2</span>
+          旋转矩阵
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+          </span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">旋转矩阵</span>（Rotation Matrix）R 是一个 3×3 正交矩阵，用于描述两个坐标系之间的姿态关系。所有旋转矩阵构成<span class="term">特殊正交群</span> SO(3)，即满足正交且行列式为 +1 的矩阵集合。</p>
+        <p>旋转矩阵的三个核心性质：</p>
+        <ul>
+          <li><strong>正交性</strong>：<span class="inline-formula">R<sup>T</sup>R = I</span>，即 <span class="inline-formula">R<sup>T</sup> = R<sup>-1</sup></span>，转置即逆；</li>
+          <li><strong>行列式</strong>：<span class="inline-formula">det(R) = +1</span>，保证是纯旋转而非反射；</li>
+          <li><strong>归一性</strong>：每一列（行）均为单位向量，且两两正交。</li>
+        </ul>
+        <p><strong>物理意义</strong>：旋转矩阵 R 的第 i 列是动坐标系 {B} 第 i 个坐标轴在静坐标系 {A} 中的方向余弦表示。因此 R 既是坐标变换矩阵，也是姿态描述矩阵。</p>
+        <p>绕三个基本轴的旋转公式如下（按右手定则确定旋转正方向：右手大拇指指向旋转轴正方向，四指弯曲方向即为正旋转方向（从轴正方向观察为逆时针））：</p>
+
+        <!-- Rx 公式 -->
+        <div class="formula-block">
+          <div class="formula-label">绕 X 轴旋转 θ 角 <span class="formula-num">(2-2)</span></div>
+          <div class="formula">
+            R<sub>x</sub>(θ) = [ 1, &nbsp;&nbsp;&nbsp;0, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0, &nbsp;cosθ, &nbsp;-sinθ; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0, &nbsp;sinθ, &nbsp;&nbsp;cosθ ]
+          </div>
+        </div>
+
+        <!-- Ry 公式 -->
+        <div class="formula-block">
+          <div class="formula-label">绕 Y 轴旋转 θ 角 <span class="formula-num">(2-3)</span></div>
+          <div class="formula">
+            R<sub>y</sub>(θ) = [ &nbsp;cosθ, &nbsp;0, &nbsp;sinθ; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0, &nbsp;1, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0; <br>
+            &nbsp;-sinθ, &nbsp;0, &nbsp;cosθ ]
+          </div>
+        </div>
+
+        <!-- Rz 公式 -->
+        <div class="formula-block">
+          <div class="formula-label">绕 Z 轴旋转 θ 角 <span class="formula-num">(2-4)</span></div>
+          <div class="formula">
+            R<sub>z</sub>(θ) = [ cosθ, &nbsp;-sinθ, &nbsp;0; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sinθ, &nbsp;&nbsp;cosθ, &nbsp;0; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0, &nbsp;1 ]
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">📌 记忆技巧</div>
+          <p>三个旋转矩阵的规律：绕哪个轴旋转，该轴所在行和列就保持单位向量（1 在对角线，其余为 0）；剩余 2×2 子块为标准的二维旋转矩阵 [[cosθ, -sinθ], [sinθ, cosθ]]，符号位置因轴而异。</p>
+        </div>
+
+        <!-- 三轴旋转SVG -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <!-- 绕X轴 -->
+            <g transform="translate(120,140)">
+              <circle cx="0" cy="0" r="70" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <!-- 原始坐标轴 -->
+              <line x1="0" y1="0" x2="0" y2="-90" stroke="#1a202c" stroke-width="1.5"/>
+              <text x="5" y="-92" fill="#1a202c" font-size="10">Z</text>
+              <line x1="0" y1="0" x2="60" y2="35" stroke="#1a202c" stroke-width="1.5"/>
+              <text x="65" y="40" fill="#1a202c" font-size="10">Y</text>
+              <!-- X轴(指出屏幕) -->
+              <circle cx="0" cy="0" r="4" fill="#2563eb"/>
+              <text x="-15" y="-8" fill="#2563eb" font-size="10" font-weight="700">X</text>
+              <!-- 旋转后 -->
+              <line x1="0" y1="0" x2="-30" y2="-83" stroke="#d97706" stroke-width="2"/>
+              <text x="-45" y="-85" fill="#d97706" font-size="10">Z'</text>
+              <line x1="0" y1="0" x2="68" y2="15" stroke="#d97706" stroke-width="2"/>
+              <text x="72" y="18" fill="#d97706" font-size="10">Y'</text>
+              <!-- 旋转箭头 -->
+              <path d="M 50 -50 A 70 70 0 0 1 65 -25" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+              <text x="55" y="-58" fill="#2563eb" font-size="10">θ</text>
+            </g>
+            <text x="120" y="240" text-anchor="middle" fill="#1a202c" font-size="12" font-weight="700">绕 X 轴旋转 R<sub>x</sub>(θ)</text>
+
+            <!-- 绕Y轴 -->
+            <g transform="translate(360,140)">
+              <circle cx="0" cy="0" r="70" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <line x1="0" y1="0" x2="90" y2="0" stroke="#1a202c" stroke-width="1.5"/>
+              <text x="95" y="5" fill="#1a202c" font-size="10">X</text>
+              <line x1="0" y1="0" x2="-35" y2="60" stroke="#1a202c" stroke-width="1.5"/>
+              <text x="-50" y="68" fill="#1a202c" font-size="10">Z</text>
+              <circle cx="0" cy="0" r="4" fill="#2563eb"/>
+              <text x="-15" y="-8" fill="#2563eb" font-size="10" font-weight="700">Y</text>
+              <line x1="0" y1="0" x2="83" y2="30" stroke="#d97706" stroke-width="2"/>
+              <text x="88" y="35" fill="#d97706" font-size="10">X'</text>
+              <line x1="0" y1="0" x2="-15" y2="68" stroke="#d97706" stroke-width="2"/>
+              <text x="-30" y="76" fill="#d97706" font-size="10">Z'</text>
+              <path d="M 60 15 A 70 70 0 0 1 35 60" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+              <text x="68" y="45" fill="#2563eb" font-size="10">θ</text>
+            </g>
+            <text x="360" y="240" text-anchor="middle" fill="#1a202c" font-size="12" font-weight="700">绕 Y 轴旋转 R<sub>y</sub>(θ)</text>
+
+            <!-- 绕Z轴 -->
+            <g transform="translate(600,140)">
+              <circle cx="0" cy="0" r="70" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <line x1="0" y1="0" x2="90" y2="0" stroke="#1a202c" stroke-width="1.5"/>
+              <text x="95" y="5" fill="#1a202c" font-size="10">X</text>
+              <line x1="0" y1="0" x2="0" y2="-90" stroke="#1a202c" stroke-width="1.5"/>
+              <text x="5" y="-92" fill="#1a202c" font-size="10">Y</text>
+              <circle cx="0" cy="0" r="4" fill="#2563eb"/>
+              <text x="-15" y="-8" fill="#2563eb" font-size="10" font-weight="700">Z</text>
+              <line x1="0" y1="0" x2="68" y2="60" stroke="#d97706" stroke-width="2"/>
+              <text x="73" y="65" fill="#d97706" font-size="10">X'</text>
+              <line x1="0" y1="0" x2="-68" y2="-30" stroke="#d97706" stroke-width="2"/>
+              <text x="-88" y="-32" fill="#d97706" font-size="10">Y'</text>
+              <path d="M 70 -10 A 70 70 0 0 1 50 50" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+              <text x="78" y="25" fill="#2563eb" font-size="10">θ</text>
+            </g>
+            <text x="600" y="240" text-anchor="middle" fill="#1a202c" font-size="12" font-weight="700">绕 Z 轴旋转 R<sub>z</sub>(θ)</text>
+          </svg>
+          <div class="diagram-caption">图2-2 绕三个基本轴的旋转：黑色为原始坐标轴，橙色为旋转后坐标轴</div>
+        </div>
+
+        <!-- MATLAB代码 -->
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 旋转矩阵定义与正交性验证</div>
+<pre>% 定义符号变量
+syms theta
+
+% 绕 X 轴旋转矩阵
+Rx = [1 0 0; 0 cos(theta) -sin(theta); 0 sin(theta) cos(theta)]
+
+% 绕 Y 轴旋转矩阵
+Ry = [cos(theta) 0 sin(theta); 0 1 0; -sin(theta) 0 cos(theta)]
+
+% 绕 Z 轴旋转矩阵
+Rz = [cos(theta) -sin(theta) 0; sin(theta) cos(theta) 0; 0 0 1]
+
+% 验证正交性: R' * R = I (单位阵)
+disp('Rx 正交性验证:'); simplify(Rx.' * Rx)
+disp('行列式验证:'); simplify(det(Rx))
+
+% 数值示例: 绕 Z 轴旋转 45 度
+theta_val = pi/4;
+Rz_45 = double(subs(Rz, theta, theta_val))</pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 考点提示</div>
+          <p>旋转矩阵的三个性质（正交性、行列式为 1、列向量单位正交）及 R<sub>x</sub>、R<sub>y</sub>、R<sub>z</sub> 三个公式是高频考点，必须能默写并理解其物理意义（每列为动系轴在静系中的投影）。</p>
+        </div>
+      </div>
+    </div>

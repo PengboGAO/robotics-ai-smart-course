@@ -1,0 +1,116 @@
+<!--META {"kp_id":"kp-2-4","kp_label":"KP 2.4","title":"四元数","tags":["难点"],"difficulty":2,"chapter":2,"order":4,"file":"kp-02-2-4.html"}-->
+<div class="kp-card" id="kp-2-4">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 2.4</span>
+          四元数
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star">★</span>
+          </span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <div class="callout callout-info">
+          <div class="callout-title">🔄 轴角表示法（旋转向量）</div>
+          <p>除欧拉角外，<span class="term">轴角表示法</span>（Axis-Angle）是另一种紧凑的旋转描述：用单位旋转轴 <strong>n</strong>（3 参数，含单位约束）和转角 θ（1 参数）共 4 个参数表示一次旋转，也称旋转向量表示法。其旋转矩阵由罗德里格斯（Rodrigues）公式给出：</p>
+          <div class="formula-block">
+            <div class="formula-label">轴角-旋转矩阵（罗德里格斯公式） <span class="formula-num">(2-5b)</span></div>
+            <div class="formula">
+              R = cosθ·I + (1 - cosθ)·n·n<sup>T</sup> + sinθ·n×
+            </div>
+          </div>
+          <p>其中 I 为 3×3 单位阵，n× 为旋转轴 n 的反对称矩阵（叉积矩阵）。轴角表示与四元数关系密切：单位四元数 q = [cos(θ/2), sin(θ/2)·n] 是轴角 (n, θ) 的“半角”编码。它避免了欧拉角的万向锁，但仍有 q 与 −q 表示同一旋转的双覆盖性质；轴角本身在 θ=0 和 θ=π 附近也存在轴选择或符号多义性。</p>
+        </div>
+
+        <p><span class="term">四元数</span>（Quaternion）是扩展复数至四维的超复数，由 Hamilton 于 1843 年提出。单位四元数用 4 个参数描述三维旋转：</p>
+        <div class="formula-block">
+          <div class="formula-label">四元数定义 <span class="formula-num">(2-6)</span></div>
+          <div class="formula">
+            q = w + x·i + y·j + z·k = [w, x, y, z]<sup>T</sup>
+          </div>
+        </div>
+        <p>其中 w 为实部，(x, y, z) 为虚部，满足归一化约束 <span class="inline-formula">w<sup>2</sup> + x<sup>2</sup> + y<sup>2</sup> + z<sup>2</sup> = 1</span>。四元数也可用旋转轴 n 与转角 θ 表示：<span class="inline-formula">q = [cos(θ/2), n<sub>x</sub>sin(θ/2), n<sub>y</sub>sin(θ/2), n<sub>z</sub>sin(θ/2)]</span>。</p>
+        <p>四元数相比欧拉角的优势：</p>
+        <ul>
+          <li><strong>无万向锁</strong>：单位四元数可连续表示姿态，但 q 与 −q 对应同一旋转，插值前需统一符号分支；</li>
+          <li><strong>计算高效</strong>：乘法运算比旋转矩阵少（4 参数 vs 9 参数）；</li>
+          <li><strong>插值平滑</strong>：支持球面线性插值（SLERP），姿态过渡自然平滑，无突变。</li>
+        </ul>
+        <p>四元数到旋转矩阵的转换公式如下，这是工程实践中连接两种表示的桥梁：</p>
+        <div class="formula-block">
+          <div class="formula-label">四元数转旋转矩阵 <span class="formula-num">(2-6a)</span></div>
+          <div class="formula">
+            R = [ 1-2(y²+z²), &nbsp;&nbsp;2(xy-wz), &nbsp;&nbsp;2(xz+wy); <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2(xy+wz), &nbsp;1-2(x²+z²), &nbsp;&nbsp;2(yz-wx); <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2(xz-wy), &nbsp;&nbsp;2(yz+wx), &nbsp;1-2(x²+y²) ]
+          </div>
+        </div>
+
+        <p>四元数乘法遵循<strong>Hamilton 乘法</strong>规则，基本虚数单位满足 i² = j² = k² = ijk = -1。两个四元数 q₁ = (w₁, v₁) 与 q₂ = (w₂, v₂) 的乘积为：</p>
+        <div class="formula-block">
+          <div class="formula-label">四元数 Hamilton 乘法 <span class="formula-num">(2-6b)</span></div>
+          <div class="formula">
+            q₁ ⊗ q₂ = (w₁w₂ - v₁·v₂, &nbsp; w₁v₂ + w₂v₁ + v₁×v₂)
+          </div>
+        </div>
+        <p>其中 v₁·v₂ 为向量点积，v₁×v₂ 为向量叉积。四元数乘法对应旋转的复合：q₁⊗q₂ 表示先按 q₂ 旋转再按 q₁ 旋转的结果，且不满足交换律（q₁⊗q₂ ≠ q₂⊗q₁）。</p>
+
+        <!-- 四元数乘法MATLAB代码 -->
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 四元数 Hamilton 乘法示例</div>
+<pre>% 定义两个四元数 q1, q2 (w, x, y, z)
+q1 = [0.7071, 0, 0.7071, 0];   % 绕 Y 轴旋转 90 度
+q2 = [0.7071, 0.7071, 0, 0];   % 绕 X 轴旋转 90 度
+
+% 方法1: 使用 Aerospace Toolbox 的 quatmultiply
+q_prod = quatmultiply(q1, q2)
+
+% 方法2: 手动实现 Hamilton 乘法
+w1 = q1(1); v1 = q1(2:4)';
+w2 = q2(1); v2 = q2(2:4)';
+q_manual = [w1*w2 - dot(v1,v2), ...
+            (w1*v2 + w2*v1 + cross(v1,v2))']
+
+% 验证: 四元数乘法不满足交换律
+q_rev = quatmultiply(q2, q1)
+disp('q1*q2 与 q2*q1 结果不同, 证明不可交换')</pre>
+        </div>
+
+        <!-- 四元数可视化SVG -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 560 240" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <!-- 单位球 -->
+            <ellipse cx="280" cy="120" rx="120" ry="120" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <ellipse cx="280" cy="120" rx="120" ry="40" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="160" y1="120" x2="400" y2="120" stroke="#cbd5e1" stroke-width="1"/>
+
+            <!-- 旋转轴 n -->
+            <line x1="280" y1="120" x2="370" y2="40" stroke="#7c3aed" stroke-width="2.5"/>
+            <text x="378" y="38" fill="#7c3aed" font-size="12" font-weight="700">n (旋转轴)</text>
+
+            <!-- 旋转角 θ -->
+            <path d="M 320 120 A 40 40 0 0 0 335 85" fill="none" stroke="#d97706" stroke-width="2"/>
+            <text x="330" y="108" fill="#d97706" font-size="11" font-weight="700">θ</text>
+
+            <!-- 四元数分量标注 -->
+            <rect x="60" y="170" width="200" height="55" rx="8" fill="#2563eb" opacity="0.08" stroke="#2563eb"/>
+            <text x="160" y="190" text-anchor="middle" fill="#2563eb" font-size="11" font-weight="700">q = [w, x, y, z]</text>
+            <text x="160" y="208" text-anchor="middle" fill="#475569" font-size="10">w = cos(θ/2)</text>
+            <text x="160" y="222" text-anchor="middle" fill="#475569" font-size="10">(x,y,z) = sin(θ/2)·n</text>
+
+            <!-- 约束 -->
+            <rect x="320" y="170" width="180" height="55" rx="8" fill="#059669" opacity="0.08" stroke="#059669"/>
+            <text x="410" y="190" text-anchor="middle" fill="#059669" font-size="11" font-weight="700">归一化约束</text>
+            <text x="410" y="212" text-anchor="middle" fill="#475569" font-size="10">w²+x²+y²+z² = 1</text>
+          </svg>
+          <div class="diagram-caption">图2-4 四元数几何意义：旋转轴 n 与转角 θ 编码为四维单位向量</div>
+        </div>
+
+        <p>四元数广泛应用于航天器姿态控制、机器人末端姿态规划、3D 图形学与游戏引擎中。其缺点是不如欧拉角直观，且需注意<strong>双覆盖</strong>性质（q 与 -q 表示同一旋转）。</p>
+      </div>
+    </div>

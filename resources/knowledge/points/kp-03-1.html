@@ -1,0 +1,86 @@
+<!--META {"kp_id": "kp-3-1", "kp_label": "KP 3.1", "title": "D-H参数法", "tags": ["重点", "难点", "考点"], "difficulty": 3, "chapter": 3, "order": 1, "file": "kp-03-1.html"}-->
+<div class="kp-card" id="kp-3-1">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 3.1</span>D-H参数法</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 难点">难点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>D-H 参数法（Denavit-Hartenberg Parameterization）由 Jacques Denavit 与 Richard S. Hartenberg 于 1955 年提出，是一种<span class="highlight">利用关节轴几何约束进行参数化</span>的串联机器人运动学建模方法。其核心思想是：按明确约定为相邻连杆建立坐标系，并用<span class="term">四个几何参数</span>描述两坐标系之间受约束的相对位姿。四参数表示依赖D-H坐标系建立规则，并不意味着任意两个坐标系的一般位姿只需要四个参数。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">为什么是 4 个参数而非 6 个？</div>
+          <p>两个任意坐标系之间的一般位姿具有6个自由度。D-H法不是对任意位姿降维，而是把z轴与关节轴对齐、把x轴选在相邻z轴的公垂线方向，并据此限制坐标系的选取。完成这些约束后，相邻连杆变换可以按约定分解为绕z转θ、沿z移d、沿x移a、绕x转α四个基本变换。平行、相交或重合关节轴会带来坐标系选择自由度，因此参数表可能不唯一，必须用正运动学结果验证约定是否一致。</p>
+        </div>
+
+        <p>四个 D-H 参数的几何含义如下：</p>
+        <ul>
+          <li><span class="term">a<sub>i</sub>（连杆长度 Link Length）</span>：沿 x<sub>i</sub> 轴从 z<sub>i-1</sub> 到 z<sub>i</sub> 的距离，即两条相邻关节轴线的最短距离（公垂线长度），通常为非负值。但在特定坐标系选取下（如 x<sub>i</sub> 轴方向反向选取），a<sub>i</sub> 也可能为负值，其符号由 x<sub>i</sub> 轴方向的选取决定。</li>
+          <li><span class="term">α<sub>i</sub>（连杆扭角 Link Twist）</span>：绕 x<sub>i</sub> 轴从 z<sub>i-1</sub> 到 z<sub>i</sub> 的夹角，描述两条关节轴线的方向偏差，取值范围 (-π, π]。</li>
+          <li><span class="term">d<sub>i</sub>（连杆偏置 Link Offset）</span>：沿 z<sub>i-1</sub> 轴从 x<sub>i-1</sub> 到 x<sub>i</sub> 的距离。对旋转关节 d<sub>i</sub> 为常量；对移动关节 d<sub>i</sub> 为关节变量。</li>
+          <li><span class="term">θ<sub>i</sub>（关节角 Joint Angle）</span>：绕 z<sub>i-1</sub> 轴从 x<sub>i-1</sub> 到 x<sub>i</sub> 的夹角。对旋转关节 θ<sub>i</sub> 为关节变量；对移动关节 θ<sub>i</sub> 为常量。</li>
+        </ul>
+        <p>四个参数中，a<sub>i</sub> 与 α<sub>i</sub> 描述连杆自身的几何形状（与关节变量无关，为结构常量）；d<sub>i</sub> 与 θ<sub>i</sub> 描述相邻连杆的连接关系，其中之一为关节变量。下图展示了相邻连杆 i 与 i+1 的几何关系及四个参数的标注方式。</p>
+
+        <div class="svg-diagram">
+          <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
+            <defs>
+              <marker id="arr3_blue" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#2563eb"/></marker>
+              <marker id="arr3_red" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#dc2626"/></marker>
+              <marker id="arr3_green" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#059669"/></marker>
+              <marker id="arr3_gray" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 8 3.5, 0 7" fill="#64748b"/></marker>
+            </defs>
+            <!-- z_{i-1} axis (vertical) -->
+            <line x1="120" y1="320" x2="120" y2="40" stroke="#2563eb" stroke-width="2.2" marker-end="url(#arr3_blue)"/>
+            <text x="92" y="42" font-size="14" fill="#2563eb" font-style="italic" font-weight="700">z<tspan baseline-shift="sub" font-size="10">i-1</tspan></text>
+            <!-- z_i axis (tilted, through point C) -->
+            <line x1="460" y1="120" x2="560" y2="60" stroke="#2563eb" stroke-width="2.2" marker-end="url(#arr3_blue)"/>
+            <line x1="460" y1="120" x2="360" y2="180" stroke="#2563eb" stroke-width="2.2" marker-end="url(#arr3_blue)"/>
+            <text x="566" y="56" font-size="14" fill="#2563eb" font-style="italic" font-weight="700">z<tspan baseline-shift="sub" font-size="10">i</tspan></text>
+            <!-- common perpendicular (x_i axis) = a_i, from A(120,180) to C(460,120) -->
+            <line x1="120" y1="180" x2="460" y2="120" stroke="#dc2626" stroke-width="2.2" marker-end="url(#arr3_red)"/>
+            <text x="280" y="138" font-size="14" fill="#dc2626" font-style="italic" font-weight="700">x<tspan baseline-shift="sub" font-size="10">i</tspan></text>
+            <!-- a_i label on the common perpendicular -->
+            <text x="290" y="168" font-size="15" fill="#dc2626" font-weight="700">a<tspan baseline-shift="sub" font-size="11">i</tspan></text>
+            <!-- d_i: along z_{i-1} from x_{i-1}(dashed) to x_i -->
+            <line x1="100" y1="110" x2="140" y2="110" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,3"/>
+            <text x="40" y="148" font-size="15" fill="#059669" font-weight="700">d<tspan baseline-shift="sub" font-size="11">i</tspan></text>
+            <line x1="120" y1="110" x2="120" y2="180" stroke="#059669" stroke-width="3"/>
+            <!-- theta_i: angle between x_{i-1} and x_i about z_{i-1} -->
+            <path d="M 165 110 A 45 45 0 0 1 165 180" fill="none" stroke="#d97706" stroke-width="2"/>
+            <text x="170" y="150" font-size="15" fill="#d97706" font-weight="700">θ<tspan baseline-shift="sub" font-size="11">i</tspan></text>
+            <!-- alpha_i: angle between z_{i-1} and z_i about x_i -->
+            <path d="M 460 90 A 28 28 0 0 1 432 112" fill="none" stroke="#7c3aed" stroke-width="2"/>
+            <text x="478" y="92" font-size="15" fill="#7c3aed" font-weight="700">α<tspan baseline-shift="sub" font-size="11">i</tspan></text>
+            <!-- joint axis points -->
+            <circle cx="120" cy="180" r="4" fill="#1a202c"/>
+            <circle cx="460" cy="120" r="4" fill="#1a202c"/>
+            <text x="78" y="200" font-size="11" fill="#64748b">A (垂足)</text>
+            <text x="468" y="138" font-size="11" fill="#64748b">C (垂足)</text>
+            <!-- link bodies -->
+            <rect x="135" y="172" width="100" height="16" rx="3" fill="#94a3b8" opacity="0.45"/>
+            <text x="155" y="184" font-size="11" fill="#475569">连杆 i</text>
+            <!-- legend -->
+            <g transform="translate(540,230)">
+              <rect x="0" y="0" width="170" height="120" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+              <text x="10" y="20" font-size="11" font-weight="700" fill="#1a202c">四参数说明</text>
+              <text x="10" y="40" font-size="11" fill="#dc2626">a<tspan baseline-shift="sub" font-size="8">i</tspan>：连杆长度(红)</text>
+              <text x="10" y="58" font-size="11" fill="#7c3aed">α<tspan baseline-shift="sub" font-size="8">i</tspan>：连杆扭角(紫)</text>
+              <text x="10" y="76" font-size="11" fill="#059669">d<tspan baseline-shift="sub" font-size="8">i</tspan>：连杆偏置(绿)</text>
+              <text x="10" y="94" font-size="11" fill="#d97706">θ<tspan baseline-shift="sub" font-size="8">i</tspan>：关节角(橙)</text>
+              <text x="10" y="112" font-size="10" fill="#64748b">a,α 为结构常量</text>
+            </g>
+          </svg>
+          <div class="diagram-caption">图 3-1 D-H 参数几何意义示意图：连杆 i 的坐标系 {i-1} 到 {i} 变换及四个参数 a<sub>i</sub>、α<sub>i</sub>、d<sub>i</sub>、θ<sub>i</sub> 标注</div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">易错点</div>
+          <p>D-H 参数的几何含义是考点。务必记住：<strong>a<sub>i</sub> 沿 x 轴量度</strong>，<strong>d<sub>i</sub> 沿 z 轴量度</strong>；<strong>α<sub>i</sub> 绕 x 轴度量</strong>，<strong>θ<sub>i</sub> 绕 z 轴度量</strong>。这"两沿两绕"的对应关系是正确建立参数表的前提。</p>
+        </div>
+      </div>
+    </div>

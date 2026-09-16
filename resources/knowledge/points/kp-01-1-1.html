@@ -1,0 +1,101 @@
+<!--META {"kp_id":"kp-1-1","kp_label":"KP 1.1","title":"机器人定义与分类","tags":["重点"],"difficulty":1,"chapter":1,"order":1,"file":"kp-01-1-1.html"}-->
+<div class="kp-card" id="kp-1-1">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 1.1</span>
+          机器人定义与分类
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="difficulty">
+            <span class="star active">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+          </span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">机器人</span>（Robot）一词源于捷克作家卡雷尔·恰佩克（K. Čapek）1920 年的科幻剧本《罗素姆的万能机器人》中的"Robota"，意为"劳役、苦工"。这一概念此后逐步演化为现代意义上的自动化机器。</p>
+        <p>国际标准化组织在 <span class="highlight">ISO 8373:2021</span> 标准中将工业机器人定义为：一种自动控制、可重复编程、多用途的操作机，具有三个或更多可编程轴，可固定或移动，用于工业自动化应用。广义而言，机器人是具备<span class="term">感知—决策—执行</span>能力、可自主或半自主完成任务的机电一体化系统。</p>
+        <p>从定义中可提炼出机器人的四个本质特征：<strong>自动控制</strong>（无需人全程干预）、<strong>可重复编程</strong>（任务柔性可变）、<strong>多用途</strong>（通用性强）、<strong>多轴</strong>（自由度≥3）。这四点共同将机器人与单一功能的专用机械区别开来。</p>
+        <p>机器人分类方式多样，最常见的是按用途分为三大类：</p>
+        <ul>
+          <li><strong>工业机器人</strong>：面向制造业，如焊接、装配、喷涂、搬运机器人；</li>
+          <li><strong>服务机器人</strong>：面向非工业环境服务人类，如医疗手术、物流配送、家政陪伴；</li>
+          <li><strong>特种机器人</strong>：替代人类在极限环境中作业，如太空探测、深海作业、灾害救援。</li>
+        </ul>
+        <p>按控制方式可分为<span class="term">点位控制</span>（PTP，只关心起点终点）与<span class="term">连续轨迹控制</span>（CP，关心整条路径）；按驱动方式可分为电动、液压、气动三类，其中电动（伺服电机）因精度高、易控制而最为常见。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">🔍 机器人 vs 普通自动化设备</div>
+          <p>机器人与数控机床、专用自动机的本质区别在于<strong>通用性与可编程性</strong>：普通自动机针对单一任务设计，结构固定；机器人通过重新编程即可切换任务，具备柔性。一台焊接机器人重新示教后即可承担搬运或装配任务，这正是"可重复编程、多用途"定义的工程体现。</p>
+        </div>
+
+        <!-- 分类树状图 -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <defs>
+              <marker id="tree-arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/>
+              </marker>
+            </defs>
+            <!-- 根节点 -->
+            <rect x="300" y="15" width="160" height="46" rx="8" fill="#1a202c"/>
+            <text x="380" y="44" text-anchor="middle" fill="white" font-size="13" font-weight="700">机器人</text>
+
+            <!-- 一级分类：按用途 -->
+            <line x1="380" y1="61" x2="380" y2="90" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="395" y="80" fill="#64748b" font-size="10">按用途</text>
+
+            <line x1="150" y1="90" x2="610" y2="90" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="150" y1="90" x2="150" y2="115" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="380" y1="90" x2="380" y2="115" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="610" y1="90" x2="610" y2="115" stroke="#94a3b8" stroke-width="1.5"/>
+
+            <rect x="80" y="115" width="140" height="42" rx="8" fill="#2563eb"/>
+            <text x="150" y="141" text-anchor="middle" fill="white" font-size="12" font-weight="700">工业机器人</text>
+
+            <rect x="310" y="115" width="140" height="42" rx="8" fill="#0891b2"/>
+            <text x="380" y="141" text-anchor="middle" fill="white" font-size="12" font-weight="700">服务机器人</text>
+
+            <rect x="540" y="115" width="140" height="42" rx="8" fill="#d97706"/>
+            <text x="610" y="141" text-anchor="middle" fill="white" font-size="12" font-weight="700">特种机器人</text>
+
+            <!-- 二级：工业 -->
+            <line x1="150" y1="157" x2="150" y2="180" stroke="#cbd5e1" stroke-width="1.2"/>
+            <text x="105" y="200" fill="#475569" font-size="10">• 焊接</text>
+            <text x="105" y="216" fill="#475569" font-size="10">• 装配</text>
+            <text x="105" y="232" fill="#475569" font-size="10">• 喷涂</text>
+            <text x="105" y="248" fill="#475569" font-size="10">• 搬运</text>
+
+            <!-- 二级：服务 -->
+            <line x1="380" y1="157" x2="380" y2="180" stroke="#cbd5e1" stroke-width="1.2"/>
+            <text x="335" y="200" fill="#475569" font-size="10">• 医疗</text>
+            <text x="335" y="216" fill="#475569" font-size="10">• 物流</text>
+            <text x="335" y="232" fill="#475569" font-size="10">• 家政</text>
+            <text x="335" y="248" fill="#475569" font-size="10">• 陪伴</text>
+
+            <!-- 二级：特种 -->
+            <line x1="610" y1="157" x2="610" y2="180" stroke="#cbd5e1" stroke-width="1.2"/>
+            <text x="565" y="200" fill="#475569" font-size="10">• 太空</text>
+            <text x="565" y="216" fill="#475569" font-size="10">• 深海</text>
+            <text x="565" y="232" fill="#475569" font-size="10">• 救援</text>
+            <text x="565" y="248" fill="#475569" font-size="10">• 军事</text>
+
+            <!-- 其他分类维度 -->
+            <rect x="40" y="290" width="220" height="50" rx="8" fill="#e8eef5" stroke="#cbd5e1"/>
+            <text x="150" y="310" text-anchor="middle" fill="#1a202c" font-size="11" font-weight="700">按控制方式</text>
+            <text x="150" y="328" text-anchor="middle" fill="#475569" font-size="10">点位控制 PTP / 连续轨迹 CP</text>
+
+            <rect x="280" y="290" width="200" height="50" rx="8" fill="#e8eef5" stroke="#cbd5e1"/>
+            <text x="380" y="310" text-anchor="middle" fill="#1a202c" font-size="11" font-weight="700">按驱动方式</text>
+            <text x="380" y="328" text-anchor="middle" fill="#475569" font-size="10">电动 / 液压 / 气动</text>
+
+            <rect x="500" y="290" width="220" height="50" rx="8" fill="#e8eef5" stroke="#cbd5e1"/>
+            <text x="610" y="310" text-anchor="middle" fill="#1a202c" font-size="11" font-weight="700">按自由度</text>
+            <text x="610" y="328" text-anchor="middle" fill="#475569" font-size="10">3轴 / 4轴 / 6轴 / 冗余</text>
+          </svg>
+          <div class="diagram-caption">图1-1 机器人分类树：按用途、控制方式、驱动方式、自由度等多维度划分</div>
+        </div>
+      </div>
+    </div>

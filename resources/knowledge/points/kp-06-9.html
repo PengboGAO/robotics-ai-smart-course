@@ -1,0 +1,79 @@
+<!--META {"kp_id": "kp-6-9", "kp_label": "KP 6.9", "title": "轨迹优化", "tags": ["了解"], "difficulty": 1, "chapter": 6, "order": 9, "file": "kp-06-9.html"}-->
+<div class="kp-card" id="kp-6-9">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.9</span>轨迹优化</div>
+        <div class="kp-tags">
+          <span class="kp-tag 了解">了解</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">轨迹优化</span>（Trajectory Optimization）是在满足运动学/动力学约束的前提下，寻找使某个性能指标最优的轨迹。它是轨迹规划的高级形式，将规划问题转化为约束优化问题求解。</p>
+
+        <p>常见的优化目标包括：</p>
+        <ul>
+          <li><strong>时间最优</strong>：在关节速度、加速度、力矩约束下，使运动时间 t<sub>f</sub> 最小。典型方法为"切换曲线法"（switching curve），在速度-位置相平面内沿约束边界加速/减速。</li>
+          <li><strong>能量最优</strong>：最小化驱动能量 ∫τᵀq̇ dt，适合电池供电的移动机器人与协作机器人，降低能耗延长续航。</li>
+          <li><strong>冲击最小</strong>：最小化加加速度（jerk）∫q⃛² dt，使运动尽可能平滑，减少机械磨损与振动，适合精密装配与医疗机器人。</li>
+        </ul>
+
+        <div class="formula-block">
+          <div class="formula-label">轨迹优化一般形式</div>
+          <div class="formula">min J = ∫₀<sup>tf</sup> L(q, q̇, q̈, t) dt</div>
+          <div class="formula">s.t.　q<sub>min</sub> ≤ q ≤ q<sub>max</sub>,&nbsp; |q̇| ≤ V<sub>max</sub>,&nbsp; |q̈| ≤ A<sub>max</sub>,&nbsp; |τ| ≤ τ<sub>max</sub></div>
+        </div>
+
+        <p>对于<strong>最小 Jerk 优化</strong>（min ∫₀<sup>tf</sup> q⃛² dt），在停-停边界条件（起止速度和加速度均为零）下存在解析解：</p>
+        <div class="formula-block">
+          <div class="formula-label">最小 Jerk 轨迹解析解</div>
+          <div class="formula">q(t) = q<sub>0</sub> + (q<sub>f</sub> − q<sub>0</sub>) · [10s<sup>3</sup> − 15s<sup>4</sup> + 6s<sup>5</sup>]</div>
+          <div class="formula-label" style="text-align:center;">其中 s = t / t<sub>f</sub> ∈ [0, 1] 为归一化时间</div>
+        </div>
+        <p>该解析解与 KP 6.3 中五次多项式的停-停轨迹形式完全一致——这说明<span class="highlight">五次多项式停-停轨迹本质上就是最小 Jerk 最优轨迹</span>。这一对应关系揭示了多项式插值与最优控制之间的内在联系：选择五次多项式不仅仅是"够用"，而是在最小化加加速度这一物理指标下的最优选择。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 时间最优与平滑性的权衡</div>
+          <p>时间最优轨迹倾向于"贴着约束边界"运动（速度/加速度饱和），这虽然最快，但会产生加速度突变（bang-bang 控制），冲击大。而冲击最小轨迹追求平滑，但运动时间变长。实际工程常采用<span class="highlight">多目标加权</span>（如 J = w₁·t<sub>f</sub> + w₂·∫jerk²），在快速性与平滑性之间折中。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 轨迹优化的工程价值</div>
+          <p>轨迹优化用于在工作范围、速度、加速度、奇异和碰撞约束下改善ABB IRB 1200任务节拍。优化收益必须由同一工位、同一工具负载和同一控制器设置下的前后记录计算，不预设固定百分比；课程结果需在RobotStudio或实体系统复核。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 优化求解方法</div>
+          <p>轨迹优化的求解方法可分为三类：① <strong>解析法</strong>——如时间最优的相平面切换曲线法，利用 Pontryagin 极小值原理得到 bang-bang 解，理论优雅但仅适用于简单系统；② <strong>数值优化法</strong>——将轨迹参数化（如 B 样条控制点），转化为非线性规划（NLP）问题，用 SQP、内点法求解，灵活通用；③ <strong>智能优化法</strong>——遗传算法、粒子群等启发式方法，适合非凸、多模态问题但计算量大。工程中数值优化法（NLP）最为常用。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 现代轨迹优化方法：TOPP-RA 与 MPC 实时规划</div>
+          <p><strong>TOPP-RA（Time-Optimal Path Parameterization via Reachability Analysis）</strong>是基于可达性分析的时间最优路径参数化方法。给定一条几何路径（如 B 样条），TOPP-RA 在路径参数-路径参数速度的相平面内，通过前向与后向可达性传播确定最大可行速度曲线，在关节速度、加速度、力矩等多重约束下求得严格时间最优解。与传统切换曲线法相比，TOPP-RA 数值稳定性更好、能统一处理多种约束，是当前时间最优轨迹规划的主流算法，已集成于 OpenSoT、TrajectoryOptimization 等开源库中。</p>
+          <p><strong>MPC 实时轨迹规划（Model Predictive Control）</strong>将轨迹规划与反馈控制融合为在线滚动优化问题：在每个控制周期内，基于当前状态预测未来有限时域内的运动，以最优控制序列的第一步作为实际输入，不断滚动更新。MPC 可显式处理关节限位、速度/加速度约束、障碍物避碰等不等式约束，且具备对模型误差与外部扰动的闭环修正能力。随着嵌入式算力提升与快速 QP 求解器的成熟，MPC 已在协作机器人安全运动规划、自主驾驶轨迹决策等领域得到广泛工程应用，代表了实时轨迹规划的发展方向。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 最小Jerk轨迹优化与代价计算</div>
+<pre><span class="comment">% 最小Jerk轨迹优化(解析解实现)</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;   <span class="comment">% 起止位置</span>
+tf = <span class="number">2</span>;               <span class="comment">% 运动时间</span>
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+s  = t / tf;            <span class="comment">% 归一化时间 s in [0,1]</span>
+<span class="comment">% 最小Jerk解析解: 10s^3 - 15s^4 + 6s^5</span>
+q  = q0 + (qf-q0)*(<span class="number">10</span>*s.<span class="number">3</span> - <span class="number">15</span>*s.<span class="number">4</span> + <span class="number">6</span>*s.<span class="number">5</span>);
+<span class="comment">% 速度/加速度/加加速度(jerk)</span>
+qd   = (qf-q0)*(<span class="number">30</span>*s.<span class="number">2</span> - <span class="number">60</span>*s.<span class="number">3</span> + <span class="number">30</span>*s.<span class="number">4</span>) / tf;
+qdd  = (qf-q0)*(<span class="number">60</span>*s - <span class="number">180</span>*s.<span class="number">2</span> + <span class="number">120</span>*s.<span class="number">3</span>) / tf^<span class="number">2</span>;
+qddd = (qf-q0)*(<span class="number">60</span> - <span class="number">360</span>*s + <span class="number">360</span>*s.<span class="number">2</span>) / tf^<span class="number">3</span>;
+<span class="comment">% 计算Jerk代价积分</span>
+jerk_cost = trapz(t, qddd.<span class="number">2</span>);
+fprintf(<span class="string">'最小Jerk代价 J = %.6f\n'</span>, jerk_cost);
+figure;
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q,<span class="string">'b'</span>); ylabel(<span class="string">'位置'</span>);
+title(<span class="string">'最小Jerk轨迹'</span>);
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qddd,<span class="string">'r'</span>); ylabel(<span class="string">'Jerk'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

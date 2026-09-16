@@ -1,0 +1,75 @@
+<!--META {"kp_id": "kp-5-2", "kp_label": "KP 5.2", "title": "动能计算", "tags": ["难点"], "difficulty": 3, "chapter": 5, "order": 2, "file": "kp-05-2.html"}-->
+<div class="kp-card" id="kp-5-2">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 5.2</span>动能计算</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>机器人系统总动能 K 等于各连杆动能之和。每个连杆 i 的动能由<span class="highlight">平动动能</span>与<span class="highlight">转动动能</span>两部分构成：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">连杆 i 动能</div>
+          <div class="formula">K<sub>i</sub> = ½ m<sub>i</sub> v<sub>ci</sub><sup>T</sup> v<sub>ci</sub> + ½ ω<sub>i</sub><sup>T</sup> <sup>c</sup>I<sub>i</sub> ω<sub>i</sub></div>
+        </div>
+
+        <p>其中：</p>
+        <ul>
+          <li><span class="inline-formula">m<sub>i</sub></span>：连杆 i 的质量；</li>
+          <li><span class="inline-formula">v<sub>ci</sub></span>：连杆 i 质心的线速度（3×1 向量）；</li>
+          <li><span class="inline-formula">ω<sub>i</sub></span>：连杆 i 的角速度（3×1 向量）；</li>
+          <li><span class="inline-formula"><sup>c</sup>I<sub>i</sub></span>：连杆 i 在质心处的惯性张量（3×3 对称矩阵），上标 c 表示在质心坐标系下表示。</li>
+        </ul>
+
+        <p>系统总动能为各连杆动能之和：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">系统总动能</div>
+          <div class="formula">K = Σ<sub>i=1</sub><sup>n</sup> [ ½ m<sub>i</sub> v<sub>ci</sub><sup>T</sup> v<sub>ci</sub> + ½ ω<sub>i</sub><sup>T</sup> <sup>c</sup>I<sub>i</sub> ω<sub>i</sub> ]</div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 关键难点：速度的关节变量表达</div>
+          <p>动能计算的核心难点在于：需将质心速度 v<sub>ci</sub> 和角速度 ω<sub>i</sub> 用广义坐标 q 及其导数 q̇ 表示。这需要借助运动学分析（雅可比矩阵）完成。可将连杆 i 质心速度写成：</p>
+          <p style="text-align:center;">v<sub>ci</sub> = J<sub>v,i</sub>(q) q̇　，　ω<sub>i</sub> = J<sub>ω,i</sub>(q) q̇</p>
+          <p>其中 J<sub>v,i</sub>、J<sub>ω,i</sub> 分别为质心线速度与角速度雅可比。代入后动能可整理为二次型：</p>
+          <p style="text-align:center;">K = ½ q̇<sup>T</sup> M(q) q̇</p>
+          <p>这里 M(q) 即为<strong>惯性矩阵</strong>（也称为质量矩阵），是对称正定矩阵，其元素依赖于机器人位形 q。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 惯性张量的平行轴定理</div>
+          <p>当已知连杆绕质心的惯性张量 <sup>c</sup>I<sub>i</sub>，而需计算绕非质心轴（如关节轴）的惯性张量时，应用平行轴定理：<sup>a</sup>I = <sup>c</sup>I + m·(r<sup>T</sup>r·I₃ − r·r<sup>T</sup>)，其中 r 为质心到参考点的位置向量。本节在ABB A2–A3平面教学子模型中演示该步骤。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 动能计算的实用技巧</div>
+          <p>在实际推导中，计算质心速度雅可比 J<sub>v,i</sub> 可借助正运动学结果：先求各连杆质心位置 r<sub>ci</sub>(q)，再对 q 求偏导即得 J<sub>v,i</sub> = ∂r<sub>ci</sub>/∂q。对于平面机器人，角速度雅可比 J<sub>ω,i</sub> 退化为1×n行向量（转动惯量直接为常数），推导大幅简化。三维机器人的惯性张量则需通过旋转矩阵转换到统一坐标系后才能相加，这是三维动力学比平面复杂得多的根本原因。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型惯性矩阵M(q)</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；非厂家惯量</span>
+syms q1 q2 qd1 qd2 real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>;
+I1=<span class="number">0.5</span>; I2=<span class="number">0.2</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心线速度雅可比 Jv（行=x,y方向，列=关节1,2）</span>
+Jv1=[-lc1*sin(q1), <span class="number">0</span>; lc1*cos(q1), <span class="number">0</span>];
+Jv2=[-l1*sin(q1)-lc2*sin(q1+q2), -lc2*sin(q1+q2);
+      l1*cos(q1)+lc2*cos(q1+q2),  lc2*cos(q1+q2)];
+<span class="comment">% 角速度雅可比 Jw（平面机器人退化为列向量）</span>
+Jw1=[<span class="number">1</span>; <span class="number">0</span>];  Jw2=[<span class="number">1</span>; <span class="number">1</span>];
+<span class="comment">% 惯性矩阵 M(q) = sum(Jv'*m*Jv + Jw'*I*Jw)</span>
+M = m1*Jv1'*Jv1 + I1*Jw1'*Jw1 + m2*Jv2'*Jv2 + I2*Jw2'*Jw2;
+M = simplify(M)
+<span class="comment">% 动能 K = 0.5 * qd' * M * qd</span>
+qd=[qd1; qd2];  K=simplify(<span class="number">0.5</span>*qd'*M*qd);
+disp(<span class="string">'惯性矩阵 M(q) ='</span>), disp(M)
+disp(<span class="string">'动能 K ='</span>), disp(K)
+</pre>
+        </div>
+      </div>
+    </div>

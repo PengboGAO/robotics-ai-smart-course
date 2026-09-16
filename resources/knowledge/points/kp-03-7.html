@@ -1,0 +1,14 @@
+<!--META {"kp_id": "kp-3-7", "kp_label": "KP 3.7", "title": "ABB等价D-H模型与一致性验证", "tags": ["重点", "难点"], "difficulty": 4, "chapter": 3, "order": 7, "file": "kp-03-7.html"}-->
+<div class="kp-card" id="kp-3-7">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.7</span>ABB等价D-H模型与一致性验证</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>厂家产品规格不提供可直接复制到本课程代码中的标准D-H表。本节给出的是依据参考关节链推导的<span class="term">课程等价标准D-H模型</span>，用于训练坐标系建模和模型间一致性验证，不冒充ABB标定参数。</p>
+    <div class="table-wrap"><table><thead><tr><th>i</th><th>a<sub>i</sub> / m</th><th>α<sub>i</sub></th><th>d<sub>i</sub> / m</th><th>θ偏置</th></tr></thead><tbody>
+      <tr><td>1</td><td>0</td><td>−90°</td><td>0.3991</td><td>0°</td></tr><tr><td>2</td><td>0.4480</td><td>0°</td><td>0</td><td>−90°</td></tr><tr><td>3</td><td>0.0420</td><td>−90°</td><td>0</td><td>0°</td></tr><tr><td>4</td><td>0</td><td>90°</td><td>0.4510</td><td>0°</td></tr><tr><td>5</td><td>0</td><td>−90°</td><td>0</td><td>0°</td></tr><tr><td>6</td><td>0</td><td>0°</td><td>0.0820</td><td>0°</td></tr>
+    </tbody></table></div>
+    <p>标准D-H连乘后需增加一个固定法兰姿态对齐矩阵，才能与参考链的link_6坐标系完全一致。对齐矩阵只能修正固定坐标系定义，不能掩盖随关节角变化的模型错误。</p>
+    <div class="formula-block"><div class="formula-label">双链一致性判据</div><div class="formula">e<sub>p</sub>=‖p<sub>DH</sub>−p<sub>ref</sub>‖₂；e<sub>R</sub>=‖R<sub>DH</sub>−R<sub>ref</sub>‖<sub>F</sub></div></div>
+    <div class="callout callout-info"><div class="callout-title">最小验证集</div><p>使用零位、课程起点[0, −30, 20, 0, 30, 0]°、课程目标[60, 40, −70, 100, 45, 180]°及至少两组自选非零构型。先找第一处超差的T<sub>0i</sub>，再检查D-H约定、θ偏置、轴向、单位和法兰固定变换。</p></div>
+    <div class="callout callout-success"><div class="callout-title">直接证据</div><p>提交“坐标系图—D-H表—代码变量—多构型误差”四项对应表。只有位置和姿态均在自定数值容差内，才能写“课程模型一致”；容差必须注明仅用于浮点复算。</p></div>
+  </div>
+</div>

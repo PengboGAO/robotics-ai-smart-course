@@ -1,0 +1,73 @@
+<!--META {"kp_id": "kp-5-1", "kp_label": "KP 5.1", "title": "拉格朗日法", "tags": ["重点", "难点", "考点"], "difficulty": 4, "chapter": 5, "order": 1, "file": "kp-05-1.html"}-->
+<div class="kp-card" id="kp-5-1">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 5.1</span>拉格朗日法</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 难点">难点</span>
+          <span class="kp-tag 考点">考点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">拉格朗日法</span>（Lagrangian Formulation）是一种基于能量观点建立系统动力学方程的方法。它从系统的动能与势能出发，通过拉格朗日函数自动消去理想约束力，直接得到与广义坐标数目相同的运动微分方程。其核心优势在于<span class="highlight">只需标量运算（能量），无需分析约束力</span>，对多自由度串联机器人尤为便利。</p>
+        <div class="callout callout-warning"><div class="callout-title">ABB子模型边界</div><p>本章符号算例统一解释为ABB IRB 1200的A2–A3平面教学子模型。m、I、质心位置均为课程符号或教学设定值，不是ABB厂家动力学参数；完整六轴力矩预测必须使用可追溯的辨识参数并另行验证。</p></div>
+        <p>对于 n 自由度机器人，定义广义坐标 <span class="inline-formula">q = [q₁, q₂, ..., qₙ]ᵀ</span>，拉格朗日函数 L 定义为系统动能 K 与势能 V 之差：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">拉格朗日函数定义</div>
+          <div class="formula">L = K − V</div>
+        </div>
+
+        <p>则第 i 个广义坐标对应的广义驱动力（关节力矩）<span class="inline-formula">τᵢ</span> 由拉格朗日方程给出：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">拉格朗日方程（第二类拉格朗日方程）</div>
+          <div class="formula">τ<sub>i</sub> = d/dt (∂L / ∂q̇<sub>i</sub>) − ∂L / ∂q<sub>i</sub>　　(i = 1, 2, ..., n)</div>
+        </div>
+
+        <p>该方程的物理意义可分解为两项：</p>
+        <ul>
+          <li><strong>第一项</strong> <span class="inline-formula">d/dt(∂L/∂q̇ᵢ)</span>：广义动量对时间的变化率，反映惯性效应；</li>
+          <li><strong>第二项</strong> <span class="inline-formula">∂L/∂qᵢ</span>：拉格朗日函数对广义坐标的偏导，反映动能位形依赖项和有势力项。</li>
+        </ul>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 拉格朗日法建模四步法</div>
+          <p>① 确定广义坐标 q；② 计算系统总动能 K；③ 计算系统总势能 V；④ 代入拉格朗日方程，化简得到 τ = f(q, q̇, q̈)。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 注意事项</div>
+          <p>拉格朗日法虽然推导过程系统化，但能量表达式中包含复杂的偏导数运算，对于自由度较多的机器人，<span class="highlight">符号推导工作量随自由度呈非线性增长</span>。这也是工程中常借助 MATLAB Symbolic Math Toolbox 或递归牛顿-欧拉法的原因。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型拉格朗日推导</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；参数为教学设定</span>
+syms q1 q2 qd1 qd2 t real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>;
+I1=<span class="number">0.5</span>; I2=<span class="number">0.2</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心位置（广义坐标的函数）</span>
+xc1=lc1*cos(q1);  yc1=lc1*sin(q1);
+xc2=l1*cos(q1)+lc2*cos(q1+q2);  yc2=l1*sin(q1)+lc2*sin(q1+q2);
+<span class="comment">% 质心速度平方</span>
+vc1sq=(diff(xc1,q1)*qd1)^<span class="number">2</span>+(diff(yc1,q1)*qd1)^<span class="number">2</span>;
+vc2sq=(diff(xc2,q1)*qd1+diff(xc2,q2)*qd2)^<span class="number">2</span>+(diff(yc2,q1)*qd1+diff(yc2,q2)*qd2)^<span class="number">2</span>;
+<span class="comment">% 动能K、势能V、拉格朗日函数L=K-V</span>
+K=<span class="number">0.5</span>*m1*vc1sq+<span class="number">0.5</span>*I1*qd1^<span class="number">2</span>+<span class="number">0.5</span>*m2*vc2sq+<span class="number">0.5</span>*I2*(qd1+qd2)^<span class="number">2</span>;
+V=m1*g*yc1+m2*g*yc2;  L=K-V;
+<span class="comment">% 拉格朗日方程：tau_i = d/dt(dL/dqd_i) - dL/dq_i</span>
+<span class="comment">% 使用链式法则：d/dt(dL/dqd_i) = sum_j d2L/dqj_dqd_i * qd_j + d2L/dqdj_dqd_i * qdd_j</span>
+syms qdd1 qdd2 real
+dL_dqd1=diff(L,qd1);  dL_dqd2=diff(L,qd2);
+d_dt_dL_dqd1=jacobian(dL_dqd1,[q1,q2,qd1,qd2])*[qd1;qd2;qdd1;qdd2];
+d_dt_dL_dqd2=jacobian(dL_dqd2,[q1,q2,qd1,qd2])*[qd1;qd2;qdd1;qdd2];
+tau1=simplify(d_dt_dL_dqd1-diff(L,q1));
+tau2=simplify(d_dt_dL_dqd2-diff(L,q2));
+disp(<span class="string">'tau1='</span>), disp(tau1), disp(<span class="string">'tau2='</span>), disp(tau2)
+</pre>
+        </div>
+      </div>
+    </div>

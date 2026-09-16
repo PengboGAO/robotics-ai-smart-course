@@ -1,0 +1,13 @@
+<!--META {"kp_id": "kp-3-8", "kp_label": "KP 3.8", "title": "ABB型号参数与模型边界", "tags": ["重点"], "difficulty": 3, "chapter": 3, "order": 8, "file": "kp-03-abb-boundary.html"}-->
+<div class="kp-card" id="kp-3-8">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.8</span>ABB型号参数与模型边界</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>同一系列机器人也不能混用型号参数。本课程固定使用 <span class="term">ABB IRB 1200-5/0.9</span>，其中5表示额定负载等级，0.9表示到达距离等级。IRB 1200-7/0.7的工作范围、速度和几何条件不得直接代入本课程模型。</p>
+    <div class="table-wrap"><table><thead><tr><th>轴</th><th>工作范围 / °</th><th>三相供电最大速度 / (°·s⁻¹)</th></tr></thead><tbody>
+      <tr><td>A1</td><td>−170～170</td><td>288</td></tr><tr><td>A2</td><td>−100～130</td><td>240</td></tr><tr><td>A3</td><td>−200～70</td><td>297</td></tr><tr><td>A4</td><td>−270～270</td><td>400</td></tr><tr><td>A5</td><td>−130～130</td><td>405</td></tr><tr><td>A6</td><td>−400～400</td><td>600</td></tr>
+    </tbody></table></div>
+    <p>上表用于课程轨迹预检。单相供电时A4/A5最大速度还需按产品规格下调；实体执行时必须以具体控制柜、RobotWare配置、tooldata、loaddata和wobjdata为准。</p>
+    <div class="callout callout-warning"><div class="callout-title">三类参数不能混写</div><p><strong>ABB产品规格</strong>用于型号、工作范围和速度；<strong>ROS-Industrial参考链</strong>用于教学几何与轴向；<strong>课程等价D-H表</strong>由学习者推导并用多构型复算。三者来源、用途和责任边界必须分别标注。</p></div>
+    <div class="callout callout-info"><div class="callout-title">工程记录要求</div><p>每次提交都写明型号、供电条件、单位、坐标系、工具/工件数据状态和未完成验证项。无法提供RobotStudio站点与事件日志时，应写“课程模型通过，控制器与碰撞待验证”。</p></div>
+  </div>
+</div>

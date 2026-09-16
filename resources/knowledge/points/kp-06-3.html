@@ -1,0 +1,126 @@
+<!--META {"kp_id": "kp-6-3", "kp_label": "KP 6.3", "title": "五次多项式插值", "tags": ["难点"], "difficulty": 3, "chapter": 6, "order": 3, "file": "kp-06-3.html"}-->
+<div class="kp-card" id="kp-6-3">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.3</span>五次多项式插值</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">五次多项式插值</span>（Quintic Polynomial Interpolation）通过提高多项式阶数，增加 2 个边界条件（起止加速度），从而实现加速度连续（C² 连续），消除三次多项式端点加速度跳变引起的冲击。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">五次多项式轨迹</div>
+          <div class="formula">q(t) = a₀ + a₁ t + a₂ t² + a₃ t³ + a₄ t⁴ + a₅ t⁵</div>
+        </div>
+
+        <p>共 6 个未知系数，需 6 个边界条件：起止点的位置、速度、加速度。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">边界条件（6 个）</div>
+          <div class="formula">q(0)=q₀,&nbsp; q(t<sub>f</sub>)=q<sub>f</sub>,&nbsp; q̇(0)=v₀,&nbsp; q̇(t<sub>f</sub>)=v<sub>f</sub>,&nbsp; q̈(0)=α₀,&nbsp; q̈(t<sub>f</sub>)=α<sub>f</sub></div>
+        </div>
+
+        <p>由 q̇(t) = a₁ + 2a₂ t + 3a₃ t² + 4a₄ t³ + 5a₅ t⁴，q̈(t) = 2a₂ + 6a₃ t + 12a₄ t² + 20a₅ t³，代入边界条件得 6×6 线性方程组，其矩阵形式为：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">系数求解（矩阵形式）</div>
+          <div class="formula">[ 1  0  0  0  0  0 ] [a₀]   [ q₀ ]</div>
+          <div class="formula">[ 0  1  0  0  0  0 ] [a₁]   [ v₀ ]</div>
+          <div class="formula">[ 0  0  2  0  0  0 ] [a₂] = [ α₀]</div>
+          <div class="formula">[ 1 tf tf² tf³ tf⁴ tf⁵][a₃]   [ qf ]</div>
+          <div class="formula">[ 0  1 2tf 3tf² 4tf³ 5tf⁴][a₄]  [ vf ]</div>
+          <div class="formula">[ 0  0  2 6tf 12tf² 20tf³][a₅]  [ αf]</div>
+        </div>
+
+        <div class="svg-diagram">
+          <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
+            <text x="380" y="22" text-anchor="middle" fill="#1a202c" font-size="15" font-weight="700">三次多项式 vs 五次多项式 连续性对比</text>
+
+            <!-- ===== 左图：位置曲线 ===== -->
+            <text x="200" y="48" text-anchor="middle" fill="#475569" font-size="12" font-weight="600">位置 q(t)</text>
+            <line x1="60" y1="200" x2="340" y2="200" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="60" y1="70" x2="60" y2="200" stroke="#94a3b8" stroke-width="1"/>
+            <!-- 三次曲线（蓝） -->
+            <path d="M 60 180 Q 200 180 340 90" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+            <!-- 五次曲线（橙，更平滑） -->
+            <path d="M 60 180 C 150 180 250 140 340 90" fill="none" stroke="#d97706" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <!-- 端点 -->
+            <circle cx="60" cy="180" r="3" fill="#1a202c"/>
+            <circle cx="340" cy="90" r="3" fill="#1a202c"/>
+            <text x="55" y="195" text-anchor="end" fill="#64748b" font-size="10">q₀</text>
+            <text x="345" y="88" fill="#64748b" font-size="10">qf</text>
+            <text x="200" y="215" text-anchor="middle" fill="#64748b" font-size="10">t</text>
+            <!-- 图例 -->
+            <line x1="90" y1="240" x2="120" y2="240" stroke="#2563eb" stroke-width="2.5"/>
+            <text x="128" y="244" fill="#475569" font-size="11">三次多项式</text>
+            <line x1="220" y1="240" x2="250" y2="240" stroke="#d97706" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <text x="258" y="244" fill="#475569" font-size="11">五次多项式</text>
+            <text x="200" y="270" text-anchor="middle" fill="#059669" font-size="11" font-weight="600">位置均连续 ✓</text>
+
+            <!-- ===== 右图：加速度曲线 ===== -->
+            <text x="590" y="48" text-anchor="middle" fill="#475569" font-size="12" font-weight="600">加速度 q̈(t)</text>
+            <line x1="450" y1="200" x2="730" y2="200" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="450" y1="70" x2="450" y2="240" stroke="#94a3b8" stroke-width="1"/>
+            <!-- 三次加速度：从正值线性减小到负值（蓝） -->
+            <path d="M 450 130 L 730 270" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+            <!-- 跳变标记 -->
+            <line x1="450" y1="200" x2="450" y2="130" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+            <line x1="730" y1="200" x2="730" y2="270" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+            <circle cx="450" cy="130" r="3" fill="#dc2626"/>
+            <circle cx="730" cy="270" r="3" fill="#dc2626"/>
+            <text x="440" y="128" text-anchor="end" fill="#dc2626" font-size="10" font-weight="600">跳变!</text>
+            <text x="735" y="278" fill="#dc2626" font-size="10" font-weight="600">跳变!</text>
+            <!-- 五次加速度：端点为0，前半正后半负，中点过零，光滑（橙） -->
+            <path d="M 450 200 C 475 105 565 105 590 200 C 615 295 705 295 730 200" fill="none" stroke="#d97706" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <!-- 中点零交叉标记 -->
+            <circle cx="590" cy="200" r="2.5" fill="#d97706"/>
+            <text x="598" y="195" fill="#d97706" font-size="9">s=0.5</text>
+            <!-- 正负区域标注 -->
+            <text x="515" y="98" text-anchor="middle" fill="#d97706" font-size="9" font-weight="600">q̈ &gt; 0</text>
+            <text x="665" y="315" text-anchor="middle" fill="#d97706" font-size="9" font-weight="600">q̈ &lt; 0</text>
+            <text x="590" y="215" text-anchor="middle" fill="#64748b" font-size="10">t</text>
+            <text x="590" y="290" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="600">三次：端点加速度跳变 ✗</text>
+            <text x="590" y="310" text-anchor="middle" fill="#059669" font-size="11" font-weight="600">五次：端点加速度=0，连续 ✓</text>
+            <!-- 图例 -->
+            <line x1="470" y1="338" x2="500" y2="338" stroke="#2563eb" stroke-width="2.5"/>
+            <text x="508" y="342" fill="#475569" font-size="11">三次</text>
+            <line x1="600" y1="338" x2="630" y2="338" stroke="#d97706" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <text x="638" y="342" fill="#475569" font-size="11">五次</text>
+          </svg>
+          <div class="diagram-caption">图6-1 三次与五次多项式轨迹的位置与加速度连续性对比</div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 五次多项式的优势</div>
+          <p>当起止速度与加速度均为零时（典型"停-停"轨迹），五次多项式的加速度在端点平滑过渡为零，<span class="highlight">全程加速度连续（C²）</span>，有效消除机械冲击与振动。代价是最大速度与加速度峰值略高于三次多项式，需要更大的驱动能力。在要求平稳运行的工业机器人中，五次多项式是优先选择。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 五次多项式系数矩阵求解与绘图</div>
+<pre><span class="comment">% 五次多项式插值：6个边界条件求解6个系数</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;     <span class="comment">% 起止位置</span>
+v0 = <span class="number">0</span>;  vf = <span class="number">0</span>;         <span class="comment">% 起止速度</span>
+ac0 = <span class="number">0</span>; acf = <span class="number">0</span>;        <span class="comment">% 起止加速度(停-停)</span>
+tf = <span class="number">2</span>;
+<span class="comment">% 构建6x6方程组 M*A = B</span>
+M = [<span class="number">1</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;  <span class="number">0</span> <span class="number">1</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;
+     <span class="number">0</span> <span class="number">0</span> <span class="number">2</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;  <span class="number">1</span> tf tf^<span class="number">2</span> tf^<span class="number">3</span> tf^<span class="number">4</span> tf^<span class="number">5</span>;
+     <span class="number">0</span> <span class="number">1</span> <span class="number">2</span>*tf <span class="number">3</span>*tf^<span class="number">2</span> <span class="number">4</span>*tf^<span class="number">3</span> <span class="number">5</span>*tf^<span class="number">4</span>;
+     <span class="number">0</span> <span class="number">0</span> <span class="number">2</span> <span class="number">6</span>*tf <span class="number">12</span>*tf^<span class="number">2</span> <span class="number">20</span>*tf^<span class="number">3</span>];
+B = [q0; v0; ac0; qf; vf; acf];
+A = M \ B;   <span class="comment">% 求解系数[a0~a5]</span>
+t = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+<span class="comment">% 计算位置/速度/加速度</span>
+q   = A(<span class="number">1</span>)+A(<span class="number">2</span>)*t+A(<span class="number">3</span>)*t.<span class="number">2</span>+A(<span class="number">4</span>)*t.<span class="number">3</span>+A(<span class="number">5</span>)*t.<span class="number">4</span>+A(<span class="number">6</span>)*t.<span class="number">5</span>;
+qd  = A(<span class="number">2</span>)+<span class="number">2</span>*A(<span class="number">3</span>)*t+<span class="number">3</span>*A(<span class="number">4</span>)*t.<span class="number">2</span>+<span class="number">4</span>*A(<span class="number">5</span>)*t.<span class="number">3</span>+<span class="number">5</span>*A(<span class="number">6</span>)*t.<span class="number">4</span>;
+qdd = <span class="number">2</span>*A(<span class="number">3</span>)+<span class="number">6</span>*A(<span class="number">4</span>)*t+<span class="number">12</span>*A(<span class="number">5</span>)*t.<span class="number">2</span>+<span class="number">20</span>*A(<span class="number">6</span>)*t.<span class="number">3</span>;
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

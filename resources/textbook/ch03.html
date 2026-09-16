@@ -45,9 +45,9 @@
       <li class="sub-item"><a href="#kp-4">KP 3.4 连杆坐标系建立</a></li>
       <li class="sub-item"><a href="#kp-5">KP 3.5 正运动学方程</a></li>
       <li><a href="#sec-3">3.3 典型机器人案例</a></li>
-      <li class="sub-item"><a href="#kp-6">KP 3.6 PUMA560正运动学</a></li>
-      <li class="sub-item"><a href="#kp-7">KP 3.7 斯坦福臂正运动学</a></li>
-      <li class="sub-item"><a href="#kp-ur5">拓展 UR5协作机器人</a></li>
+      <li class="sub-item"><a href="#kp-3-6">KP 3.6 ABB参考关节链</a></li>
+      <li class="sub-item"><a href="#kp-3-7">KP 3.7 ABB等价D-H验证</a></li>
+      <li class="sub-item"><a href="#kp-3-8">KP 3.8 ABB参数与模型边界</a></li>
       <li><a href="#sec-summary">3.4 本章小结</a></li>
       <li><a href="#sec-think">3.5 本章思考题</a></li>
     </ul>
@@ -61,9 +61,9 @@
     <div class="chapter-header">
       <div class="chapter-num">CHAPTER 03</div>
       <h1>正运动学</h1>
-      <p class="subtitle">D-H参数法 · 连杆坐标系 · 正运动学方程 · PUMA560与斯坦福臂案例</p>
+      <p class="subtitle">D-H参数法 · ABB IRB 1200参考链 · 等价模型一致性验证</p>
       <div class="meta-row">
-        <div class="meta-item">📖 7个知识点 + 1个拓展案例</div>
+        <div class="meta-item">📖 8个知识点 · ABB贯穿案例</div>
         <div class="meta-item">⏱ 8学时</div>
         <div class="meta-item">🎬 5个精讲视频</div>
       </div>
@@ -72,7 +72,7 @@
 
     <div class="callout callout-info">
       <div class="callout-title">本章导读</div>
-      <p>正运动学（Forward Kinematics）研究在已知机器人各关节变量的前提下，求解末端执行器相对于基坐标系的位姿。它是机器人学最基础、也是唯一具有<span class="highlight">封闭且唯一解</span>的运动学问题。本章从 Denavit 与 Hartenberg 于 1955 年提出的 D-H 参数法出发，系统讲解连杆坐标系的建立规则、相邻坐标系变换矩阵的推导，并以 PUMA560 与斯坦福臂两类典型构型为例完成正运动学方程的求解与 MATLAB 验证。</p>
+      <p>正运动学在已知关节变量时求解末端位姿。本章以ABB IRB 1200-5/0.9贯穿：先依据参考关节链逐级计算T<sub>01</sub>至T<sub>06</sub>，再由学生建立课程等价D-H模型，通过零位和多组非零构型同时比较位置与姿态误差。重点不是让程序“跑起来”，而是证明坐标系、参数、代码和结果相互一致。</p>
     </div>
 
     <h2 class="section-title" id="sec-1"><span class="section-num">3.1</span>D-H参数法</h2>
@@ -89,11 +89,11 @@
         </div>
       </div>
       <div class="kp-body">
-        <p>D-H 参数法（Denavit-Hartenberg Parameterization）由 Jacques Denavit 与 Richard S. Hartenberg 于 1955 年提出，是一种<span class="highlight">系统化、参数最少</span>的机器人运动学建模方法。其核心思想是：为每个连杆固连一个坐标系，并用<span class="term">四个几何参数</span>完全描述相邻两个坐标系之间的位姿关系。由于单自由度关节只有 1 个自由度，而两坐标系间的一般位姿关系有 6 个自由度，D-H 法利用关节轴线的特殊几何约束消去了 2 个冗余自由度，因此仅需 4 个参数即可。</p>
+        <p>D-H 参数法（Denavit-Hartenberg Parameterization）由 Jacques Denavit 与 Richard S. Hartenberg 于 1955 年提出，是一种<span class="highlight">利用关节轴几何约束进行参数化</span>的串联机器人运动学建模方法。其核心思想是：按明确约定为相邻连杆建立坐标系，并用<span class="term">四个几何参数</span>描述两坐标系之间受约束的相对位姿。四参数表示依赖D-H坐标系建立规则，并不意味着任意两个坐标系的一般位姿只需要四个参数。</p>
 
         <div class="callout callout-info">
           <div class="callout-title">为什么是 4 个参数而非 6 个？</div>
-          <p>两个坐标系间的一般位姿关系有 6 个自由度（3 平移 + 3 旋转）。但 D-H 法通过<strong>两条约束</strong>消去了 2 个自由度：（1）将 x<sub>i</sub> 轴取为两相邻 z 轴的公垂线方向，使坐标系绕该公垂线的转动被唯一确定（消去 1 自由度）；（2）原点取在公垂线与 z 轴的交点，使沿 x 轴的位置被约束（消去 1 自由度）。因此 6−2=4，仅需 a、α、d、θ 四个参数。这是 D-H 法"参数最少"的数学本质，也是它优于一般位姿描述的关键。</p>
+          <p>两个任意坐标系之间的一般位姿具有6个自由度。D-H法不是对任意位姿降维，而是把z轴与关节轴对齐、把x轴选在相邻z轴的公垂线方向，并据此限制坐标系的选取。完成这些约束后，相邻连杆变换可以按约定分解为绕z转θ、沿z移d、沿x移a、绕x转α四个基本变换。平行、相交或重合关节轴会带来坐标系选择自由度，因此参数表可能不唯一，必须用正运动学结果验证约定是否一致。</p>
         </div>
 
         <p>四个 D-H 参数的几何含义如下：</p>
@@ -214,7 +214,7 @@
         </div>
       </div>
       <div class="kp-body">
-        <p><span class="term">改进 D-H 法</span>（Modified D-H，又称 Craig 约定）由 John J. Craig 在《Introduction to Robotics》中推广。其关键差异在于：<strong>坐标系 {i} 固连于连杆 i-1</strong>（即建在关节 i 的远端），z<sub>i</sub> 轴沿关节 i+1 的轴线方向，x<sub>i</sub> 轴沿 z<sub>i-1</sub> 与 z<sub>i</sub> 的公垂线。这一调整使得参数下标统一为 a<sub>i-1</sub>、α<sub>i-1</sub>、d<sub>i</sub>、θ<sub>i</sub>，物理意义更清晰，特别适合处理含平行关节的工业机器人。</p>
+        <p><span class="term">改进 D-H 法</span>（Modified D-H，常指Craig约定）改变了相邻坐标系之间四个基本变换的排列，并常采用 a<sub>i-1</sub>、α<sub>i-1</sub>、d<sub>i</sub>、θ<sub>i</sub> 的下标体系。不同教材对坐标系归属和下标描述可能存在差异，因此本课程不把“坐标系固连于哪一编号连杆”作为脱离公式的记忆结论，而以本页给出的变换次序和坐标轴定义为准。使用时必须保证坐标系、参数表、变换矩阵与软件接口采用同一约定。</p>
         <div class="formula-block">
           <div class="formula-label">改进 D-H 变换矩阵分解</div>
           <div class="formula"><sup>i-1</sup><sub>i</sub>T = Rot(x, α<sub>i-1</sub>) · Trans(x, a<sub>i-1</sub>) · Rot(z, θ<sub>i</sub>) · Trans(z, d<sub>i</sub>)</div>
@@ -284,7 +284,7 @@
 
         <div class="callout callout-info">
           <div class="callout-title">约定选择提示</div>
-          <p>本课程后续案例（PUMA560、斯坦福臂、UR5）<strong>统一采用经典 D-H 约定</strong>，这也是 MATLAB Robotics Toolbox 的 standard 模式所采用的约定。引用不同教材的 D-H 参数表时，务必先确认其采用的是经典还是改进约定，否则会导致正运动学结果错误。</p>
+          <p>本课程后续案例统一采用 <strong>ABB IRB 1200-5/0.9</strong>。建模时先以ROS-Industrial的关节原点与轴向建立参考链，再由学生建立课程等价的经典D-H链；两条链必须在零位和多组非零构型下同时比较位置误差与姿态误差。课程D-H表是教学建模结果，不表述为ABB厂家公布参数。</p>
         </div>
       </div>
     </div>
@@ -369,7 +369,7 @@
 
         <div class="callout callout-info">
           <div class="callout-title">参数表快速校验法</div>
-          <p>填写参数表后可用三条规则快速校验：（1）<strong>关节变量计数</strong>——表中标★的变量数应等于机器人自由度数；（2）<strong>基座行</strong>——第 1 行通常 a<sub>1</sub>=0（基座无连杆长度），α<sub>1</sub> 反映关节 1、2 轴线的夹角；（3）<strong>末端行</strong>——最后一行 d<sub>n</sub> 常为工具长度（end-effector offset）。若这三条不符，应重新检查坐标系建立。</p>
+          <p>参数表不能靠“首行 a<sub>1</sub>=0”或“末行 d<sub>n</sub> 等于工具长度”等经验规则判真，因为数值取决于坐标系约定。可靠校验应包括：（1）旋转关节的变量在 θ 列、移动关节的变量在 d 列，变量数与自由度一致；（2）零位和至少一组非零位姿的矩阵连乘与几何尺寸一致；（3）与 CAD/URDF/厂商模型比较时统一基座、法兰、工具坐标系和零位偏置。三类检查同时通过后，参数表才具备工程可用性。</p>
         </div>
       </div>
     </div>
@@ -450,9 +450,9 @@
         </div>
 
         <div class="callout callout-success">
-          <div class="callout-title">例题：两连杆平面机器人正运动学</div>
-          <p>两连杆平面机器人（RR）是最简单的多关节机器人，是理解 D-H 参数法的入门案例。设连杆 1、2 长度分别为 l<sub>1</sub>、l<sub>2</sub>，两关节均为旋转关节，且共面运动。建立坐标系：z<sub>0</sub>、z<sub>1</sub> 均垂直于运动平面（同向），z<sub>2</sub> 同向；x<sub>0</sub> 沿连杆 1 方向，x<sub>1</sub> 沿连杆 2 方向。</p>
-          <p>按经典 D-H 约定，两连杆平面机器人的 D-H 参数为：</p>
+          <div class="callout-title">例题：ABB IRB 1200 A2–A3平面教学子链</div>
+          <p>为单独观察肩、肘角对腕心位置的影响，先把ABB IRB 1200的A2–A3定位部分投影为RR平面教学子链。设两段等效长度为l<sub>1</sub>、l<sub>2</sub>，该简化仅用于推导与查错，不替代第3.6节的六轴参考链。</p>
+          <p>按经典 D-H 约定，ABB A2–A3平面教学子链的参数为：</p>
           <ul>
             <li>关节 1：a<sub>1</sub>=l<sub>1</sub>，α<sub>1</sub>=0，d<sub>1</sub>=0，θ<sub>1</sub>（变量）</li>
             <li>关节 2：a<sub>2</sub>=l<sub>2</sub>，α<sub>2</sub>=0，d<sub>2</sub>=0，θ<sub>2</sub>（变量）</li>
@@ -461,7 +461,7 @@
         </div>
 
         <div class="formula-block">
-          <div class="formula-label">两连杆平面机器人末端位姿（3-8）</div>
+          <div class="formula-label">ABB A2–A3平面教学子链末端位姿（3-8）</div>
           <div class="formula">
             T<sub>02</sub> = ⎡ c<sub>12</sub> &nbsp; −s<sub>12</sub> &nbsp; 0 &nbsp; l<sub>1</sub>c<sub>1</sub>+l<sub>2</sub>c<sub>12</sub> ⎤<br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⎢ s<sub>12</sub> &nbsp; c<sub>12</sub> &nbsp;&nbsp; 0 &nbsp; l<sub>1</sub>s<sub>1</sub>+l<sub>2</sub>s<sub>12</sub> ⎥<br>
@@ -513,7 +513,7 @@
             <line x1="100" y1="220" x2="100" y2="190" stroke="#059669" stroke-width="2" marker-end="url(#arr3_b2)"/>
             <text x="78" y="188" font-size="11" fill="#059669">y₀</text>
           </svg>
-          <div class="diagram-caption">图 3-2 两连杆平面机器人 D-H 坐标系与正运动学几何关系</div>
+          <div class="diagram-caption">图 3-2 ABB A2–A3平面教学子链的D-H坐标系与几何关系</div>
         </div>
       </div>
     </div>
@@ -534,317 +534,53 @@
 
 
     <div class="kp-card" id="kp-3-6">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 3.6</span>PUMA560正运动学</div>
-        <div class="kp-tags">
-          <span class="kp-tag 考点">考点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p>PUMA560 是机器人学教学中经典的 6 自由度全旋转关节工业机器人，由 Unimation 公司于 1978 年推出。其结构特征为：腰部回转（关节1）、肩部俯仰（关节2）、肘部俯仰（关节3），后三个关节构成<span class="highlight">球形腕</span>（关节4、5、6 轴线交于一点），是典型的可解析构型。</p>
-
-        <p>按经典 D-H 约定建立坐标系，PUMA560 的 D-H 参数表如下（单位：m，角度单位：rad。参数值与 MATLAB Robotics Toolbox 内置 mdl_puma560 一致）：</p>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>关节 i</th>
-                <th>a<sub>i</sub> (m)</th>
-                <th>α<sub>i</sub> (rad)</th>
-                <th>d<sub>i</sub> (m)</th>
-                <th>θ<sub>i</sub> (rad)</th>
-                <th>关节类型</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>0</td>
-                <td>−π/2</td>
-                <td>0</td>
-                <td>θ<sub>1</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>a<sub>2</sub>=0.4318</td>
-                <td>0</td>
-                <td>0</td>
-                <td>θ<sub>2</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>a<sub>3</sub>=0.0203</td>
-                <td>−π/2</td>
-                <td>d<sub>3</sub>=0.15</td>
-                <td>θ<sub>3</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td>0</td>
-                <td>π/2</td>
-                <td>d<sub>4</sub>=0.4318</td>
-                <td>θ<sub>4</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>5</td>
-                <td>0</td>
-                <td>−π/2</td>
-                <td>0</td>
-                <td>θ<sub>5</sub></td>
-                <td>旋转</td>
-              </tr>
-              <tr>
-                <td>6</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>θ<sub>6</sub></td>
-                <td>旋转</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-2 PUMA560 机器人 D-H 参数表（经典 D-H 约定，参数值取自 MATLAB Robotics Toolbox 内置 mdl_puma560）</p>
-
-        <p>将各关节参数代入经典 D-H 变换矩阵通式（3-1），得到 6 个连杆变换矩阵 A<sub>1</sub>~A<sub>6</sub>，连乘即得 T<sub>06</sub>。前三个关节（手臂）确定腕部中心位置：</p>
-        <div class="formula-block">
-          <div class="formula-label">腕部中心位置（3-6）</div>
-          <div class="formula">
-            p<sub>c</sub> = [ a<sub>2</sub>c<sub>1</sub>c<sub>2</sub> + a<sub>3</sub>c<sub>1</sub>c<sub>23</sub> − d<sub>4</sub>c<sub>1</sub>s<sub>23</sub> − d<sub>3</sub>s<sub>1</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a<sub>2</sub>s<sub>1</sub>c<sub>2</sub> + a<sub>3</sub>s<sub>1</sub>c<sub>23</sub> − d<sub>4</sub>s<sub>1</sub>s<sub>23</sub> + d<sub>3</sub>c<sub>1</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; −a<sub>2</sub>s<sub>2</sub> − a<sub>3</sub>s<sub>23</sub> − d<sub>4</sub>c<sub>23</sub> ]<sup>T</sup>
-          </div>
-        </div>
-        <p>其中 c<sub>i</sub>=cos θ<sub>i</sub>，s<sub>i</sub>=sin θ<sub>i</sub>，c<sub>23</sub>=cos(θ<sub>2</sub>+θ<sub>3</sub>)，s<sub>23</sub>=sin(θ<sub>2</sub>+θ<sub>3</sub>)。后三个关节（腕部）仅改变末端姿态，不改变腕部中心位置——这是球腕结构的标志特性。</p>
-
-        <p>下面给出使用 MATLAB Robotics Toolbox 建立 PUMA560 模型并求解正运动学的完整代码：</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> Robotics Toolbox · PUMA560 正运动学</div>
-<pre><span class="comment">% PUMA560 正运动学求解（经典 D-H 约定）</span>
-<span class="comment">% 需安装 MATLAB Robotics Toolbox for MATLAB (Peter Corke)</span>
-clc; clear; close all;
-
-<span class="comment">% --- 1. 按 D-H 参数表定义 6 个连杆（L1~L6）---</span>
-<span class="comment">%    参数顺序为 [theta, d, a, alpha]，'standard' 表示经典 D-H</span>
-<span class="comment">%    长度单位 m，角度单位 rad（与 Robotics Toolbox 内置 mdl_puma560 一致）</span>
-L(1) = Link([0       0        0           -pi/2  ], <span class="string">'standard'</span>);
-L(2) = Link([0       0        0.4318      0      ], <span class="string">'standard'</span>);
-L(3) = Link([0       0.15     0.0203      -pi/2  ], <span class="string">'standard'</span>);
-L(4) = Link([0       0.4318   0           pi/2   ], <span class="string">'standard'</span>);
-L(5) = Link([0       0        0           -pi/2  ], <span class="string">'standard'</span>);
-L(6) = Link([0       0        0           0      ], <span class="string">'standard'</span>);
-
-<span class="comment">% --- 2. 构造串联机器人对象 ---</span>
-puma = SerialLink(L, <span class="string">'name'</span>, <span class="string">'PUMA560'</span>, ...
-                      <span class="string">'manufacturer'</span>, <span class="string">'Unimation'</span>);
-
-<span class="comment">% --- 3. 设定一组关节角，求正运动学 ---</span>
-q = [0  pi/4  -pi/2  0  pi/2  0];   <span class="comment">% 单位 rad</span>
-T  = puma.fkine(q);                  <span class="comment">% 末端位姿齐次矩阵</span>
-disp(<span class="string">'末端位姿 T06 ='</span>); disp(T);
-
-<span class="comment">% --- 4. 提取位置与姿态 ---</span>
-position = transl(T);                <span class="comment">% 末端位置 [x;y;z]</span>
-rpy      = tr2rpy(T);                <span class="comment">% RPY 欧拉角</span>
-fprintf(<span class="string">'末端位置 = [%.4f %.4f %.4f] m\n'</span>, position);
-fprintf(<span class="string">'末端姿态 RPY = [%.3f %.3f %.3f] rad\n'</span>, rpy);
-
-<span class="comment">% --- 5. 可视化机器人构型 ---</span>
-figure; puma.plot(q); title(<span class="string">'PUMA560 @ q=[0 pi/4 -pi/2 0 pi/2 0]'</span>);
-
-<span class="comment">% --- 6. 工作空间采样验证 ---</span>
-q_samples = rand(6,50)*2*pi - pi;    <span class="comment">% 随机 50 组关节角</span>
-T_samples = puma.fkine(q_samples);
-positions = transl(T_samples);
-figure; plot3(positions(1,:),positions(2,:),positions(3,:),<span class="string">'b.'</span>); axis equal;
-xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'y'</span>); zlabel(<span class="string">'z'</span>); title(<span class="string">'PUMA560 工作空间采样'</span>);</pre>
-        </div>
-
-        <div class="callout callout-success">
-          <div class="callout-title">运行结果</div>
-          <p>当 q = [0, π/4, −π/2, 0, π/2, 0] 时，末端位置约为 [0.625, 0.150, −0.596] m，姿态 RPY 约为 [π, π/4, 0] rad。<strong>以上结果基于修正后的 D-H 参数重新计算</strong>（参数取值与 MATLAB Robotics Toolbox 内置 mdl_puma560 一致，长度单位为 m）。由于 d<sub>6</sub>=0，末端位置即腕部中心位置。该结果可手工代入式（3-6）验证，从而确认 D-H 参数表与代码实现一致。</p>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">手工验证：代入式（3-6）</div>
-          <p>以 q = [0, π/4, −π/2, 0, π/2, 0] 为例手工计算腕部中心位置。代入 θ<sub>1</sub>=0 得 c<sub>1</sub>=1, s<sub>1</sub>=0；θ<sub>2</sub>=π/4 得 c<sub>2</sub>=s<sub>2</sub>=√2/2≈0.7071；θ<sub>23</sub>=θ<sub>2</sub>+θ<sub>3</sub>=π/4−π/2=−π/4 得 c<sub>23</sub>=0.7071, s<sub>23</sub>=−0.7071。代入式（3-6）：</p>
-          <p>p<sub>x</sub>=a<sub>2</sub>c<sub>1</sub>c<sub>2</sub>+a<sub>3</sub>c<sub>1</sub>c<sub>23</sub>−d<sub>4</sub>c<sub>1</sub>s<sub>23</sub>−d<sub>3</sub>s<sub>1</sub>=0.4318×0.7071+0.0203×0.7071−0.4318×(−0.7071)−0=(0.4318+0.0203+0.4318)×0.7071≈0.625 m</p>
-          <p>p<sub>y</sub>=a<sub>2</sub>s<sub>1</sub>c<sub>2</sub>+a<sub>3</sub>s<sub>1</sub>c<sub>23</sub>−d<sub>4</sub>s<sub>1</sub>s<sub>23</sub>+d<sub>3</sub>c<sub>1</sub>=0+0−0+0.15×1=0.150 m</p>
-          <p>p<sub>z</sub>=−a<sub>2</sub>s<sub>2</sub>−a<sub>3</sub>s<sub>23</sub>−d<sub>4</sub>c<sub>23</sub>=−0.4318×0.7071−0.0203×(−0.7071)−0.4318×0.7071=(−0.4318+0.0203−0.4318)×0.7071≈−0.596 m</p>
-          <p>手工计算结果 [0.625, 0.150, −0.596] m 与 MATLAB 输出吻合，确认 D-H 参数表与代码实现一致。这种手工验证是确认参数表正确性的必要步骤。</p>
-        </div>
-
-        <div class="callout callout-warning">
-          <div class="callout-title">常见参数表错误</div>
-          <p>引用 PUMA560 参数时易出错的三点：（1）<strong>约定混淆</strong>——经典 D-H 与改进 D-H 的 a、α 下标不同，混用导致结果错误；（2）<strong>参数顺序错误</strong>——MATLAB Robotics Toolbox 的 Link 构造函数参数顺序为 [theta, d, a, alpha]，若误写为 [theta, a, d, alpha] 等其他顺序将导致模型错误；（3）<strong>单位混淆</strong>——不同文献有的用 mm、有的用 m，需统一单位。本课程代码统一采用 m，与 Robotics Toolbox 内置 mdl_puma560 一致。建议以 Robotics Toolbox 官方文档为基准核对。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.6</span>ABB IRB 1200关节链正运动学</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>课程统一对象为 <span class="term">ABB IRB 1200-5/0.9</span>。参考关节链取自ROS-Industrial <code>abb_irb1200_support</code> 的 <code>irb1200_5_90_macro.xacro</code>：每个关节先执行固定原点平移，再绕该关节局部轴旋转。该模型属于社区维护的教学参考链；工作范围和最大轴速度仍以ABB产品规格为准。</p>
+    <div class="table-wrap"><table><thead><tr><th>轴</th><th>原点平移 xyz / m</th><th>局部转轴</th></tr></thead><tbody>
+      <tr><td>A1</td><td>[0, 0, 0.3991]</td><td>[0, 0, 1]</td></tr><tr><td>A2</td><td>[0, 0, 0]</td><td>[0, 1, 0]</td></tr><tr><td>A3</td><td>[0, 0, 0.4480]</td><td>[0, 1, 0]</td></tr><tr><td>A4</td><td>[0, 0, 0.0420]</td><td>[1, 0, 0]</td></tr><tr><td>A5</td><td>[0.4510, 0, 0]</td><td>[0, 1, 0]</td></tr><tr><td>A6</td><td>[0.0820, 0, 0]</td><td>[1, 0, 0]</td></tr>
+    </tbody></table></div>
+    <div class="formula-block"><div class="formula-label">参考链递推</div><div class="formula">T<sub>0i</sub> = T<sub>0,i-1</sub> · Trans(r<sub>i</sub>) · Rot(u<sub>i</sub>, q<sub>i</sub>)，i=1…6</div></div>
+    <p>学生必须逐级保存T<sub>01</sub>…T<sub>06</sub>，不能只提交最终矩阵。零位只能检查尺寸和轴向的明显错误；至少再选两组非零构型，计算位置差 Δp=‖p<sub>1</sub>−p<sub>2</sub>‖ 和姿态差 ΔR=‖R<sub>1</sub>−R<sub>2</sub>‖<sub>F</sub>。</p>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> 单关节递推核心</div><pre>T = eye(4);
+for axisIndex = 1:6
+    T = T * translationMatrix(jointOrigins(axisIndex,:));
+    T = T * axisRotationMatrix(jointAxes(axisIndex,:), qRad(axisIndex));
+    T0i(:,:,axisIndex) = T;
+end</pre></div>
+    <div class="callout callout-warning"><div class="callout-title">证据边界</div><p>“参考链复算通过”只证明课程代码与该关节链定义一致，不等于RobotStudio站点无碰撞，也不等于实体机器人绝对精度达到某一数值。工具、负载、工件坐标与控制器日志必须另行验证。</p></div>
+    <div class="callout callout-success"><div class="callout-title">学习产出</div><p>提交关节轴图、原点/轴向表、三组构型的逐级矩阵与误差记录。AI可定位第一处差异，但完整矩阵、复算代码和结论由学生完成。</p></div>
+  </div>
+</div>
 
 
     <div class="kp-card" id="kp-3-7">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">KP 3.7</span>斯坦福臂正运动学</div>
-        <div class="kp-tags">
-          <span class="kp-tag 重点">重点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">斯坦福臂</span>（Stanford Arm）由 Victor Scheinman 于 1969 年在斯坦福大学设计，是机器人学史上另一经典构型。它与 PUMA560 的关键区别在于：第 3 关节为<strong>移动关节（Prismatic）</strong>，构成 5R1P 结构（5 个旋转关节 + 1 个移动关节）。该设计使腕部中心可在球面上沿径向伸缩，工作空间呈球壳形。</p>
-
-        <p>斯坦福臂的 D-H 参数表如下（经典 D-H 约定，关节 3 为移动关节，d<sub>3</sub> 为变量。单位：m，角度单位：rad。结构常量 d<sub>2</sub>=0.152 m、d<sub>6</sub>=0.0563 m 取自 MATLAB Robotics Toolbox 内置 mdl_stanford）：</p>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>关节 i</th>
-                <th>a<sub>i</sub> (m)</th>
-                <th>α<sub>i</sub> (rad)</th>
-                <th>d<sub>i</sub> (m)</th>
-                <th>θ<sub>i</sub> (rad)</th>
-                <th>关节类型</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>0</td><td>−π/2</td><td>0</td><td>θ<sub>1</sub></td><td>旋转</td></tr>
-              <tr><td>2</td><td>0</td><td>π/2</td><td>d<sub>2</sub>=0.152</td><td>θ<sub>2</sub></td><td>旋转</td></tr>
-              <tr><td>3</td><td>0</td><td>0</td><td>d<sub>3</sub> (变量)</td><td>0</td><td>移动</td></tr>
-              <tr><td>4</td><td>0</td><td>−π/2</td><td>0</td><td>θ<sub>4</sub></td><td>旋转</td></tr>
-              <tr><td>5</td><td>0</td><td>π/2</td><td>0</td><td>θ<sub>5</sub></td><td>旋转</td></tr>
-              <tr><td>6</td><td>0</td><td>0</td><td>d<sub>6</sub>=0.0563</td><td>θ<sub>6</sub></td><td>旋转</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-3 斯坦福臂 D-H 参数表（5R1P 构型，关节 3 为移动关节，参数值取自 MATLAB Robotics Toolbox 内置 mdl_stanford）</p>
-
-        <p>注意表中有两点与 PUMA560 不同：（1）关节 3 的 <strong>d<sub>3</sub> 是变量</strong>，θ<sub>3</sub>=0 为常量，这是移动关节的标志；（2）所有 a<sub>i</sub> 均为 0，表明相邻关节轴线要么相交要么平行，结构紧凑。前三个关节构成<strong>球坐标定位机构</strong>（RRP），后三个关节构成球形腕（RRR），同样满足 Pieper 准则，逆运动学可解析。</p>
-
-        <p>代入经典 D-H 通式，前三个关节变换矩阵连乘得腕部中心位置：</p>
-        <div class="formula-block">
-          <div class="formula-label">斯坦福臂腕部中心位置（3-7）</div>
-          <div class="formula">
-            p<sub>c</sub> = [ c<sub>1</sub>s<sub>2</sub>d<sub>3</sub> − s<sub>1</sub>d<sub>2</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s<sub>1</sub>s<sub>2</sub>d<sub>3</sub> + c<sub>1</sub>d<sub>2</sub>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c<sub>2</sub>d<sub>3</sub> ]<sup>T</sup>
-          </div>
-        </div>
-
-        <p>位置仅依赖 θ<sub>1</sub>、θ<sub>2</sub>、d<sub>3</sub> 三个变量，几何上对应球坐标 (r, φ, θ) = (d<sub>3</sub>, θ<sub>2</sub>, θ<sub>1</sub>)，这就是"球坐标臂"名称的由来。后三个关节仅决定末端姿态。</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> Robotics Toolbox · 斯坦福臂建模</div>
-<pre><span class="comment">% 斯坦福臂 (5R1P) 正运动学</span>
-<span class="comment">% 需安装 MATLAB Robotics Toolbox for MATLAB (Peter Corke)</span>
-<span class="comment">% 参数顺序为 [theta, d, a, alpha]，'standard' 表示经典 D-H</span>
-<span class="comment">% 长度单位 m，角度单位 rad（与 Robotics Toolbox 内置 mdl_stanford 一致）</span>
-clc; clear; close all;
-
-<span class="comment">% 结构常量定义</span>
-d2 = <span class="number">0.152</span>;   <span class="comment">% 关节2偏移 (m)</span>
-d6 = <span class="number">0.0563</span>;  <span class="comment">% 末端工具长度 (m)</span>
-
-L(1) = Link([0    0    0  -pi/2], <span class="string">'standard'</span>);
-L(2) = Link([0    d2   0   pi/2], <span class="string">'standard'</span>);
-L(3) = Link([0    0    0   0   ], <span class="string">'standard'</span>, <span class="string">'P'</span>); <span class="comment">% 移动关节，d3 为变量</span>
-L(4) = Link([0    0    0  -pi/2], <span class="string">'standard'</span>);
-L(5) = Link([0    0    0   pi/2], <span class="string">'standard'</span>);
-L(6) = Link([0    d6   0   0   ], <span class="string">'standard'</span>);
-
-stanford = SerialLink(L, <span class="string">'name'</span>, <span class="string">'Stanford Arm'</span>);
-
-<span class="comment">% 关节变量：前2个为角度(rad)，第3个为位移(m)，后3个为角度(rad)</span>
-q = [0.3  0.5  0.4  1.0  -0.8  0.2];
-T = stanford.fkine(q);
-disp(<span class="string">'斯坦福臂末端位姿 ='</span>); disp(T);
-fprintf(<span class="string">'末端位置 = [%.4f %.4f %.4f] m\n'</span>, transl(T));
-figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'</span>);</pre>
-        </div>
-
-        <div class="callout callout-info">
-          <div class="callout-title">构型对比</div>
-          <p>PUMA560（6R）与斯坦福臂（5R1P）都是满足 Pieper 准则的可解析构型，但定位方式不同：PUMA560 用三个旋转关节实现肘部弯曲定位（工作空间近似环形），斯坦福臂用 RRP 实现球坐标定位（工作空间为球壳）。工业上 6R 构型因结构紧凑、维护方便更为常见。</p>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>对比维度</th>
-                <th>PUMA560</th>
-                <th>斯坦福臂</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>构型</td><td>6R（全旋转关节）</td><td>5R1P（含1移动关节）</td></tr>
-              <tr><td>定位机构</td><td>RRR（肘部弯曲）</td><td>RRP（球坐标）</td></tr>
-              <tr><td>腕部</td><td>球形腕（RRR）</td><td>球形腕（RRR）</td></tr>
-              <tr><td>是否满足 Pieper 准则</td><td>是</td><td>是</td></tr>
-              <tr><td>工作空间形状</td><td>近似环形/球冠</td><td>球壳</td></tr>
-              <tr><td>位置变量</td><td>θ<sub>1</sub>, θ<sub>2</sub>, θ<sub>3</sub></td><td>θ<sub>1</sub>, θ<sub>2</sub>, d<sub>3</sub></td></tr>
-              <tr><td>逆运动学解数</td><td>最多8组</td><td>最多8组</td></tr>
-              <tr><td>移动关节优势</td><td>—</td><td>径向伸缩直接、定位精度高</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-4 PUMA560 与斯坦福臂构型对比</p>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.7</span>ABB等价D-H模型与一致性验证</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>厂家产品规格不提供可直接复制到本课程代码中的标准D-H表。本节给出的是依据参考关节链推导的<span class="term">课程等价标准D-H模型</span>，用于训练坐标系建模和模型间一致性验证，不冒充ABB标定参数。</p>
+    <div class="table-wrap"><table><thead><tr><th>i</th><th>a<sub>i</sub> / m</th><th>α<sub>i</sub></th><th>d<sub>i</sub> / m</th><th>θ偏置</th></tr></thead><tbody>
+      <tr><td>1</td><td>0</td><td>−90°</td><td>0.3991</td><td>0°</td></tr><tr><td>2</td><td>0.4480</td><td>0°</td><td>0</td><td>−90°</td></tr><tr><td>3</td><td>0.0420</td><td>−90°</td><td>0</td><td>0°</td></tr><tr><td>4</td><td>0</td><td>90°</td><td>0.4510</td><td>0°</td></tr><tr><td>5</td><td>0</td><td>−90°</td><td>0</td><td>0°</td></tr><tr><td>6</td><td>0</td><td>0°</td><td>0.0820</td><td>0°</td></tr>
+    </tbody></table></div>
+    <p>标准D-H连乘后需增加一个固定法兰姿态对齐矩阵，才能与参考链的link_6坐标系完全一致。对齐矩阵只能修正固定坐标系定义，不能掩盖随关节角变化的模型错误。</p>
+    <div class="formula-block"><div class="formula-label">双链一致性判据</div><div class="formula">e<sub>p</sub>=‖p<sub>DH</sub>−p<sub>ref</sub>‖₂；e<sub>R</sub>=‖R<sub>DH</sub>−R<sub>ref</sub>‖<sub>F</sub></div></div>
+    <div class="callout callout-info"><div class="callout-title">最小验证集</div><p>使用零位、课程起点[0, −30, 20, 0, 30, 0]°、课程目标[60, 40, −70, 100, 45, 180]°及至少两组自选非零构型。先找第一处超差的T<sub>0i</sub>，再检查D-H约定、θ偏置、轴向、单位和法兰固定变换。</p></div>
+    <div class="callout callout-success"><div class="callout-title">直接证据</div><p>提交“坐标系图—D-H表—代码变量—多构型误差”四项对应表。只有位置和姿态均在自定数值容差内，才能写“课程模型一致”；容差必须注明仅用于浮点复算。</p></div>
+  </div>
+</div>
 
 
     <div class="kp-card" id="kp-3-8">
-      <div class="kp-header">
-        <div class="kp-title"><span class="kp-id">拓展</span>UR5 协作机器人 D-H 参数简介</div>
-        <div class="kp-tags">
-          <span class="kp-tag 重点">重点</span>
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">UR5</span> 是丹麦 Universal Robots 公司推出的 6 自由度协作机器人（Cobot），负载 5 kg、工作半径 850 mm，以人机协作安全性和易用性著称，是现代工业协作机器人的代表产品。与 PUMA560 相比，UR5 在机械结构上有两个显著差异：（1）关节内置扭矩传感器，实现碰撞检测与安全停机；（2）腕部采用<strong>非球形腕</strong>设计（后三关节轴线不完全交于一点），牺牲了严格的 Pieper 可解析条件以换取结构紧凑与灵活度。</p>
-
-        <p>按经典 D-H 约定建立坐标系，UR5 的 D-H 参数表如下（单位：m，角度单位：rad）：</p>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>关节 i</th>
-                <th>a<sub>i</sub> (m)</th>
-                <th>α<sub>i</sub> (rad)</th>
-                <th>d<sub>i</sub> (m)</th>
-                <th>θ<sub>i</sub> (rad)</th>
-                <th>关节类型</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>0</td><td>π/2</td><td>0.089</td><td>θ<sub>1</sub></td><td>旋转</td></tr>
-              <tr><td>2</td><td>−0.425</td><td>0</td><td>0</td><td>θ<sub>2</sub></td><td>旋转</td></tr>
-              <tr><td>3</td><td>−0.392</td><td>0</td><td>0</td><td>θ<sub>3</sub></td><td>旋转</td></tr>
-              <tr><td>4</td><td>0</td><td>π/2</td><td>0.109</td><td>θ<sub>4</sub></td><td>旋转</td></tr>
-              <tr><td>5</td><td>0</td><td>−π/2</td><td>0.094</td><td>θ<sub>5</sub></td><td>旋转</td></tr>
-              <tr><td>6</td><td>0</td><td>0</td><td>0.0823</td><td>θ<sub>6</sub></td><td>旋转</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="font-size:0.85rem;color:#64748b;">表 3-5 UR5 协作机器人 D-H 参数表（经典 D-H 约定，参数值取自 Universal Robots 官方文档）</p>
-
-        <p>注意 UR5 参数表的两个特征：（1）a<sub>2</sub> 和 a<sub>3</sub> 为<strong>负值</strong>，这是由于 UR5 的肘部关节几何配置导致 x 轴方向与经典约定中的正方向相反；（2）d<sub>5</sub>≠0（0.094 m），意味着关节 5 和关节 6 之间存在偏置，后三关节轴线不完全交于一点——这正是 UR5 <strong>不严格满足 Pieper 准则</strong>的原因。尽管如此，UR5 仍可通过特殊代数技巧获得半解析逆解，也可用数值法求解，相关内容将在第 4 章详细讨论。</p>
-
-        <div class="callout callout-info">
-          <div class="callout-title">协作机器人 vs 传统工业机器人</div>
-          <p>PUMA560 代表传统工业机器人设计哲学：球形腕保证解析可解性，控制器计算效率高。UR5 代表协作机器人新趋势：非球形腕换取结构紧凑与灵活度，借助现代计算能力（数值法或半解析法）补偿算法复杂度。这一设计转变体现了"机械简单→算法复杂"到"机械灵活→算法智能"的范式演进，也是机器人学从经典走向现代的缩影。</p>
-        </div>
-      </div>
-    </div>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.8</span>ABB型号参数与模型边界</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>同一系列机器人也不能混用型号参数。本课程固定使用 <span class="term">ABB IRB 1200-5/0.9</span>，其中5表示额定负载等级，0.9表示到达距离等级。IRB 1200-7/0.7的工作范围、速度和几何条件不得直接代入本课程模型。</p>
+    <div class="table-wrap"><table><thead><tr><th>轴</th><th>工作范围 / °</th><th>三相供电最大速度 / (°·s⁻¹)</th></tr></thead><tbody>
+      <tr><td>A1</td><td>−170～170</td><td>288</td></tr><tr><td>A2</td><td>−100～130</td><td>240</td></tr><tr><td>A3</td><td>−200～70</td><td>297</td></tr><tr><td>A4</td><td>−270～270</td><td>400</td></tr><tr><td>A5</td><td>−130～130</td><td>405</td></tr><tr><td>A6</td><td>−400～400</td><td>600</td></tr>
+    </tbody></table></div>
+    <p>上表用于课程轨迹预检。单相供电时A4/A5最大速度还需按产品规格下调；实体执行时必须以具体控制柜、RobotWare配置、tooldata、loaddata和wobjdata为准。</p>
+    <div class="callout callout-warning"><div class="callout-title">三类参数不能混写</div><p><strong>ABB产品规格</strong>用于型号、工作范围和速度；<strong>ROS-Industrial参考链</strong>用于教学几何与轴向；<strong>课程等价D-H表</strong>由学习者推导并用多构型复算。三者来源、用途和责任边界必须分别标注。</p></div>
+    <div class="callout callout-info"><div class="callout-title">工程记录要求</div><p>每次提交都写明型号、供电条件、单位、坐标系、工具/工件数据状态和未完成验证项。无法提供RobotStudio站点与事件日志时，应写“课程模型通过，控制器与碰撞待验证”。</p></div>
+  </div>
+</div>
 
     <h2 class="section-title" id="sec-summary"><span class="section-num">3.4</span>本章小结</h2>
 
@@ -857,7 +593,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           <li><strong>经典 D-H</strong>（坐标系固连于连杆 i）与<strong>改进 D-H</strong>（坐标系固连于连杆 i-1）在参数下标与变换矩阵形式上不同，但结果等价。使用时必须保证参数表与公式约定一致，本课程统一采用经典 D-H 约定。</li>
           <li><strong>连杆坐标系建立</strong>遵循"定 z 轴→定 x 轴→定原点→定 y 轴→读参数"六步法，是 D-H 建模中最易出错的一步，需结合结构图反复核对。</li>
           <li><strong>正运动学方程</strong>为各连杆变换矩阵的连乘 T<sub>0n</sub>=A<sub>1</sub>·A<sub>2</sub>·…·A<sub>n</sub>，结果唯一且连续可微，是机器人学中唯一具有封闭唯一解的运动学问题。</li>
-          <li><strong>典型构型</strong>：PUMA560（6R 球腕）与斯坦福臂（5R1P 球坐标臂）均满足 Pieper 准则，是可解析构型的代表；球形腕结构使位置与姿态解耦，为第 4 章逆运动学求解奠定基础。</li>
+          <li><strong>ABB贯穿案例</strong>：IRB 1200参考关节链、课程等价D-H链与法兰固定变换共同构成可复算模型；多构型的位置与姿态误差用于证明模型一致。</li>
         </ul>
         <div class="callout callout-info">
           <div class="callout-title">与下一章的衔接</div>
@@ -869,7 +605,7 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
           <p>D-H 参数法虽是运动学建模的经典工具，但在现代机器人学中，以下前沿方法正在拓展其边界：</p>
           <ul>
             <li><strong>指数积公式（PoE, Product of Exponentials）</strong>：由 Brockett 提出，基于李群 SE(3) 的指数映射描述运动学。与 D-H 法相比，PoE 无需为每个连杆建立坐标系，直接用关节轴线的旋量（twist）描述运动，公式更简洁、几何意义更统一，特别适合并联机器人和冗余机器人的建模。现代机器人学教材（如 Lynch & Park《Modern Robotics》）已将 PoE 作为与 D-H 并列的核心方法。</li>
-            <li><strong>基于优化的逆运动学（QP-IK）</strong>：将逆运动学表述为二次规划（Quadratic Programming）问题，以 ‖Jδq−v‖² 为目标函数，叠加关节极限、避障等不等式约束。QP-IK 天然处理冗余度与约束，是协作机器人（如 UR5）实时控制的主流方法，也是 ROS MoveIt! 运动规划框架的底层求解器。</li>
+            <li><strong>基于优化的逆运动学（QP-IK）</strong>：以末端速度误差为主要目标，叠加ABB工作范围、速度和避障约束。课程要求记录求解器、权重和约束，不能把“软件返回结果”当作模型正确的证据。</li>
             <li><strong>学习法逆运动学</strong>：利用神经网络（MLP、ResNet）或高斯过程回归（GPR），从大量"关节角-末端位姿"样本中学习逆映射。其优势是无需显式推导解析公式，适用于任意复杂构型；缺点是需要训练数据、泛化性受限于训练分布、且难以保证数值精度。近年来，可微分运动学层与深度学习端到端融合的方法（如 Differentiable Robot Model）正在兴起。</li>
           </ul>
           <p>这些方法并非取代 D-H 法，而是与其互补：D-H 法仍是理解机器人运动学的基础语言，PoE 提供更优雅的理论框架，QP-IK 与学习法则在实时控制与复杂约束场景中发挥优势。读者应在掌握 D-H 法的基础上，逐步了解这些前沿方法。</p>
@@ -884,18 +620,18 @@ figure; stanford.plot(q); title(<span class="string">'Stanford Arm 正运动学'
       <div class="callout-title">课后思考 · 巩固提升</div>
       <p>1. D-H 参数法的四个参数 a、α、d、θ 分别描述什么几何关系？为什么单自由度关节只需 4 个参数就能描述 6 自由度的位姿变换？</p>
       <p>2. 经典 D-H 法与改进 D-H 法在坐标系固连位置和变换矩阵通式上有何区别？为什么改进 D-H 更适合处理含平行关节的机器人？</p>
-      <p>3. 给定一组 PUMA560 的关节角，请手工代入式（3-6）计算腕部中心位置，并与 MATLAB 代码运行结果对比，分析误差来源。</p>
+      <p>3. 给定一组ABB IRB 1200关节角，使用参考关节链手工计算前三个中间变换，并与MATLAB输出比较，定位第一处误差。</p>
       <p>4. 为什么说正运动学解是唯一的，而逆运动学可能多解？这一性质对机器人控制与路径规划有何影响？</p>
-      <p>5. 斯坦福臂的关节 3 为移动关节，其 D-H 参数表中哪个参数是变量？若将斯坦福臂的关节 3 改为旋转关节，工作空间形状将如何变化？</p>
+      <p>5. 说明ABB课程等价D-H表为何不能写成“ABB官方D-H参数”，并列出证明模型一致所需的最小构型集合。</p>
       <p>6. 球形腕（后三关节轴线交于一点）对机器人运动学有何重要意义？这一结构特征如何简化后续的逆运动学求解？</p>
-      <p>7. UR5 协作机器人的 D-H 参数表中 d<sub>5</sub>≠0，这意味着它不严格满足 Pieper 准则。请查阅资料，了解 UR5 是如何实现逆运动学求解的（半解析法还是数值法），并与 PUMA560 的解析法对比。</p>
+      <p>7. 比较ABB产品规格、ROS-Industrial参考链和课程等价D-H模型的来源与用途；若缺少RobotStudio站点，哪些结论必须标为待验证？</p>
       <p>8. 除 D-H 参数法外，指数积公式（PoE）也是一种重要的运动学建模方法。请简述 PoE 的基本思想，并比较其与 D-H 法的优缺点。</p>
     </div>
 
 
     <div class="callout callout-warning">
       <div class="callout-title">学习提示</div>
-      <p>本章是机器人学的核心基础，D-H 参数法的掌握程度直接决定第 4 章逆运动学的学习效果。建议结合 MATLAB Robotics Toolbox 实际运行 PUMA560 代码，亲手验证参数表与变换矩阵，培养"参数表↔坐标系↔变换矩阵"三者对应的空间想象能力。</p>
+      <p>完成本章后，应能用ABB IRB 1200同一组关节角分别驱动参考关节链与课程等价D-H链，定位第一处不一致的中间变换，并说明产品规格、参考模型和教学模型各自证明什么。</p>
     </div>
 
 

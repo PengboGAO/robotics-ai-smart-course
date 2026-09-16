@@ -1,0 +1,68 @@
+<!--META {"kp_id": "kp-8-5", "kp_label": "KP 8.5", "title": "课程项目", "tags": ["重点", "考点"], "difficulty": 2, "chapter": 8, "order": 5, "file": "kp-08-5.html"}-->
+<div class="kp-card" id="kp-8-5">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 8.5</span>
+          课程项目
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">课程项目</span>是机器人学基础课程的综合性实践环节，要求学生综合运用前七章所学的<strong>运动学、动力学、轨迹规划、控制理论</strong>和本章的工程工具，完成一个完整的机器人应用系统。项目分为以下几种方向供学生选择：</p>
+
+        <ul>
+          <li><strong>机器人抓取</strong>：利用视觉识别目标物体，规划抓取轨迹，控制机械臂完成抓取-搬运-放置任务。</li>
+          <li><strong>机器人装配</strong>：模拟工业装配线，完成轴孔装配、螺钉拧紧等精密操作，涉及力控制与柔顺控制。</li>
+          <li><strong>轨迹跟踪</strong>：控制机器人末端工具沿复杂空间曲线（如焊接焊缝、涂胶路径）精确运动。</li>
+          <li><strong>基于VLA大模型的机器人操作</strong>（前沿方向）：利用视觉-语言-动作大模型（如OpenVLA），根据自然语言指令（如"把红色方块放到蓝色碗里面"）直接生成机器人动作序列。需部署预训练VLA模型，完成多物体场景下的指令理解与操作执行。</li>
+          <li><strong>人形机器人步态规划仿真</strong>（前沿方向）：在MATLAB或Gazebo中建立双足机器人模型，设计ZMP（零矩点）或MPC步态规划算法，实现平地行走、转向、上下楼梯等步态仿真。涉及倒立摆模型、轨迹优化和稳定性判据。</li>
+          <li><strong>强化学习抓取策略训练</strong>（前沿方向）：在仿真环境（如Isaac Gym、Gazebo）中使用深度强化学习算法（PPO/SAC）训练机器人抓取策略，通过域随机化实现Sim-to-Real迁移。需设计奖励函数、状态空间和动作空间，分析策略泛化能力。</li>
+        </ul>
+
+        <!-- 项目流程步骤 -->
+        <p><strong>课程项目实施流程</strong>遵循工程化开发方法论：</p>
+
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-title">需求分析</div>
+            <div class="step-desc">明确任务目标、精度要求、约束条件，撰写需求规格说明书</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-title">建模</div>
+            <div class="step-desc">建立机器人D-H模型、工作空间分析、环境建模</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-title">规划</div>
+            <div class="step-desc">设计轨迹规划方案，关节空间与笛卡尔空间插值</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-title">控制</div>
+            <div class="step-desc">设计控制策略（PID/计算力矩/阻抗），整定参数</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-title">仿真验证</div>
+            <div class="step-desc">在MATLAB/Gazebo中仿真验证，分析性能指标</div>
+          </div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✓ 项目评价标准</div>
+          <p>课程项目采用多维度评价体系：<strong>方案设计（25%）</strong>评估理论分析的严谨性；<strong>代码实现（30%）</strong>评估编程质量与工程规范；<strong>仿真验证（25%）</strong>评估系统功能完成度；<strong>报告答辩（20%）</strong>评估表达与问答能力。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠ 项目注意事项</div>
+          <p>项目需提交完整的<strong>实验报告</strong>（含理论推导、代码清单、仿真截图、性能分析）和<strong>源代码</strong>。鼓励团队协作（2-3人/组），但每人需独立完成各自模块的代码并注明贡献。严禁抄袭，引用开源代码需注明来源。</p>
+        </div>
+      </div>
+    </div>

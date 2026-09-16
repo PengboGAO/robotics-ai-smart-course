@@ -1,0 +1,81 @@
+<!--META {"kp_id": "kp-6-8", "kp_label": "KP 6.8", "title": "样条曲线", "tags": ["难点"], "difficulty": 3, "chapter": 6, "order": 8, "file": "kp-06-8.html"}-->
+<div class="kp-card" id="kp-6-8">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.8</span>样条曲线</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>当轨迹需经过多个中间路径点（waypoints）时，单一多项式插值会导致高次多项式振荡（Runge 现象）。<span class="term">样条曲线</span>（Spline）通过分段低次多项式并在节点处保持连续性，兼顾光滑性与局部可控性，是多点轨迹规划的主流方法。</p>
+
+        <p><strong>B 样条（B-Spline）</strong>：由基函数 B<sub>i,k</sub>(t) 加权控制点构成，具有<strong>局部支撑性</strong>（移动一个控制点只影响附近 k+1 段）和<strong>凸包性</strong>（曲线位于控制点凸包内，稳定性好）。k 次 B 样条保证 C<sup>k−1</sup> 连续。三次 B 样条（k=3）保证 C² 连续，是最常用形式。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">B 样条曲线定义</div>
+          <div class="formula">P(t) = Σ<sub>i</sub> B<sub>i,k</sub>(t) · C<sub>i</sub></div>
+        </div>
+
+        <p><strong>贝塞尔曲线（Bézier Curve）</strong>：由控制点与伯恩斯坦基函数构成，曲线必过首末控制点（端点插值），中间控制点"拉"曲线但不一定经过。n 阶贝塞尔曲线由 n+1 个控制点确定，全局性强（移动任一控制点影响整条曲线）。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">n 阶贝塞尔曲线</div>
+          <div class="formula">P(t) = Σ<sub>i=0</sub><sup>n</sup> C<sub>n</sub><sup>i</sup> t<sup>i</sup> (1−t)<sup>n−i</sup> · P<sub>i</sub>,&nbsp;&nbsp; t ∈ [0,1]</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:20%">特性</th>
+                <th style="width:40%">B 样条</th>
+                <th style="width:40%">贝塞尔曲线</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>端点插值</strong></td><td>不一定过首末控制点</td><td>必过首末控制点</td></tr>
+              <tr><td><strong>局部性</strong></td><td>强，控制点影响局部</td><td>弱，控制点影响全局</td></tr>
+              <tr><td><strong>连续性</strong></td><td>k 次 B 样条 C<sup>k−1</sup> 连续</td><td>n 阶 C<sup>n−1</sup> 连续</td></tr>
+              <tr><td><strong>适用场景</strong></td><td>多点复杂轨迹、局部调整</td><td>外形设计、平滑过渡</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="text-align:center;color:#64748b;font-size:0.85rem;margin-top:-0.5rem;">表6-1 B 样条与贝塞尔曲线对比</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 B 样条的节点向量与连续性控制</div>
+          <p>B 样条的连续性由阶数 k 与节点向量共同决定。<strong>均匀节点向量</strong>（节点等距分布）计算简单但端点不插值；<strong>准均匀节点向量</strong>（两端重复 k+1 次）使曲线通过首末控制点，是机器人轨迹最常用的形式；<strong>非均匀节点向量</strong>（如根据弦长参数化）可在控制点密集处提高分辨率。通过在中间节点处重复 k 次，还可人为降低该处连续性，实现轨迹"折角"效果，适用于需要精确经过某些路径点的场景。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 多点轨迹的规划策略</div>
+          <p>当轨迹需经过多个中间路径点时，有三种常见策略：① <strong>分段三次多项式</strong>——每段独立三次多项式，节点处匹配速度保证 C¹，但加速度不连续；② <strong>三次 B 样条</strong>——整体 C² 连续，光滑性最佳，但不一定精确经过路径点（需用插值型 B 样条）；③ <strong>LSPB 串联</strong>——每段用 LSPB，节点速度匹配，兼顾匀速与连续性。工业控制器多采用 B 样条或分段多项式方案。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> B样条轨迹生成(多点轨迹)</div>
+<pre><span class="comment">% B样条轨迹生成：三次B样条(多点轨迹规划)</span>
+<span class="comment">% 定义路径点(waypoints)</span>
+wp = [<span class="number">0</span> <span class="number">0.5</span> <span class="number">1.0</span> <span class="number">1.5</span> <span class="number">2.0</span> <span class="number">1.5</span> <span class="number">1.0</span>;
+      <span class="number">0</span> <span class="number">0.8</span> <span class="number">0.5</span> <span class="number">0.3</span> <span class="number">0.0</span> <span class="number">0.4</span> <span class="number">0.7</span>]';
+N = <span class="number">100</span>;   <span class="comment">% 采样点数</span>
+t_wp   = linspace(<span class="number">0</span>, <span class="number">1</span>, size(wp,<span class="number">1</span>));
+t_fine = linspace(<span class="number">0</span>, <span class="number">1</span>, N);
+<span class="comment">% 三次样条插值(等价于C2连续的插值型B样条)</span>
+q1 = spline(t_wp, wp(:,<span class="number">1</span>), t_fine);
+q2 = spline(t_wp, wp(:,<span class="number">2</span>), t_fine);
+<span class="comment">% 数值微分求速度</span>
+qd1 = gradient(q1, t_fine);
+qd2 = gradient(q2, t_fine);
+figure;
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>);
+plot(t_fine, q1, <span class="string">'b-'</span>, t_wp, wp(:,<span class="number">1</span>), <span class="string">'ro'</span>);
+ylabel(<span class="string">'位置'</span>); legend(<span class="string">'B样条轨迹'</span>, <span class="string">'路径点'</span>);
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>);
+plot(t_fine, qd1, <span class="string">'r-'</span>); ylabel(<span class="string">'速度'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

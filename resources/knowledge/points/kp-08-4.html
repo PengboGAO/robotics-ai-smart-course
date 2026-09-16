@@ -1,0 +1,160 @@
+<!--META {"kp_id": "kp-8-4", "kp_label": "KP 8.4", "title": "视觉伺服入门", "tags": ["难点"], "difficulty": 3, "chapter": 8, "order": 4, "file": "kp-08-4.html"}-->
+<div class="kp-card" id="kp-8-4">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 8.4</span>
+          视觉伺服入门
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">视觉伺服</span>（Visual Servoing）是利用<strong>视觉反馈</strong>控制机器人运动的闭环控制方法。通过相机实时获取目标图像信息，计算图像误差并转化为机器人运动指令，使机器人末端精确对准或跟踪目标。视觉伺服分为两大类：</p>
+
+        <ul>
+          <li><strong>基于图像的视觉伺服（IBVS, Image-Based Visual Servoing）</strong>：直接在<strong>图像空间</strong>中定义误差，控制目标特征点在图像中的位置。不需要完整的目标三维重建，但对深度信息敏感。</li>
+          <li><strong>基于位置的视觉伺服（PBVS, Position-Based Visual Servoing）</strong>：先从图像中<strong>估计目标的3D位姿</strong>，再在笛卡尔空间中定义位姿误差进行控制。需要相机标定和目标三维模型，但物理意义直观。</li>
+        </ul>
+
+        <!-- 视觉伺服控制框图 SVG -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <defs>
+              <marker id="arr-vs1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+              </marker>
+              <marker id="arr-vs2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/>
+              </marker>
+            </defs>
+
+            <!-- IBVS 部分（上半部分） -->
+            <text x="450" y="20" text-anchor="middle" fill="#2563eb" font-size="14" font-weight="700">IBVS: 基于图像的视觉伺服</text>
+
+            <rect x="20" y="35" width="100" height="45" rx="6" fill="#1a202c" opacity="0.85"/>
+            <text x="70" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">期望图像</text>
+            <text x="70" y="70" text-anchor="middle" fill="#93c5fd" font-size="9">s*</text>
+
+            <circle cx="170" cy="58" r="16" fill="white" stroke="#2563eb" stroke-width="2"/>
+            <text x="170" y="63" text-anchor="middle" fill="#2563eb" font-size="14" font-weight="700">±</text>
+
+            <rect x="210" y="35" width="110" height="45" rx="6" fill="#2563eb"/>
+            <text x="265" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">图像雅可比</text>
+            <text x="265" y="70" text-anchor="middle" fill="#dbeafe" font-size="9">J_img · Δs</text>
+
+            <rect x="355" y="35" width="100" height="45" rx="6" fill="#0891b2"/>
+            <text x="405" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">机器人控制</text>
+            <text x="405" y="70" text-anchor="middle" fill="#cffafe" font-size="9">速度指令 v</text>
+
+            <rect x="490" y="35" width="90" height="45" rx="6" fill="#059669" opacity="0.85"/>
+            <text x="535" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">机器人</text>
+            <text x="535" y="70" text-anchor="middle" fill="#a7f3d0" font-size="9">运动</text>
+
+            <rect x="615" y="35" width="90" height="45" rx="6" fill="#7c3aed"/>
+            <text x="660" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">相机</text>
+            <text x="660" y="70" text-anchor="middle" fill="#e9d5ff" font-size="9">图像采集</text>
+
+            <rect x="740" y="35" width="110" height="45" rx="6" fill="#d97706"/>
+            <text x="795" y="55" text-anchor="middle" fill="white" font-size="10" font-weight="700">特征提取</text>
+            <text x="795" y="70" text-anchor="middle" fill="#fef3c7" font-size="9">当前图像 s</text>
+
+            <!-- IBVS 连线 -->
+            <line x1="120" y1="58" x2="152" y2="58" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="186" y1="58" x2="208" y2="58" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <text x="197" y="50" text-anchor="middle" fill="#dc2626" font-size="9" font-weight="700">e</text>
+            <line x1="320" y1="58" x2="353" y2="58" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="455" y1="58" x2="488" y2="58" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="580" y1="58" x2="613" y2="58" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="705" y1="58" x2="738" y2="58" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+
+            <!-- IBVS 反馈（虚线+橙色） -->
+            <line x1="795" y1="80" x2="795" y2="110" stroke="#d97706" stroke-width="2" stroke-dasharray="5,3"/>
+            <line x1="795" y1="110" x2="170" y2="110" stroke="#d97706" stroke-width="2" stroke-dasharray="5,3"/>
+            <line x1="170" y1="110" x2="170" y2="74" stroke="#d97706" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr-vs2)"/>
+
+            <!-- 分隔线 -->
+            <line x1="20" y1="140" x2="860" y2="140" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="8,4"/>
+
+            <!-- PBVS 部分（下半部分） -->
+            <text x="450" y="165" text-anchor="middle" fill="#d97706" font-size="14" font-weight="700">PBVS: 基于位置的视觉伺服</text>
+
+            <rect x="20" y="180" width="100" height="45" rx="6" fill="#1a202c" opacity="0.85"/>
+            <text x="70" y="200" text-anchor="middle" fill="white" font-size="10" font-weight="700">期望位姿</text>
+            <text x="70" y="215" text-anchor="middle" fill="#93c5fd" font-size="9">r*</text>
+
+            <circle cx="170" cy="203" r="16" fill="white" stroke="#d97706" stroke-width="2"/>
+            <text x="170" y="208" text-anchor="middle" fill="#d97706" font-size="14" font-weight="700">±</text>
+
+            <rect x="210" y="180" width="110" height="45" rx="6" fill="#d97706"/>
+            <text x="265" y="200" text-anchor="middle" fill="white" font-size="10" font-weight="700">位姿控制器</text>
+            <text x="265" y="215" text-anchor="middle" fill="#fef3c7" font-size="9">笛卡尔误差</text>
+
+            <rect x="355" y="180" width="100" height="45" rx="6" fill="#0891b2"/>
+            <text x="405" y="200" text-anchor="middle" fill="white" font-size="10" font-weight="700">机器人控制</text>
+            <text x="405" y="215" text-anchor="middle" fill="#cffafe" font-size="9">速度指令 v</text>
+
+            <rect x="490" y="180" width="90" height="45" rx="6" fill="#059669" opacity="0.85"/>
+            <text x="535" y="200" text-anchor="middle" fill="white" font-size="10" font-weight="700">机器人</text>
+            <text x="535" y="215" text-anchor="middle" fill="#a7f3d0" font-size="9">运动</text>
+
+            <rect x="615" y="180" width="90" height="45" rx="6" fill="#7c3aed"/>
+            <text x="660" y="200" text-anchor="middle" fill="white" font-size="10" font-weight="700">相机</text>
+            <text x="660" y="215" text-anchor="middle" fill="#e9d5ff" font-size="9">图像采集</text>
+
+            <rect x="740" y="180" width="110" height="45" rx="6" fill="#2563eb"/>
+            <text x="795" y="200" text-anchor="middle" fill="white" font-size="10" font-weight="700">3D位姿估计</text>
+            <text x="795" y="215" text-anchor="middle" fill="#dbeafe" font-size="9">PnP求解 r</text>
+
+            <!-- PBVS 连线（实线+蓝色） -->
+            <line x1="120" y1="203" x2="152" y2="203" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="186" y1="203" x2="208" y2="203" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <text x="197" y="195" text-anchor="middle" fill="#dc2626" font-size="9" font-weight="700">Δr</text>
+            <line x1="320" y1="203" x2="353" y2="203" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="455" y1="203" x2="488" y2="203" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="580" y1="203" x2="613" y2="203" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+            <line x1="705" y1="203" x2="738" y2="203" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-vs1)"/>
+
+            <!-- PBVS 反馈（虚线+橙色） -->
+            <line x1="795" y1="225" x2="795" y2="255" stroke="#d97706" stroke-width="2" stroke-dasharray="5,3"/>
+            <line x1="795" y1="255" x2="170" y2="255" stroke="#d97706" stroke-width="2" stroke-dasharray="5,3"/>
+            <line x1="170" y1="255" x2="170" y2="219" stroke="#d97706" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr-vs2)"/>
+
+            <!-- 底部对比说明 -->
+            <rect x="20" y="280" width="840" height="100" rx="8" fill="#f0f4f8" stroke="#cbd5e1"/>
+            <text x="440" y="305" text-anchor="middle" fill="#1a202c" font-size="12" font-weight="700">IBVS vs PBVS 关键区别</text>
+            <text x="30" y="328" fill="#2563eb" font-size="10" font-weight="600">IBVS：</text>
+            <text x="75" y="328" fill="#64748b" font-size="10">误差定义在图像空间 | 无需3D重建 | 对相机标定不敏感 | 可能出现机器人奇异位形</text>
+            <text x="30" y="348" fill="#d97706" font-size="10" font-weight="600">PBVS：</text>
+            <text x="75" y="348" fill="#64748b" font-size="10">误差定义在3D笛卡尔空间 | 需要3D位姿估计 | 依赖相机标定精度 | 位姿误差物理意义直观</text>
+            <text x="30" y="368" fill="#059669" font-size="10" font-weight="600">共性：</text>
+            <text x="75" y="368" fill="#64748b" font-size="10">均为视觉闭环反馈控制 | 均需特征提取 | 伺服速率受图像处理速度限制（通常10~60Hz）</text>
+          </svg>
+          <div class="diagram-caption">图8-2 IBVS vs PBVS 视觉伺服控制框图对比</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">IBVS图像雅可比控制律</div>
+          <div class="formula">v<sub>c</sub> = −λ·J<sub>img</sub><sup>+</sup>·(s − s*)</div>
+          <div class="formula-label" style="text-align:center;">J<sub>img</sub>: 图像雅可比矩阵 | s: 当前图像特征 | s*: 期望图像特征 | λ: 控制增益</div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 视觉伺服的工程挑战</div>
+          <p>视觉伺服在实际工程中面临诸多挑战：<strong>特征提取鲁棒性</strong>（光照变化、遮挡导致特征丢失）、<strong>实时性</strong>（图像处理延迟影响控制带宽）、<strong>深度信息估计</strong>（单目相机无法直接获取深度）、<strong>手眼标定精度</strong>（相机与机器人坐标系的变换关系）。现代视觉伺服系统常结合深度学习进行鲁棒特征提取，并使用眼在手外（Eye-to-Hand）或眼在手内（Eye-in-Hand）两种配置。</p>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✓ 深度学习在视觉伺服中的应用</div>
+          <p>传统视觉伺服依赖人工设计的图像特征（如角点、边缘、色块），在光照变化、遮挡、纹理缺失等场景下鲁棒性不足。<strong>深度学习</strong>的引入为视觉伺服带来了革命性改进，典型流程为：</p>
+          <p><strong>(1) 目标检测</strong>：使用<strong>YOLO</strong>（You Only Look Once）等实时目标检测网络，从原始图像中快速定位目标物体的边界框和类别。YOLOv8等最新版本可在GPU上实现百帧以上的检测速度，满足视觉伺服的实时性要求。</p>
+          <p><strong>(2) 位姿估计</strong>：在目标检测基础上，使用<strong>位姿估计网络</strong>（如PoseCNN、PVNet、FoundationPose）或关键点检测网络（如HRNet）估计目标的6D位姿（3D位置+3D姿态），替代传统PnP求解。深度学习方法对遮挡和对称物体更具鲁棒性。</p>
+          <p><strong>(3) 伺服控制</strong>：将深度学习输出的目标位姿或特征点坐标输入伺服控制器（IBVS或PBVS），生成机器人运动指令。部分最新研究直接用神经网络学习<strong>端到端的视觉运动策略</strong>（从像素到动作），跳过显式的位姿估计步骤。</p>
+          <p>深度学习赋能的视觉伺服已在<strong>无序抓取</strong>（bin picking）、<strong>柔性物体操控</strong>、<strong>人机协作</strong>等复杂场景中取得突破，是当前机器人视觉领域的研究热点。</p>
+        </div>
+
+        <p><strong>典型应用场景</strong>：视觉伺服在工业中有广泛应用，包括<strong>目标抓取</strong>（机器人末端对准物体）、<strong>焊缝跟踪</strong>（沿焊缝实时调整焊枪位置）、<strong>无人飞行器着陆</strong>（基于跑道标记精确对准着陆点）等。在协作机器人领域，视觉伺服与力控制结合可实现更加智能的人机交互。</p>
+      </div>
+    </div>

@@ -1,0 +1,62 @@
+<!--META {"kp_id": "kp-6-2", "kp_label": "KP 6.2", "title": "三次多项式插值", "tags": ["重点"], "difficulty": 2, "chapter": 6, "order": 2, "file": "kp-06-2.html"}-->
+<div class="kp-card" id="kp-6-2">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.2</span>三次多项式插值</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">三次多项式插值</span>（Cubic Polynomial Interpolation）是关节空间最常用的轨迹规划方法。设关节角 q(t) 为时间的三次多项式：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">三次多项式轨迹</div>
+          <div class="formula">q(t) = a₀ + a₁ t + a₂ t² + a₃ t³</div>
+        </div>
+
+        <p>共有 4 个未知系数 a₀、a₁、a₂、a₃，需 4 个边界条件求解。典型边界条件为起止点的位置与速度：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">边界条件（4 个）</div>
+          <div class="formula">q(0) = q₀,&nbsp;&nbsp; q(t<sub>f</sub>) = q<sub>f</sub>,&nbsp;&nbsp; q̇(0) = v₀,&nbsp;&nbsp; q̇(t<sub>f</sub>) = v<sub>f</sub></div>
+        </div>
+
+        <p>由 q̇(t) = a₁ + 2a₂ t + 3a₃ t² 代入边界条件，解得系数：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">系数解析解</div>
+          <div class="formula">a₀ = q₀,&nbsp;&nbsp; a₁ = v₀</div>
+          <div class="formula">a₂ = [ 3(q<sub>f</sub>−q₀) − (2v₀+v<sub>f</sub>) t<sub>f</sub> ] / t<sub>f</sub>²</div>
+          <div class="formula">a₃ = [ −2(q<sub>f</sub>−q₀) + (v₀+v<sub>f</sub>) t<sub>f</sub> ] / t<sub>f</sub>³</div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 三次多项式的特性</div>
+          <p>当起止速度均为零（v₀ = v<sub>f</sub> = 0，即"停-停"轨迹）时，公式简化为 a₀ = q₀、a₁ = 0、a₂ = 3(q<sub>f</sub>−q₀)/t<sub>f</sub>²、a₃ = −2(q<sub>f</sub>−q₀)/t<sub>f</sub>³。此时位置、速度连续，但<strong>加速度在端点不连续</strong>（从 0 跳变到 6(q<sub>f</sub>−q₀)/t<sub>f</sub>²），可能引起机械冲击。这是三次多项式的主要不足。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 三次多项式系数计算与轨迹绘制</div>
+<pre><span class="comment">% 三次多项式插值：解析法求系数并绘图</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;    <span class="comment">% 起止位置</span>
+v0 = <span class="number">0</span>;  vf = <span class="number">0</span>;        <span class="comment">% 起止速度(停-停)</span>
+tf = <span class="number">2</span>;                 <span class="comment">% 运动时间</span>
+<span class="comment">% 解析法求系数 a0+a1*t+a2*t^2+a3*t^3</span>
+a0 = q0;
+a1 = v0;
+a2 = (<span class="number">3</span>*(qf-q0) - (<span class="number">2</span>*v0+vf)*tf) / tf^<span class="number">2</span>;
+a3 = (-<span class="number">2</span>*(qf-q0) + (v0+vf)*tf) / tf^<span class="number">3</span>;
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+q   = a0 + a1*t + a2*t.<span class="number">2</span> + a3*t.<span class="number">3</span>;   <span class="comment">% 位置</span>
+qd  = a1 + <span class="number">2</span>*a2*t + <span class="number">3</span>*a3*t.<span class="number">2</span>;       <span class="comment">% 速度</span>
+qdd = <span class="number">2</span>*a2 + <span class="number">6</span>*a3*t;                <span class="comment">% 加速度</span>
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

@@ -50,11 +50,12 @@
     {id:"T05",phase:"transfer",module:"M5",outcome:"CO3",text:"控制仿真达标但实体超调增大，最合理的解释路径是：",options:["比较模型参数、负载、摩擦、采样与饱和约束","直接宣布仿真错误","只降低绘图比例","删除实体数据"],correct:0,explain:"应从模型假设与实体非理想因素逐项对照。"},
     {id:"T06",phase:"transfer",module:"M6",outcome:"CO4",text:"面对AI建议与复算结果冲突，学生应：",options:["以AI为准","保留冲突记录，以可复算证据为准并说明原因","删除复算","任选一个结论"],correct:1,explain:"证据优先和过程留痕体现学术诚信与结果责任。"}
   ];
+  questions.push(...(window.COURSE_QUESTION_BANK || []));
 
   function readState() {
     let state = {};
     try { state = JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch {}
-    return { completed:[], evidence:[], aiLogs:[], attempts:[], mastery:{}, profile:{alias:"",goal:"系统掌握"}, ...state };
+    return { completed:[], evidence:[], aiLogs:[], attempts:[], mastery:{}, aiLocked:false, profile:{alias:"",goal:"系统掌握"}, ...state };
   }
   function writeState(patch) {
     const next = { ...readState(), ...patch };
@@ -76,6 +77,21 @@
     const types = new Set(evidence.flatMap(item => item.types || []));
     return Math.round(types.size / 4 * 100);
   }
+  function masteryComponents(state) {
+    const moduleScores=course.modules.map(module=>[...state.attempts].reverse().find(item=>item.mode==="module"&&item.module===module.id)?.score).filter(Number.isFinite);
+    const evidenceScores=state.evidence.map(item=>item.rubricScore).filter(Number.isFinite);
+    const transferScores=state.attempts.filter(item=>item.mode==="transfer").map(item=>item.score);
+    return {knowledge:Math.round(average(moduleScores)),evidence:Math.round(average(evidenceScores)),transfer:Math.round(average(transferScores)),hasKnowledge:moduleScores.length>0,hasEvidence:evidenceScores.length>0,hasTransfer:transferScores.length>0};
+  }
+  function masteryLevel(components) {
+    if(!components.hasKnowledge&&!components.hasEvidence&&!components.hasTransfer)return "证据不足：先完成入口诊断与首个模块测评";
+    const index=Math.round(components.knowledge*.4+components.evidence*.4+components.transfer*.2);
+    if(!components.hasTransfer)return `形成性掌握 ${index}：尚缺无AI迁移证据`;
+    if(index>=90)return `熟练掌握 ${index}：可进入综合迁移与教师抽检`;
+    if(index>=80)return `达到预期 ${index}：补齐薄弱证据后进入综合任务`;
+    if(index>=60)return `基础理解 ${index}：按薄弱知识点补学并重新提交证据`;
+    return `需要补学 ${index}：先修正概念理解，再进入工程任务`;
+  }
   function lifecycleStatus(state) {
     const hasDiagnostic = state.attempts.some(item=>item.mode==="diagnostic");
     const moduleAttempts = state.attempts.filter(item=>item.mode==="module");
@@ -92,12 +108,8 @@
     ];
   }
   function progressIndex(state) {
-    const diagnostic = state.attempts.some(item=>item.mode==="diagnostic") ? 10 : 0;
-    const learning = state.completed.length/course.modules.length*30;
-    const practice = Object.keys(state.mastery).length/course.modules.length*20;
-    const evidence = evidenceCoverage(state.evidence)*.25;
-    const transfer = average(state.attempts.filter(item=>item.mode==="transfer").map(item=>item.score))*.15;
-    return Math.round(diagnostic+learning+practice+evidence+transfer);
+    const components=masteryComponents(state);
+    return Math.round(components.knowledge*.4+components.evidence*.4+components.transfer*.2);
   }
   function nextAction(state) {
     if(!state.profile.alias)return ["先建立匿名学习档案","填写学习代号与目标，系统才能生成连续学习记录。"];
@@ -116,6 +128,7 @@
     if($("#learner-goal"))$("#learner-goal").value=state.profile.goal||"系统掌握";
     const index=progressIndex(state); if($("#learning-index-value"))$("#learning-index-value").textContent=index;
     if($("#learning-index-ring"))$("#learning-index-ring").style.setProperty("--progress",`${index*3.6}deg`);
+    const components=masteryComponents(state);if($("#mastery-components"))$("#mastery-components").innerHTML=`<span>知识理解 40% · ${components.hasKnowledge?components.knowledge:"待测"}</span><span>任务证据 40% · ${components.hasEvidence?components.evidence:"待提交"}</span><span>无AI迁移 20% · ${components.hasTransfer?components.transfer:"待测"}</span>`;
     const [title,detail]=nextAction(state); if($("#next-action-title"))$("#next-action-title").textContent=title;if($("#next-action-detail"))$("#next-action-detail").textContent=detail;
     if($("#lifecycle-track"))$("#lifecycle-track").innerHTML=lifecycleStatus(state).map((stage,index)=>`<article class="lifecycle-stage ${stage.done?"done":""} ${stage.active?"active":""}"><span>0${index+1}</span><b>${stage.label}</b><small>${stage.done?"已形成记录":stage.detail}</small></article>`).join("");
   }
@@ -130,7 +143,7 @@
     $("#assessment-mode").value=mode;
     $$('[data-assessment-mode]').forEach(button=>button.classList.toggle("active",button.dataset.assessmentMode===mode));
     $("#assessment-module-wrap").hidden=mode!=="module";
-    const rules={diagnostic:"不计入正式成绩；提交后显示知识缺口和建议起点。",module:"每模块3个关键检查点；全部正确后标记为已掌握，可重复测评并保留过程。",transfer:"答题过程中关闭AI提示；提交后统一显示证据化反馈。"};
+    const rules={diagnostic:"不计入正式成绩；提交后显示知识缺口和建议起点。",module:"每模块8个检查点，判断知识理解与接受程度；达到80分后进入直接证据任务，答题分不能单独证明课程目标达成。",transfer:"答题过程中关闭AI提示；提交后统一反馈，用于检验离开AI后能否把方法迁移到新情境。"};
     $("#assessment-rules").textContent=rules[mode];
   }
   function selectedQuestions() {
@@ -140,6 +153,7 @@
   }
   function startAssessment() {
     const list=selectedQuestions(),mode=$("#assessment-mode").value;
+    writeState({aiLocked:mode==="transfer"});
     $("#assessment-empty").hidden=true;$("#assessment-result").hidden=true;$("#assessment-form").hidden=false;
     $("#assessment-form").innerHTML=`<div class="assessment-intro"><span class="eyebrow">${modeNames[mode]}</span><h2>${list.length}道题 · ${mode==="transfer"?"答题阶段不提供AI提示":"提交后生成AI学习处方"}</h2></div>${list.map((question,index)=>`<section class="assessment-question"><h3><span>${String(index+1).padStart(2,"0")}</span>${question.text}</h3><div class="option-list">${question.options.map((option,optionIndex)=>`<label><input type="radio" name="${question.id}" value="${optionIndex}"><span>${option}</span></label>`).join("")}</div></section>`).join("")}<div class="assessment-submit"><small>请完成全部题目后提交。</small><button class="primary-btn" type="submit">提交并生成学习处方</button></div>`;
     $("#assessment-form").scrollIntoView({behavior:"smooth",block:"start"});
@@ -150,6 +164,7 @@
     return `本次主要缺口集中在${weakModules.join("、")}。${advice} 补学后重新测评，并把修正前后的证据一并保存。`;
   }
   async function enhanceGuidance(attempt,localGuidance) {
+    if(attempt.mode==="transfer")return {text:localGuidance,source:"规则反馈（作答阶段无AI）"};
     const endpoint=window.COURSE_RUNTIME?.aiEndpoint?.trim(); if(!endpoint)return {text:localGuidance,source:"本地诊断引擎"};
     try{
       const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({course:"机器人学基础",policy:"依据测评错题生成补学路径，只给检查方法，不代做模型、代码或结论。",type:"assessment",level:2,question:JSON.stringify({mode:attempt.mode,score:attempt.score,weakModules:attempt.weakModules,localGuidance})})});
@@ -164,12 +179,12 @@
     const weakModules=[...new Set(responses.filter(item=>!item.correct).map(item=>item.module))];
     const outcomes={}; Object.keys(outcomeNames).forEach(outcome=>{const subset=responses.filter(item=>item.outcome===outcome);if(subset.length)outcomes[outcome]=Math.round(subset.filter(item=>item.correct).length/subset.length*100);});
     const mode=$("#assessment-mode").value; const attempt={id:`A-${Date.now()}`,time:new Date().toISOString(),mode,module:mode==="module"?$("#assessment-module").value:null,score,weakModules,outcomes,responses};
-    const state=readState(),attempts=[...state.attempts,attempt],mastery={...state.mastery};if(mode==="module"&&score===100)mastery[attempt.module]=score;writeState({attempts,mastery});
+    const state=readState(),attempts=[...state.attempts,attempt],mastery={...state.mastery};if(mode==="module"&&score>=80)mastery[attempt.module]=score;writeState({attempts,mastery,aiLocked:false});
     const guidance=await enhanceGuidance(attempt,buildLocalGuidance(weakModules,score)); attempt.guidance=guidance; writeState({attempts:[...attempts.slice(0,-1),attempt],mastery}); renderAssessmentResult(attempt,list);renderAssessmentHistory();renderLearnerDashboard();renderTeacherLifecycle();
   }
   function renderAssessmentResult(attempt,list) {
     $("#assessment-form").hidden=true;const wrong=attempt.responses.filter(item=>!item.correct).map(response=>{const question=list.find(item=>item.id===response.id);return `<div class="wrong-item"><b>${question.id} · ${question.text}</b><p>检查提示：${question.explain}</p></div>`;}).join("");
-    const passed=attempt.mode==="module"?attempt.score===100:attempt.score>=80;$("#assessment-result").hidden=false;$("#assessment-result").innerHTML=`<div class="result-hero"><div class="result-score">${attempt.score}<small>学习诊断分</small></div><div><h2>${passed?"达到本次检查要求":"需要补学与补证"}</h2><p>${modeNames[attempt.mode]}结果只反映本次答题表现。正式评价还需结合任务过程和四类直接证据。</p></div></div><div class="guidance-card"><header><b>AI学习处方</b><small>${attempt.guidance.source}</small></header><p>${escapeHtml(attempt.guidance.text)}</p></div><div class="result-breakdown">${Object.entries(attempt.outcomes).map(([outcome,value])=>`<div><span>${outcomeNames[outcome]}</span><b>${value}</b></div>`).join("")}</div>${wrong?`<h3>错题与补学检查点</h3><div class="wrong-review">${wrong}</div>`:'<div class="empty-state">没有错题。请转入工程任务，用直接证据检验是否真正掌握。</div>'}<div class="assessment-submit"><small>系统已保留本次过程记录。</small><button class="secondary-btn" type="button" data-retry-assessment>重新测评</button></div>`;
+    const passed=attempt.score>=80;const guidanceTitle=attempt.mode==="transfer"?"迁移任务统一反馈":"AI学习处方",scoreLabel=attempt.mode==="module"?"知识理解度":attempt.mode==="transfer"?"独立迁移度":"起点诊断分";$("#assessment-result").hidden=false;$("#assessment-result").innerHTML=`<div class="result-hero"><div class="result-score">${attempt.score}<small>${scoreLabel}</small></div><div><h2>${passed?"达到本次检查要求":"需要补学与补证"}</h2><p>${modeNames[attempt.mode]}结果只反映本次答题表现。课程目标达成还需结合工程任务和可抽检的直接证据。</p></div></div><div class="guidance-card"><header><b>${guidanceTitle}</b><small>${attempt.guidance.source}</small></header><p>${escapeHtml(attempt.guidance.text)}</p></div><div class="result-breakdown">${Object.entries(attempt.outcomes).map(([outcome,value])=>`<div><span>${outcomeNames[outcome]}</span><b>${value}</b></div>`).join("")}</div>${wrong?`<h3>错题与补学检查点</h3><div class="wrong-review">${wrong}</div>`:'<div class="empty-state">没有错题。请转入工程任务，用直接证据检验是否真正掌握。</div>'}<div class="assessment-submit"><small>系统已保留本次过程记录。</small><button class="secondary-btn" type="button" data-retry-assessment>重新测评</button></div>`;
     $("[data-retry-assessment]").addEventListener("click",startAssessment);
   }
   function renderAssessmentHistory() {
@@ -178,23 +193,24 @@
 
   async function loadKnowledgeCatalog() {
     if(!$("#knowledge-catalog"))return;
-    try{const response=await fetch("./assets/knowledge-graph.json");const payload=await response.json();window.SMARTCOURSE_KNOWLEDGE=payload.modules||[];const chapters=[...new Map(window.SMARTCOURSE_KNOWLEDGE.map(item=>[item.chapter,item.chapterTitle])).entries()];$("#knowledge-chapter").innerHTML='<option value="all">全部章节</option>'+chapters.map(([number,title])=>`<option value="${number}">第${number}章 ${title}</option>`).join("");renderKnowledgeCatalog();}
+    try{const [graphResponse,extensionResponse]=await Promise.all([fetch("./assets/knowledge-graph.json"),fetch("./assets/knowledge-extensions.json")]);const graph=await graphResponse.json(),extensions=await extensionResponse.json();window.SMARTCOURSE_KNOWLEDGE=[...(graph.modules||[]),...(extensions.modules||[])];const chapters=[...new Map(window.SMARTCOURSE_KNOWLEDGE.map(item=>[item.chapter,item.chapterTitle])).entries()];$("#knowledge-chapter").innerHTML='<option value="all">全部章节</option>'+chapters.map(([number,title])=>`<option value="${number}">第${number}章 ${title}</option>`).join("");renderKnowledgeCatalog();}
     catch{$("#knowledge-catalog").innerHTML='<div class="empty-state">知识图谱加载失败，请刷新页面重试。</div>';}
   }
   function renderKnowledgeCatalog() {
     const all=window.SMARTCOURSE_KNOWLEDGE||[],keyword=$("#knowledge-search").value.trim().toLowerCase(),chapter=$("#knowledge-chapter").value;
     const filtered=all.filter(item=>(chapter==="all"||String(item.chapter)===chapter)&&(!keyword||[item.title,item.description,item.chapterTitle,...(item.tags||[]),...(item.obeOutcomes||[])].join(" ").toLowerCase().includes(keyword)));
-    $("#knowledge-stats").innerHTML=`<span>知识点 ${all.length}</span><span>当前结果 ${filtered.length}</span><span>章节 ${new Set(all.map(item=>item.chapter)).size}</span><span>细分OBE指标 ${new Set(all.flatMap(item=>item.obeOutcomes||[])).size}</span>`;
-    $("#knowledge-catalog").innerHTML=filtered.length?filtered.map(item=>`<article class="knowledge-item"><header><b>${item.label} ${item.title}</b><em>难度 ${item.difficulty}/5</em></header><p>${item.description}</p><footer><span>${item.bloomLevel}</span><span>${item.learningType}</span>${(item.tags||[]).slice(0,2).map(tag=>`<span>${tag}</span>`).join("")}</footer></article>`).join(""):'<div class="empty-state">没有匹配的知识点</div>';
+    const core=all.filter(item=>!item.id.startsWith("ext-")).length,extensions=all.length-core;
+    $("#knowledge-stats").innerHTML=`<span>核心知识点 ${core}</span><span>工程延伸 ${extensions}</span><span>当前结果 ${filtered.length}</span><span>章节 ${new Set(all.map(item=>item.chapter)).size}</span>`;
+    $("#knowledge-catalog").innerHTML=filtered.length?filtered.map(item=>{const profile=item.id.startsWith("ext-")?item:window.getKnowledgeProfile(item);return `<a class="knowledge-item" href="./resources/knowledge/viewer.html?id=${encodeURIComponent(item.id)}"><header><b>${item.label} ${item.title}</b><em>${item.id.startsWith("ext-")?"工程延伸":`难度 ${item.difficulty}/5`}</em></header><p>${item.description}</p><div class="knowledge-proof"><span>产出</span>${profile.outcome}</div><footer><span>${item.bloomLevel}</span><span>${item.learningType}</span>${(item.tags||[]).slice(0,2).map(tag=>`<span>${tag}</span>`).join("")}</footer></a>`;}).join(""):'<div class="empty-state">没有匹配的知识点</div>';
   }
 
   function renderTeacherLifecycle() {
-    const state=readState(),scores=attemptScores(state.attempts);if($("#outcome-attainment"))$("#outcome-attainment").innerHTML=Object.entries(outcomeNames).map(([outcome,name])=>`<div class="attainment-row"><b>${outcome} ${name}</b><div class="attainment-bar"><i style="width:${scores[outcome]}%"></i></div><span>${scores[outcome]||"—"}</span></div>`).join("");
+    const state=readState(),scores=attemptScores(state.attempts),components=masteryComponents(state);if($("#outcome-attainment"))$("#outcome-attainment").innerHTML=Object.entries(outcomeNames).map(([outcome,name])=>`<div class="attainment-row"><b>${outcome} ${name}</b><div class="attainment-bar"><i style="width:${scores[outcome]}%"></i></div><span>${scores[outcome]||"—"}</span></div>`).join("");if($("#mastery-level-note"))$("#mastery-level-note").textContent=`学习掌握指数口径：知识理解40% + 任务直接证据40% + 无AI迁移20%。${masteryLevel(components)}。当前仅为本机形成性记录，正式达成度由教师核查原始证据后认定。`;
     const stages=lifecycleStatus(state);if($("#cycle-evidence-ledger"))$("#cycle-evidence-ledger").innerHTML=stages.map(stage=>`<div class="ledger-row"><b>${stage.label}</b><p>${stage.done?"已形成可导出的本机记录":`尚缺：${stage.detail}`}</p><span class="badge ${stage.done?"":"pending"}">${stage.done?"已记录":"待完成"}</span></div>`).join("");
     const audits=[
       ["目标—任务—评价一致",true,"4项产出、6项任务、测评与证据已建立映射。"],
       ["AI全周期指导",true,"入口诊断、模块反馈、学习处方、补证与迁移限制。"],
-      ["知识任务能力图谱",(window.SMARTCOURSE_KNOWLEDGE||[]).length===57,"宏观任务图与57个知识单元可检索。"],
+      ["知识任务能力图谱",(window.SMARTCOURSE_KNOWLEDGE||[]).length===72,"57个核心知识点与15个工程延伸单元均可进入学习、提示和证据记录。"],
       ["真实课堂运行数据",false,"必须补充至少两个教学周期的脱敏原始数据。"],
       ["班级级平台接入",false,"公开版仅记录当前学习者；需对接统一认证和学校平台。"],
       ["ABB虚实验证",false,"课程模型可复算；RobotStudio站点、碰撞集和实体日志待补。"],

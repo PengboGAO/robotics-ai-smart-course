@@ -1,0 +1,44 @@
+<!--META {"kp_id": "kp-7-4", "kp_label": "KP 7.4", "title": "力控制", "tags": ["难点"], "difficulty": 3, "chapter": 7, "order": 4, "file": "kp-07-4.html"}-->
+<div class="kp-card" id="kp-7-4">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 7.4</span>
+          力控制
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">力控制</span>是通过<strong>力/力矩传感器</strong>实时测量末端接触力，并将其作为反馈信号构成闭环控制，使机器人末端维持期望的接触力。力控制的核心是将力误差转化为位置或速度修正量。</p>
+
+        <div class="formula-block">
+          <div class="formula-label">力控制律（基于阻抗修正）</div>
+          <div class="formula">x<sub>c</sub> = x<sub>d</sub> + K<sub>f</sub>·(F<sub>d</sub> − F<sub>ext</sub>)</div>
+          <div class="formula-label" style="text-align:center;">F<sub>d</sub>: 期望力 | F<sub>ext</sub>: 实际测量力 | K<sub>f</sub>: 力反馈增益 | x<sub>c</sub>: 修正后位置指令</div>
+        </div>
+
+        <p>力控制的典型应用场景包括：</p>
+        <ul>
+          <li><strong>精密装配</strong>：轴孔装配中实时调整接触力，避免卡阻</li>
+          <li><strong>表面加工</strong>：打磨、抛光时保持恒定法向压力</li>
+          <li><strong>拖拽示教</strong>：操作者施加力使机器人跟随运动</li>
+          <li><strong>医疗康复</strong>：康复训练中根据患者交互力调整运动辅助量</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠ 力控制的关键挑战</div>
+          <p>力控制面临<strong>接触稳定性</strong>问题：刚性环境下的高频力反馈可能导致系统振荡甚至失稳。实际应用中需合理选择力反馈增益，并结合阻抗控制或导纳控制来改善稳定性。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 Raibert-Craig混合位置/力控制</div>
+          <p>在许多接触任务中，机器人需要<strong>同时</strong>控制某些方向的位置和另一些方向的力。例如，沿曲面打磨时，法向方向需要力控制（保持恒定压力），切向方向需要位置控制（沿轨迹运动）。<strong>Raibert-Craig混合控制框架</strong>通过<strong>选择矩阵 S</strong>（对角矩阵，元素为0或1）分离位置控制方向和力控制方向：</p>
+          <div class="formula-block" style="margin: 10px 0;">
+            <div class="formula">τ = J<sup>T</sup>·[S·K<sub>p</sub>·e<sub>p</sub> + (I − S)·K<sub>f</sub>·e<sub>f</sub>]</div>
+          </div>
+          <p>其中 S 为选择矩阵（对角线上1对应位置控制方向，0对应力控制方向），I−S 为力控制选择矩阵，e<sub>p</sub> 为位置误差，e<sub>f</sub> = F<sub>d</sub> − F<sub>ext</sub> 为力误差，J 为雅可比矩阵。该框架的核心思想是：<strong>每个自由度要么控位置、要么控力，二者互斥</strong>，从而避免了位置与力控制之间的冲突。</p>
+        </div>
+      </div>
+    </div>

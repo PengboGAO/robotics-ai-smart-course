@@ -1,0 +1,20 @@
+<!--META {"kp_id": "kp-3-6", "kp_label": "KP 3.6", "title": "ABB IRB 1200关节链正运动学", "tags": ["重点", "考点"], "difficulty": 4, "chapter": 3, "order": 6, "file": "kp-03-6.html"}-->
+<div class="kp-card" id="kp-3-6">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 3.6</span>ABB IRB 1200关节链正运动学</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>课程统一对象为 <span class="term">ABB IRB 1200-5/0.9</span>。参考关节链取自ROS-Industrial <code>abb_irb1200_support</code> 的 <code>irb1200_5_90_macro.xacro</code>：每个关节先执行固定原点平移，再绕该关节局部轴旋转。该模型属于社区维护的教学参考链；工作范围和最大轴速度仍以ABB产品规格为准。</p>
+    <div class="table-wrap"><table><thead><tr><th>轴</th><th>原点平移 xyz / m</th><th>局部转轴</th></tr></thead><tbody>
+      <tr><td>A1</td><td>[0, 0, 0.3991]</td><td>[0, 0, 1]</td></tr><tr><td>A2</td><td>[0, 0, 0]</td><td>[0, 1, 0]</td></tr><tr><td>A3</td><td>[0, 0, 0.4480]</td><td>[0, 1, 0]</td></tr><tr><td>A4</td><td>[0, 0, 0.0420]</td><td>[1, 0, 0]</td></tr><tr><td>A5</td><td>[0.4510, 0, 0]</td><td>[0, 1, 0]</td></tr><tr><td>A6</td><td>[0.0820, 0, 0]</td><td>[1, 0, 0]</td></tr>
+    </tbody></table></div>
+    <div class="formula-block"><div class="formula-label">参考链递推</div><div class="formula">T<sub>0i</sub> = T<sub>0,i-1</sub> · Trans(r<sub>i</sub>) · Rot(u<sub>i</sub>, q<sub>i</sub>)，i=1…6</div></div>
+    <p>学生必须逐级保存T<sub>01</sub>…T<sub>06</sub>，不能只提交最终矩阵。零位只能检查尺寸和轴向的明显错误；至少再选两组非零构型，计算位置差 Δp=‖p<sub>1</sub>−p<sub>2</sub>‖ 和姿态差 ΔR=‖R<sub>1</sub>−R<sub>2</sub>‖<sub>F</sub>。</p>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> 单关节递推核心</div><pre>T = eye(4);
+for axisIndex = 1:6
+    T = T * translationMatrix(jointOrigins(axisIndex,:));
+    T = T * axisRotationMatrix(jointAxes(axisIndex,:), qRad(axisIndex));
+    T0i(:,:,axisIndex) = T;
+end</pre></div>
+    <div class="callout callout-warning"><div class="callout-title">证据边界</div><p>“参考链复算通过”只证明课程代码与该关节链定义一致，不等于RobotStudio站点无碰撞，也不等于实体机器人绝对精度达到某一数值。工具、负载、工件坐标与控制器日志必须另行验证。</p></div>
+    <div class="callout callout-success"><div class="callout-title">学习产出</div><p>提交关节轴图、原点/轴向表、三组构型的逐级矩阵与误差记录。AI可定位第一处差异，但完整矩阵、复算代码和结论由学生完成。</p></div>
+  </div>
+</div>

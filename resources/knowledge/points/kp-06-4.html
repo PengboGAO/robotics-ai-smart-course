@@ -1,0 +1,138 @@
+<!--META {"kp_id": "kp-6-4", "kp_label": "KP 6.4", "title": "LSPB 直线抛物线混合", "tags": ["难点", "考点"], "difficulty": 3, "chapter": 6, "order": 4, "file": "kp-06-4.html"}-->
+<div class="kp-card" id="kp-6-4">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 6.4</span>LSPB 直线抛物线混合</div>
+        <div class="kp-tags">
+          <span class="kp-tag 难点">难点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">LSPB</span>（Linear Segment with Parabolic Blend，直线抛物线混合）是一种兼顾<span class="highlight">匀速运动</span>与<span class="highlight">速度连续</span>的轨迹规划方法。它在中间段采用匀速直线运动（恒速），在起止段采用抛物线过渡（匀加速），从而既保证速度连续，又能在大部分时间保持恒定速度，适合需要稳定作业速度的场景。</p>
+
+        <p>LSPB 轨迹分为三段：</p>
+        <ul>
+          <li><strong>第1段（抛物线加速段）</strong>：t ∈ [0, t<sub>b</sub>，匀加速，速度从 0 线性增至 v；</li>
+          <li><strong>第2段（直线匀速段）</strong>：t ∈ [t<sub>b</sub>, t<sub>f</sub>−t<sub>b</sub>，恒速 v；</li>
+          <li><strong>第3段（抛物线减速段）</strong>：t ∈ [t<sub>f</sub>−t<sub>b</sub>, t<sub>f</sub>]，匀减速，速度从 v 线性减至 0。</li>
+        </ul>
+
+        <div class="formula-block">
+          <div class="formula-label">LSPB 各段表达式（停-停，起止速度为0）</div>
+          <div class="formula">① q(t) = q₀ + ½ a t²,&nbsp;&nbsp; 0 ≤ t ≤ t<sub>b</sub></div>
+          <div class="formula">② q(t) = q<sub>b</sub> + v (t − t<sub>b</sub>),&nbsp;&nbsp; t<sub>b</sub> ≤ t ≤ t<sub>f</sub> − t<sub>b</sub></div>
+          <div class="formula">③ q(t) = q<sub>f</sub> − ½ a (t<sub>f</sub> − t)²,&nbsp;&nbsp; t<sub>f</sub> − t<sub>b</sub> ≤ t ≤ t<sub>f</sub></div>
+          <div class="formula">其中 q<sub>b</sub> = q(t<sub>b</sub>) = q₀ + ½ v·t<sub>b</sub> 为过渡段终点位置</div>
+        </div>
+
+        <p>其中加速度 a 与过渡时间 t<sub>b</sub>、匀速 v 的关系为 v = a·t<sub>b</sub>，且由位移约束可解得：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">过渡时间与匀速的约束关系</div>
+          <div class="formula">t<sub>b</sub> = (q₀ − q<sub>f</sub> + v·t<sub>f</sub>) / v,&nbsp;&nbsp; a = v / t<sub>b</sub></div>
+        </div>
+
+        <div class="svg-diagram">
+          <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
+            <text x="380" y="22" text-anchor="middle" fill="#1a202c" font-size="15" font-weight="700">LSPB 轨迹：位置 / 速度 / 加速度曲线</text>
+
+            <!-- ===== 位置曲线 ===== -->
+            <text x="50" y="55" fill="#2563eb" font-size="12" font-weight="700">位置 q(t)</text>
+            <line x1="60" y1="120" x2="700" y2="120" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="60" y1="50" x2="60" y2="120" stroke="#94a3b8" stroke-width="1"/>
+            <!-- 三段：抛物线(凸)-直线-抛物线(凹) -->
+            <path d="M 60 115 Q 160 110 200 95 L 560 70 Q 600 60 700 55" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+            <!-- 分段标记 -->
+            <line x1="200" y1="50" x2="200" y2="120" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="560" y1="50" x2="560" y2="120" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+            <text x="130" y="135" text-anchor="middle" fill="#d97706" font-size="10">①抛物线(加速)</text>
+            <text x="380" y="135" text-anchor="middle" fill="#059669" font-size="10">②直线(匀速)</text>
+            <text x="630" y="135" text-anchor="middle" fill="#dc2626" font-size="10">③抛物线(减速)</text>
+            <text x="55" y="58" text-anchor="end" fill="#64748b" font-size="10">qf</text>
+            <text x="55" y="118" text-anchor="end" fill="#64748b" font-size="10">q₀</text>
+            <text x="700" y="135" fill="#64748b" font-size="10">t</text>
+
+            <!-- ===== 速度曲线 ===== -->
+            <text x="50" y="175" fill="#0891b2" font-size="12" font-weight="700">速度 q̇(t)</text>
+            <line x1="60" y1="240" x2="700" y2="240" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="60" y1="160" x2="60" y2="240" stroke="#94a3b8" stroke-width="1"/>
+            <!-- 三段：斜线(上升)-水平线-斜线(下降) -->
+            <path d="M 60 240 L 200 195 L 560 195 L 700 240" fill="none" stroke="#0891b2" stroke-width="2.5"/>
+            <line x1="200" y1="160" x2="200" y2="240" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="560" y1="160" x2="560" y2="240" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+            <text x="380" y="188" text-anchor="middle" fill="#059669" font-size="10" font-weight="600">v (匀速)</text>
+            <text x="55" y="200" text-anchor="end" fill="#64748b" font-size="10">v</text>
+            <text x="700" y="255" fill="#64748b" font-size="10">t</text>
+            <text x="130" y="255" text-anchor="middle" fill="#d97706" font-size="10">斜坡</text>
+            <text x="630" y="255" text-anchor="middle" fill="#dc2626" font-size="10">斜坡</text>
+
+            <!-- ===== 加速度曲线 ===== -->
+            <text x="50" y="295" fill="#7c3aed" font-size="12" font-weight="700">加速度 q̈(t)</text>
+            <line x1="60" y1="360" x2="700" y2="360" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="60" y1="290" x2="60" y2="410" stroke="#94a3b8" stroke-width="1"/>
+            <!-- 三段：+a水平线 - 0 - -a水平线（-a在零线下方） -->
+            <path d="M 60 320 L 200 320 L 200 360 L 560 360 L 560 400 L 700 400" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+            <line x1="200" y1="290" x2="200" y2="410" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="560" y1="290" x2="560" y2="410" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+            <text x="130" y="314" text-anchor="middle" fill="#7c3aed" font-size="10" font-weight="600">+a</text>
+            <text x="380" y="375" text-anchor="middle" fill="#059669" font-size="10" font-weight="600">0</text>
+            <text x="630" y="394" text-anchor="middle" fill="#7c3aed" font-size="10" font-weight="600">−a</text>
+            <text x="700" y="375" fill="#64748b" font-size="10">t</text>
+            <text x="55" y="324" text-anchor="end" fill="#64748b" font-size="10">+a</text>
+            <text x="55" y="404" text-anchor="end" fill="#64748b" font-size="10">−a</text>
+
+            <!-- 时间标注 -->
+            <text x="200" y="412" text-anchor="middle" fill="#64748b" font-size="10">tb</text>
+            <text x="560" y="412" text-anchor="middle" fill="#64748b" font-size="10">tf−tb</text>
+            <text x="700" y="412" text-anchor="middle" fill="#64748b" font-size="10">tf</text>
+            <line x1="700" y1="360" x2="700" y2="408" stroke="#94a3b8" stroke-width="0.5" stroke-dasharray="2,2"/>
+          </svg>
+          <div class="diagram-caption">图6-2 LSPB 三段轨迹的位置、速度、加速度曲线（抛物线-直线-抛物线）</div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ LSPB 的加速度不连续</div>
+          <p>LSPB 保证了<span class="highlight">速度连续</span>（C¹），但<strong>加速度在分段切换点（t<sub>b</sub> 和 t<sub>f</sub>−t<sub>b</sub>）处存在跳变</strong>（从 +a 跳到 0，再从 0 跳到 −a），即不满足 C² 连续。这会在分段点产生有限的加加速度（jerk）冲击。对冲击敏感的精密作业，应改用五次多项式或高阶样条。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 匀速段 v 的取值约束</div>
+          <p>匀速 v 不能任意取值。匀速 v 需满足双重约束：下限 v ≥ (q<sub>f</sub>−q₀)/t<sub>f</sub>（保证 t<sub>b</sub> ≥ 0），上限 v ≤ 2(q<sub>f</sub>−q₀)/t<sub>f</sub>（保证匀速段存在，即 t<sub>b</sub> ≤ t<sub>f</sub>/2）。同时 v 也不能过大，否则加速度超出关节驱动能力。加速度需满足约束：</p>
+          <div class="formula-block">
+            <div class="formula-label">加速度约束</div>
+            <div class="formula">a = v / t<sub>b</sub> ≤ a<sub>max</sub>　，　即 v ≤ a<sub>max</sub> · t<sub>b</sub></div>
+          </div>
+          <p>实际中需在速度上限与加速度上限之间折中选择 v。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> LSPB轨迹计算与绘图</div>
+<pre><span class="comment">% LSPB直线抛物线混合轨迹规划</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;    <span class="comment">% 起止位置</span>
+tf = <span class="number">2</span>;                 <span class="comment">% 总时间</span>
+v  = <span class="number">0.7</span>*(qf-q0)/tf;     <span class="comment">% 匀速(需满足约束)</span>
+tb = (q0 - qf + v*tf) / v;  <span class="comment">% 过渡时间</span>
+a  = v / tb;                <span class="comment">% 加速度</span>
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+q  = zeros(size(t));
+<span class="comment">% 三段轨迹：加速段-匀速段-减速段</span>
+for i = <span class="number">1</span>:length(t)
+    if t(i) &lt;= tb
+        q(i) = q0 + <span class="number">0.5</span>*a*t(i)^<span class="number">2</span>;         <span class="comment">% 抛物线加速</span>
+    elseif t(i) &lt;= tf - tb
+        q(i) = q0 + <span class="number">0.5</span>*a*tb^<span class="number">2</span> + v*(t(i)-tb);  <span class="comment">% 直线匀速</span>
+    else
+        q(i) = qf - <span class="number">0.5</span>*a*(tf-t(i))^<span class="number">2</span>;    <span class="comment">% 抛物线减速</span>
+    end
+end
+qd  = gradient(q, t);    <span class="comment">% 数值求导: 速度</span>
+qdd = gradient(qd, t);   <span class="comment">% 加速度</span>
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

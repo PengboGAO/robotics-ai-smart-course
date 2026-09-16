@@ -108,7 +108,7 @@
               <label>本轮目标<select id="learner-goal"><option value="系统掌握">系统掌握课程</option><option value="运动学突破">突破运动学建模</option><option value="轨迹验证">完成轨迹验证</option><option value="综合迁移">完成综合迁移</option></select></label>
               <button class="primary-btn" type="submit">保存学习档案</button>
             </form>
-            <div class="learning-index"><div class="index-ring" id="learning-index-ring"><strong id="learning-index-value">0</strong><span>学习进展指数</span></div><div><span class="eyebrow">下一步建议</span><h2 id="next-action-title">先完成入口诊断</h2><p id="next-action-detail">系统将依据错题、任务和证据缺口生成学习路径。</p><button class="secondary-btn" data-go="assessment" type="button">进入智能测评</button></div></div>
+            <div class="learning-index"><div class="index-ring" id="learning-index-ring"><strong id="learning-index-value">0</strong><span>学习掌握指数</span></div><div><span class="eyebrow">下一步建议</span><h2 id="next-action-title">先完成入口诊断</h2><p id="next-action-detail">系统依据知识理解、任务证据和无AI迁移生成个体补学建议。</p><div id="mastery-components" class="mastery-components" aria-label="学习掌握指数构成"></div><button class="secondary-btn" data-go="assessment" type="button">进入智能测评</button></div></div>
           </div>
           <div id="lifecycle-track" class="lifecycle-track" aria-label="全周期学习阶段"></div>
           <div class="diagnostic-card">
@@ -126,7 +126,7 @@
             <aside id="node-inspector" class="node-inspector"><span class="eyebrow">节点说明</span><h2>选择一个节点</h2><p>这里将显示先修关系、任务与证据要求。</p></aside>
           </div>
           <div class="knowledge-catalog-card">
-            <div class="catalog-head"><div><span class="eyebrow">57 KNOWLEDGE UNITS</span><h2>知识点可检索、可定位、可关联任务</h2><p>4项课程产出用于课程评价，7项细分OBE指标用于知识点定位；两级指标分工明确，不重复计算。</p></div><div class="catalog-tools"><input id="knowledge-search" type="search" placeholder="搜索知识点、标签或能力"><select id="knowledge-chapter"><option value="all">全部章节</option></select></div></div>
+            <div class="catalog-head"><div><span class="eyebrow">57 CORE + 15 ENGINEERING EXTENSIONS</span><h2>每个知识点都能进入任务、提示与证据评价</h2><p>核心内容保证基础系统性，工程延伸连接ABB、RobotStudio、URDF、碰撞、安全与开放软件栈；点击卡片即可学习。</p></div><div class="catalog-tools"><input id="knowledge-search" type="search" placeholder="搜索知识点、标签或能力"><select id="knowledge-chapter"><option value="all">全部章节</option></select></div></div>
             <div id="knowledge-stats" class="knowledge-stats"></div>
             <div id="knowledge-catalog" class="knowledge-catalog"><div class="empty-state">正在加载知识图谱……</div></div>
           </div>
@@ -134,21 +134,23 @@
         </section>
 
         <section class="page" data-page="lab" aria-labelledby="lab-title">
-          <div class="page-intro"><span class="eyebrow">ABB IRB 1200-5/0.9</span><h1 id="lab-title">用同一模型完成计算、仿真与反证</h1><p>本页计算链与课程可复算MATLAB脚本采用同一组ROS-Industrial参考关节链参数。社区参考模型不是ABB个体标定模型，碰撞和RobotStudio控制器结果仍需站点文件验证。</p></div>
+          <div class="page-intro"><span class="eyebrow">ABB IRB 1200-5/0.9</span><h1 id="lab-title">同一组MATLAB轨迹同步驱动ABB三维网格模型</h1><p>学生先读六轴轨迹曲线并预测动作，再观察同源关节数据驱动的ABB三维网格模型，最后解释曲线、构型和约束之间的对应关系。该方法用于认知校核，不等同于实体机器人实时数字孪生。</p></div>
           <div class="lab-grid">
             <div class="sim-panel">
-              <div class="panel-head"><div><span class="eyebrow">实时正运动学</span><h2>六轴构型检查</h2></div><button id="reset-joints" class="ghost-btn" type="button">恢复起点</button></div>
-              <canvas id="robot-canvas" width="820" height="560" aria-label="ABB IRB 1200关节链仿真图"></canvas>
-              <div class="sim-readout"><div><span>法兰位置 x</span><b id="fk-x">—</b></div><div><span>法兰位置 y</span><b id="fk-y">—</b></div><div><span>法兰位置 z</span><b id="fk-z">—</b></div><div><span>A5奇异筛查</span><b id="singularity-state">—</b></div></div>
+              <div class="panel-head"><div><span class="eyebrow">同源数据同步演示</span><h2>MATLAB q(t) → ABB三维网格动作</h2></div><button id="reset-joints" class="ghost-btn" type="button">恢复起点</button></div>
+              <div id="sync-stage" class="sync-stage"><img id="mesh-frame" class="mesh-frame" src="./resources/abb/mesh-frames/irb1200-valid-00.png" alt="ABB IRB 1200验证轨迹三维网格动作帧"><canvas id="robot-canvas" width="820" height="520" aria-label="ABB IRB 1200三维参考关节链动作图"></canvas><div class="sync-badge"><span>同步时刻</span><b id="sync-time">0.00 / 3.00 s</b><small>同一q(t)同时用于曲线与模型</small></div><div id="mesh-mode-note" class="mesh-mode-note">ROS-Industrial碰撞网格 · 离线教学帧</div></div>
+              <canvas id="trajectory-canvas" width="820" height="280" aria-label="MATLAB五次时间标度六轴轨迹曲线"></canvas>
+        <div class="sim-readout"><div><span>法兰位置 x</span><b id="fk-x">—</b></div><div><span>法兰位置 y</span><b id="fk-y">—</b></div><div><span>法兰位置 z</span><b id="fk-z">—</b></div><div><span>当前帧 A5筛查</span><b id="singularity-state">—</b></div></div>
+              <div class="cognition-check"><article><span>01</span><b>读曲线</b><small>识别起止角、斜率与边界条件</small></article><article><span>02</span><b>先预测</b><small>写下六轴动作和可能风险</small></article><article><span>03</span><b>同步观察</b><small>比较曲线游标与三维动作</small></article><article><span>04</span><b>解释差异</b><small>用模型、约束或反例说明原因</small></article></div>
             </div>
             <div class="joint-panel"><div class="panel-head"><div><span class="eyebrow">JOINT SPACE</span><h2>关节输入与限位</h2></div></div><div id="joint-controls"></div></div>
           </div>
           <div class="trajectory-panel">
-            <div><span class="eyebrow">五次时间标度</span><h2>轨迹约束预检</h2><p>端点速度、加速度为零；峰值速度按1.875×|Δq|/T计算。通过仅表示课程模型预检通过，不等于实体机器人安全放行。</p></div>
+            <div><span class="eyebrow">五次时间标度</span><h2>先算约束，再看动作</h2><p>端点速度、加速度为零；峰值速度按1.875×|Δq|/T计算。播放前先完成预测和约束检查，动画只能帮助理解，不能替代数值证据。</p></div>
             <div class="trajectory-controls"><label>目标构型<select id="goal-preset"><option value="valid">验证轨迹 [60,40,-70,100,45,180]</option><option value="singular">奇异反例 [60,40,-70,100,0,180]</option><option value="overlimit">超限反例 [60,140,-70,100,45,180]</option></select></label><label>运行时间 / s<input id="duration-input" type="number" min="1" max="15" step="0.5" value="3"></label><button id="check-trajectory" class="primary-btn" type="button">执行约束检查</button><button id="animate-trajectory" class="secondary-btn" type="button">播放轨迹</button></div>
             <div id="trajectory-results" class="trajectory-results"></div>
           </div>
-          <div class="truth-note"><b>真实性说明</b><p>D-H链、关节限位、最大速度、正逆解与轨迹结果可由随课程提供的MATLAB脚本复算。RobotStudio站点、工具负载、工件坐标、碰撞集和虚拟控制器日志未提供时，相关结论必须标记“待验证”。</p><a href="./resources/abb/ABB_IRB1200_5_90_trajectory_validation.m" download>下载可复算MATLAB代码</a><a href="./resources/abb/ABB_IRB1200_复算结果.json" download>下载复算结果</a></div>
+          <div class="truth-note"><b>真实性说明</b><p>验证轨迹使用ROS-Industrial维护的IRB1200碰撞网格生成31个离线动作帧；网页曲线、网格帧与MATLAB复算共享同一组q(t)。反例和手动调节仅显示参考关节链。没有RobotStudio站点、工具负载、碰撞集、虚拟控制器或实体日志时，只能写“课程模型预检通过/待控制器验证”。</p><a href="./resources/abb/ABB_IRB1200_5_90_trajectory_validation.m" download>下载可复算MATLAB代码</a><a href="./resources/abb/mesh-frames/manifest.json" download>下载网格帧数据口径</a><a href="./resources/abb/ABB_IRB1200_复算结果.json" download>下载复算结果</a></div>
         </section>
 
         <section class="page" data-page="assistant" aria-labelledby="assistant-title">
@@ -158,8 +160,10 @@
               <div class="assistant-policy"><b id="ai-mode-label">当前模式：课程知识库诊断</b><span>不在前端保存密钥 · 对话默认仅存本机</span></div>
               <div id="chat-log" class="chat-log" aria-live="polite"><div class="message assistant"><span>AI助教</span><p>请告诉我：你在做哪一项任务？预期结果是什么？实际结果是什么？已经检查过哪些参数或约束？</p></div></div>
               <form id="assistant-form" class="assistant-form">
+                <label>当前任务<select id="assistant-module"></select></label>
                 <label>问题类型<select id="question-type"><option value="model">模型与坐标系</option><option value="code">代码与公式对应</option><option value="simulation">仿真与轨迹约束</option><option value="verification">反证与结果解释</option></select></label>
                 <label class="grow">问题描述<textarea id="question-input" rows="3" placeholder="示例：同一组关节角下，D-H正解与参考关节链的末端位置不一致；已核对单位，但未核对theta偏置。" required></textarea></label>
+                <div id="ai-stage-note" class="assessment-rules"></div>
                 <div class="hint-levels" role="group" aria-label="提示级别"><button type="submit" data-level="1">一级：定位</button><button type="submit" data-level="2">二级：方法</button><button type="submit" data-level="3">三级：局部支架</button></div>
               </form>
             </div>
@@ -168,7 +172,7 @@
         </section>
 
         <section class="page" data-page="assessment" aria-labelledby="assessment-title">
-          <div class="page-intro"><span class="eyebrow">AI ASSESSMENT</span><h1 id="assessment-title">每次测评都生成下一步学习行动</h1><p>入口诊断定位基础，模块测评检查理解，迁移测评在无AI条件下检验独立能力。结果用于学习指导，不自动替代正式课程成绩。</p></div>
+          <div class="page-intro"><span class="eyebrow">STUDENT-CENTERED OBE</span><h1 id="assessment-title">评价学生真正理解了什么、还能独立做什么</h1><p>入口诊断确定起点，模块测评检查知识理解与接受程度，工程任务核查直接证据，无AI迁移检验独立应用。系统据此推荐补学，不用点击量或页面停留时长替代学习成效。</p></div>
           <div class="assessment-modes">
             <button type="button" data-assessment-mode="diagnostic"><span>01</span><b>入口诊断</b><small>8题 · 不计成绩 · 生成起点</small></button>
             <button type="button" data-assessment-mode="module"><span>02</span><b>模块测评</b><small>按模块抽题 · 形成性反馈</small></button>
@@ -221,7 +225,7 @@
           </div>
           <div class="teacher-note"><b>部署建议</b><p>公开GitHub Pages版本用于展示课程结构和交互原型；真实教学应接入学校统一身份认证、课程平台、对象存储和经审批的教育大模型网关，不在前端保存API密钥或学生敏感信息。</p></div>
           <div class="teacher-lifecycle-grid">
-            <div class="outcome-attainment-card"><div class="panel-head"><div><span class="eyebrow">OBE ATTAINMENT</span><h2>课程目标达成诊断</h2></div><span class="demo-label">当前学习者记录</span></div><div id="outcome-attainment"></div></div>
+            <div class="outcome-attainment-card"><div class="panel-head"><div><span class="eyebrow">OBE ATTAINMENT</span><h2>学习产出达成诊断</h2></div><span class="demo-label">当前学习者记录</span></div><div id="outcome-attainment"></div><div id="mastery-level-note" class="mastery-level-note"></div></div>
             <div class="cycle-evidence-card"><div class="panel-head"><div><span class="eyebrow">FULL-CYCLE EVIDENCE</span><h2>全周期证据账本</h2></div></div><div id="cycle-evidence-ledger"></div></div>
           </div>
           <div class="provincial-audit-card"><div class="panel-head"><div><span class="eyebrow">PROVINCIAL REVIEW</span><h2>省级智慧课程申报自检</h2></div><a href="./docs/省级智慧课程申报证据清单.md" class="secondary-btn">打开证据清单</a></div><div id="provincial-audit"></div></div>
@@ -234,6 +238,8 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./assets/runtime-config.js"></script>
   <script src="./assets/course-data.js"></script>
+  <script src="./assets/knowledge-system.js"></script>
+  <script src="./assets/question-bank.js"></script>
   <script src="./assets/app.js"></script>
   <script src="./assets/lifecycle.js"></script>
 </body>

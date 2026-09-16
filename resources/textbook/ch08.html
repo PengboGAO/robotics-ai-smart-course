@@ -38,14 +38,14 @@
       <h3>本章目录</h3>
     <ul class="toc-list">
       <li><a href="#sec-1">8.1 MATLAB仿真</a></li>
-      <li class="sub-item"><a href="#kp-1">KP 8.1 MATLAB仿真</a></li>
-      <li><a href="#sec-2">8.2 工业机器人编程</a></li>
-      <li class="sub-item"><a href="#kp-2">KP 8.2 ABB机器人编程</a></li>
-      <li><a href="#sec-3">8.3 ROS机器人</a></li>
-      <li class="sub-item"><a href="#kp-3">KP 8.3 ROS基础</a></li>
-      <li><a href="#sec-4">8.4 视觉与项目</a></li>
-      <li class="sub-item"><a href="#kp-4">KP 8.4 视觉伺服入门</a></li>
-      <li class="sub-item"><a href="#kp-5">KP 8.5 课程项目</a></li>
+      <li class="sub-item"><a href="#kp-8-1">KP 8.1 MATLAB仿真</a></li>
+      <li><a href="#sec-2">8.2 ABB机器人编程</a></li>
+      <li class="sub-item"><a href="#kp-8-2">KP 8.2 ABB机器人编程</a></li>
+      <li><a href="#sec-3">8.3 ROS基础</a></li>
+      <li class="sub-item"><a href="#kp-8-3">KP 8.3 ROS基础</a></li>
+      <li><a href="#sec-4">8.4 视觉伺服与课程项目</a></li>
+      <li class="sub-item"><a href="#kp-8-4">KP 8.4 视觉伺服入门</a></li>
+      <li class="sub-item"><a href="#kp-8-5">KP 8.5 课程项目</a></li>
       <li><a href="#sec-compare">实践平台对比</a></li>
       <li><a href="#sec-summary">课程总结</a></li>
       <li><a href="#sec-project">项目要求</a></li>
@@ -75,97 +75,29 @@
       <p>理论的价值最终要通过工程实践来体现。本章是全课程的实践收官章，将前七章的理论知识落地为可运行、可验证的工程系统。我们将通过<span class="highlight">MATLAB Robotics Toolbox</span>验证运动学与控制算法，通过<strong>ABB RAPID编程</strong>掌握工业机器人的实际操作，通过<strong>ROS</strong>理解机器人软件生态，并通过<strong>视觉伺服</strong>与<strong>课程项目</strong>将所有知识融会贯通。本章强调动手实践，每个知识点都配有可运行的代码示例。</p>
     </div>
 
-    <h2 class="section-title" id="sec-1"><span class="section-num">8.1</span>MATLAB仿真</h2>
+    <h2 class="section-title" id="sec-1"><span class="section-num">8.1</span> MATLAB仿真</h2>
 
 
     <div class="kp-card" id="kp-8-1">
-      <div class="kp-header">
-        <div class="kp-title">
-          <span class="kp-id">KP 8.1</span>
-          MATLAB仿真
-        </div>
-        <div class="kp-tags">
-          <span class="kp-tag 重点">重点</span>
-          <span class="kp-tag 考点">考点</span>
-        
-          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
-        </div>
-      </div>
-      <div class="kp-body">
-        <p><span class="term">MATLAB Robotics Toolbox</span>是机器人学教学与研究中最重要的仿真工具之一，由Peter Corke开发维护。它提供了机器人<strong>建模、运动学求解、轨迹规划、动力学仿真和控制验证</strong>的完整功能链，是连接理论公式与工程实践的关键桥梁。</p>
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 8.1</span>ABB MATLAB复算与仿真</div><div class="kp-tags"><span class="kp-tag 重点">重点</span><span class="kp-tag 考点">考点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>本课程MATLAB实践统一使用 <span class="term">ABB IRB 1200-5/0.9</span>。提供的参考脚本不依赖第三方机器人模型，直接实现关节链正运动学、课程等价D-H复算、阻尼最小二乘逆解、几何雅可比、五次轨迹和约束检查，便于逐行对应数学模型。</p>
+    <div class="callout callout-info"><div class="callout-title">一份脚本生成五类可核验证据</div><p>①参考关节链与D-H链多构型误差；②正解—逆解—再正解误差；③六轴角度、速度、加速度曲线；④工作范围和最大速度检查；⑤A5穿越0°反例与最小奇异值。RobotStudio碰撞和控制器日志明确保留为待验证项。</p></div>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> 运行ABB复算脚本</div><pre>outputDirectory = fullfile(pwd,"abb_results");
+results = ABB_IRB1200_5_90_trajectory_validation(outputDirectory);
 
-        <div class="callout callout-info">
-          <div class="callout-title">💡 Robotics Toolbox核心功能</div>
-          <p><strong>Link类</strong>：定义机器人连杆参数（D-H参数）；<strong>SerialLink类</strong>：构建串联机器人模型；<strong>fkine</strong>：正运动学求解；<strong>ikine</strong>：逆运动学求解；<strong>jtraj</strong>：关节空间轨迹规划；<strong>plot</strong>：三维动画可视化。</p>
-        </div>
+disp(results.dhMaximumPositionDifferenceMeters);
+disp(results.inversePositionErrorMeters);
+disp(results.peakSpeedDegPerSecond);
+disp(results.collisionAndRobotStudioStatus);</pre></div>
+    <p>脚本默认起点为[0, −30, 20, 0, 30, 0]°，目标为[60, 40, −70, 100, 45, 180]°，运行时间3 s，使用五次时间标度。学生应先预测哪一轴速度利用率最高，再运行复算；修改时间或A5目标时，每次只改变一个条件并保留修正前后输出。</p>
+    <div class="formula-block"><div class="formula-label">五次时间标度</div><div class="formula">s(τ)=10τ³−15τ⁴+6τ⁵，τ=t/T；max(ds/dt)=1.875/T</div></div>
+    <div class="callout callout-warning"><div class="callout-title">仿真不能替代现场放行</div><p>脚本中的速度检查采用产品规格上限，尚未包含控制器加速度限制、负载、工具、工件、碰撞几何和安全区域。结果只能支持“课程模型预检”，实体运行前必须在RobotStudio完整站点和现场流程中复核。</p></div>
+    <div class="callout callout-success"><div class="callout-title">下载与提交</div><p><a href="../abb/ABB_IRB1200_5_90_trajectory_validation.m">下载ABB IRB 1200完整复算脚本</a>。提交时附脚本版本、输入参数、JSON结果、曲线图和AI使用记录；不得只提交动画截图。</p></div>
+  </div>
+</div>
 
-        <p><strong>1. 建立PUMA560机器人模型</strong>：使用D-H参数定义六轴机器人的连杆参数，构建SerialLink串联机器人对象。</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> 建立PUMA560机器人模型与正运动学</div>
-<pre><span class="comment">% === 建立PUMA560机器人模型 ===</span>
-<span class="comment">% 使用标准D-H参数法定义6个连杆</span>
-<span class="comment">% 适用于 RTB 10.x+</span>
-<span class="comment">% Link([theta d a alpha], 'standard') — 数组语法</span>
-
-L(1) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(2) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0.4318</span> <span class="number">0</span>], <span class="string">'standard'</span>);
-L(3) = Link([<span class="number">0</span> <span class="number">0.15</span> <span class="number">0.0203</span> -pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(4) = Link([<span class="number">0</span> <span class="number">0.4318</span> <span class="number">0</span> pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(5) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> -pi/<span class="number">2</span>], <span class="string">'standard'</span>);
-L(6) = Link([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>], <span class="string">'standard'</span>);
-
-<span class="comment">% 构建串联机器人对象</span>
-puma = SerialLink(L, <span class="string">'name'</span>, <span class="string">'PUMA560'</span>);
-
-<span class="comment">% 正运动学求解：给定关节角求末端位姿</span>
-q = [<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>];  <span class="comment">% 关节角（弧度）</span>
-T = puma.fkine(q);        <span class="comment">% 4x4齐次变换矩阵</span>
-disp(<span class="string">'末端位姿矩阵 T ='</span>); disp(T);
-
-<span class="comment">% 三维可视化</span>
-puma.plot(q);
-title(<span class="string">'PUMA560 机器人模型（初始位姿）'</span>);</pre>
-        </div>
-
-        <p><strong>2. 逆运动学与轨迹规划仿真</strong>：给定末端目标位姿，求解关节角，并规划从初始位姿到目标位姿的平滑轨迹。</p>
-
-        <div class="code-block">
-          <div class="code-label"><span class="lang">MATLAB</span> 逆运动学与轨迹规划仿真</div>
-<pre><span class="comment">% === 逆运动学与轨迹规划 ===</span>
-
-<span class="comment">% 定义起始位姿和目标位姿（关节空间）</span>
-q_start = [<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>];
-q_end   = [<span class="number">0</span> -pi/<span class="number">4</span> pi/<span class="number">2</span> <span class="number">0</span> pi/<span class="number">4</span> <span class="number">0</span>];
-
-<span class="comment">% 关节空间五次多项式插值轨迹规划</span>
-t = [<span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>];  <span class="comment">% 时间序列，2秒完成</span>
-[q_traj, qd_traj, qdd_traj] = jtraj(q_start, q_end, t);
-
-<span class="comment">% 轨迹动画播放</span>
-puma.plot(q_traj, <span class="string">'trajectory'</span>, <span class="number">true</span>);
-
-<span class="comment">% 绘制关节角轨迹曲线</span>
-figure;
-subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t, q_traj); title(<span class="string">'关节角度'</span>);
-subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t, qd_traj); title(<span class="string">'关节角速度'</span>);
-subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t, qdd_traj); title(<span class="string">'关节角加速度'</span>);
-xlabel(<span class="string">'时间 (s)'</span>);
-
-<span class="comment">% 逆运动学验证：从末端位姿反解关节角</span>
-T_target = transl(<span class="number">0.5</span>, <span class="number">0.2</span>, <span class="number">0.6</span>) * trotx(pi);
-q_sol = puma.ikine(T_target, q_start);
-disp(<span class="string">'逆解关节角: '</span>); disp(q_sol);</pre>
-        </div>
-
-        <div class="callout callout-success">
-          <div class="callout-title">✓ 仿真验证的意义</div>
-          <p>通过MATLAB仿真，我们可以在不依赖真实硬件的情况下<strong>验证理论公式的正确性</strong>、<strong>可视化机器人的运动过程</strong>、<strong>评估控制算法的性能</strong>。这种"先仿真后实物"的开发流程是现代机器人工程的标配。</p>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="section-title" id="sec-2"><span class="section-num">8.2</span>工业机器人编程</h2>
+    <h2 class="section-title" id="sec-2"><span class="section-num">8.2</span> ABB机器人编程</h2>
 
 
     <div class="kp-card" id="kp-8-2">
@@ -265,7 +197,7 @@ ENDMODULE</pre>
         <p>robtarget由四个分量组构成，共包含位置、姿态、轴配置和外部轴信息：</p>
         <ul>
           <li><strong>pos [x, y, z]</strong>：末端工具在工件坐标系下的三维位置，单位为毫米（mm）。例如 [800, 0, 900] 表示X=800mm, Y=0mm, Z=900mm。</li>
-          <li><strong>orient [q1, q2, q3, q4]</strong>：末端姿态的<strong>四元数</strong>表示（单位四元数），描述工具坐标系相对于工件坐标系的旋转。四元数相比欧拉角无奇异点、无万向锁问题。例如 [1, 0, 0, 0] 表示无旋转（与基坐标系对齐）。</li>
+          <li><strong>orient [q1, q2, q3, q4]</strong>：末端姿态的<strong>单位四元数</strong>表示，描述工具坐标系相对于工件坐标系的旋转。它没有欧拉角万向锁，但 q 与 −q 表示同一姿态；例如 [1, 0, 0, 0] 表示单位旋转。</li>
           <li><strong>confdata [cf1, cf4, cf6, cfx]</strong>：轴配置数据，指定机器人到达目标位姿时各关节所在的<strong>象限区间</strong>。cf1、cf4、cf6分别对应关节1、4、6的转角象限（0/1/-1），cfx为附加配置。同一末端位姿可能对应多个关节解（逆运动学多解），confdata用于指定使用哪个解。9E9表示不限制该轴配置。</li>
           <li><strong>extax [eax1~eax6]</strong>：外部轴位置值，最多支持6个外部轴（如导轨、变位机）。若无外部轴，所有值设为9E9。</li>
         </ul>
@@ -311,7 +243,7 @@ ENDMODULE</pre>
       </div>
     </div>
 
-    <h2 class="section-title" id="sec-3"><span class="section-num">8.3</span>ROS机器人</h2>
+    <h2 class="section-title" id="sec-3"><span class="section-num">8.3</span> ROS基础</h2>
 
 
     <div class="kp-card" id="kp-8-3">
@@ -501,7 +433,7 @@ ENDMODULE</pre>
       </div>
     </div>
 
-    <h2 class="section-title" id="sec-4"><span class="section-num">8.4</span>视觉与项目</h2>
+    <h2 class="section-title" id="sec-4"><span class="section-num">8.4</span> 视觉伺服与课程项目</h2>
 
 
     <div class="kp-card" id="kp-8-4">
@@ -912,7 +844,7 @@ ENDMODULE</pre>
           <li><strong>RAPID条件与循环</strong>：RAPID程序中如何实现条件判断（IF...THEN）和循环（FOR/WHILE）？请编写一个简单的物料检测分拣程序框架：当检测到物料到位时（WaitDI信号），机器人抓取物料并根据颜色（IF条件）放置到不同位置。</li>
           <li><strong>ROS通信机制</strong>：ROS中Publisher和Subscriber的通信机制是什么？请画出一个简单的消息流图，说明消息从发布到订阅的完整过程，并解释ROS Master在其中扮演的角色。</li>
           <li><strong>视觉伺服系统设计</strong>：设计一个视觉伺服抓取系统的总体方案，包括硬件选型（相机类型、机器人型号、计算平台）和软件架构（图像处理模块、位姿估计模块、运动规划模块、控制模块），并说明各模块之间的数据流。</li>
-          <li><strong>D-H参数约定</strong>：MATLAB Robotics Toolbox中Link的'standard'（标准D-H）和'modified'（改进D-H）参数约定有何区别？在建立同一个机器人模型时，两种约定下的参数表是否相同？请以一个简单二连杆机器人为例说明。</li>
+          <li><strong>D-H参数约定</strong>：标准D-H和改进D-H的变换次序有何区别？以ABB IRB 1200参考链为对象，说明为何参数表不同但经固定坐标对齐后末端位姿应一致。</li>
           <li><strong>示教编程与离线编程</strong>：比较示教编程和离线编程（如RobotStudio）的优缺点，各适用于什么场景？在实际工业产线中，如何选择合适的编程方式？</li>
           <li><strong>ROS 2与ROS 1对比</strong>：ROS 2相比ROS 1有哪些主要改进？为什么ROS 2更适合工业级实时应用？（提示：考虑DDS中间件、实时性支持、多机通信、生命周期管理等方面）</li>
           <li><strong>相机配置选择</strong>：在视觉伺服系统中，眼在手内（Eye-in-Hand）和眼在手外（Eye-to-Hand）两种相机配置各有什么优缺点？在什么应用场景下应选择哪种配置？</li>

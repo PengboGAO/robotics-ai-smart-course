@@ -249,40 +249,40 @@
       "description": "正运动学方程推导流程，A矩阵连乘得到T矩阵，末端位姿的完整描述"
     },
     {
-      "id": "kp-3-6", "label": "KP 3.6", "title": "PUMA560正运动学",
+      "id": "kp-3-6", "label": "KP 3.6", "title": "ABB IRB 1200关节链正运动学",
       "chapter": 3, "chapterTitle": "正运动学", "section": "3.3", "sectionTitle": "典型机器人案例",
       "order": 6, "file": "kp-03-6.html",
-      "difficulty": 4, "tags": ["考点"],
+      "difficulty": 4, "tags": ["重点", "考点"],
       "bloomLevel": "分析", "learningType": "案例",
       "estimatedTime": 35,
       "resources": ["video", "matlab"],
       "obeOutcomes": ["OBE-2"],
       "learningStyles": ["analytical", "practical"],
-      "description": "PUMA560六自由度机器人D-H参数表建立，运动学方程完整推导，坐标系标注实例"
+      "description": "依据ROS-Industrial关节原点与轴向建立ABB IRB 1200参考链，逐级计算并验证正运动学"
     },
     {
-      "id": "kp-3-7", "label": "KP 3.7", "title": "斯坦福臂正运动学",
+      "id": "kp-3-7", "label": "KP 3.7", "title": "ABB等价D-H模型与一致性验证",
       "chapter": 3, "chapterTitle": "正运动学", "section": "3.3", "sectionTitle": "典型机器人案例",
       "order": 7, "file": "kp-03-7.html",
-      "difficulty": 3, "tags": ["重点"],
+      "difficulty": 4, "tags": ["重点", "难点"],
       "bloomLevel": "分析", "learningType": "案例",
       "estimatedTime": 30,
       "resources": ["video", "matlab"],
       "obeOutcomes": ["OBE-2"],
       "learningStyles": ["analytical", "practical"],
-      "description": "斯坦福臂含移动关节的D-H参数建立，运动学方程推导，与全旋转关节机器人的差异"
+      "description": "推导ABB课程等价标准D-H模型，并用多构型位置与姿态误差验证两条关节链一致性"
     },
     {
-      "id": "kp-3-8", "label": "KP 3.8", "title": "UR5协作机器人D-H参数简介",
+      "id": "kp-3-8", "label": "KP 3.8", "title": "ABB型号参数与模型边界",
       "chapter": 3, "chapterTitle": "正运动学", "section": "3.3", "sectionTitle": "典型机器人案例",
-      "order": 8, "file": "kp-03-ur5.html",
+      "order": 8, "file": "kp-03-abb-boundary.html",
       "difficulty": 3, "tags": ["重点"],
       "bloomLevel": "分析", "learningType": "案例",
       "estimatedTime": 25,
       "resources": ["video", "matlab"],
       "obeOutcomes": ["OBE-2"],
       "learningStyles": ["analytical", "practical"],
-      "description": "UR5协作机器人结构特点，D-H参数表建立，现代工业机器人的运动学建模实践"
+      "description": "区分ABB产品规格、ROS参考链和课程等价D-H模型，建立型号、供电与验证边界意识"
     },
 
     {
@@ -322,7 +322,7 @@
       "description": "Pieper六自由度机器人封闭解充分条件，后三轴交于一点的特殊结构，分步求解策略"
     },
     {
-      "id": "kp-4-4", "label": "KP 4.4", "title": "代数法",
+      "id": "kp-4-4", "label": "KP 4.4", "title": "ABB逆运动学代数分解",
       "chapter": 4, "chapterTitle": "逆运动学", "section": "4.2", "sectionTitle": "解析求解方法",
       "order": 4, "file": "kp-04-3.html",
       "difficulty": 4, "tags": ["难点"],
@@ -331,10 +331,10 @@
       "resources": ["video", "matlab"],
       "obeOutcomes": ["OBE-3"],
       "learningStyles": ["analytical"],
-      "description": "代数法求解逆运动学，矩阵方程展开与三角函数化简技巧，关节角的代数解"
+      "description": "统一ABB工件、工具与法兰坐标，按腕心位置和腕部姿态分解逆运动学候选解"
     },
     {
-      "id": "kp-4-5", "label": "KP 4.5", "title": "几何法",
+      "id": "kp-4-5", "label": "KP 4.5", "title": "ABB腕心几何法",
       "chapter": 4, "chapterTitle": "逆运动学", "section": "4.2", "sectionTitle": "解析求解方法",
       "order": 5, "file": "kp-04-4.html",
       "difficulty": 3, "tags": ["难点"],
@@ -343,10 +343,10 @@
       "resources": ["video", "animation"],
       "obeOutcomes": ["OBE-3"],
       "learningStyles": ["visual", "analytical"],
-      "description": "几何法利用平面几何关系求解，投影到关节平面，余弦定理的应用，直观解法"
+      "description": "将ABB前三轴定位投影到肩肘平面，用余弦定理生成并验证肘部候选解"
     },
     {
-      "id": "kp-4-6", "label": "KP 4.6", "title": "数值法",
+      "id": "kp-4-6", "label": "KP 4.6", "title": "ABB数值逆运动学",
       "chapter": 4, "chapterTitle": "逆运动学", "section": "4.3", "sectionTitle": "数值法与雅可比",
       "order": 6, "file": "kp-04-6.html",
       "difficulty": 4, "tags": ["难点"],
@@ -355,10 +355,10 @@
       "resources": ["video", "matlab"],
       "obeOutcomes": ["OBE-3"],
       "learningStyles": ["analytical", "practical"],
-      "description": "数值迭代法求解逆运动学，牛顿-拉夫逊法，收敛性与多解处理"
+      "description": "采用阻尼最小二乘法求解ABB逆运动学，并检查收敛误差、限位与解支依赖"
     },
     {
-      "id": "kp-4-7", "label": "KP 4.7", "title": "雅可比矩阵",
+      "id": "kp-4-7", "label": "KP 4.7", "title": "ABB几何雅可比与奇异筛查",
       "chapter": 4, "chapterTitle": "逆运动学", "section": "4.3", "sectionTitle": "数值法与雅可比",
       "order": 7, "file": "kp-04-7.html",
       "difficulty": 5, "tags": ["重点", "难点", "考点"],
@@ -367,7 +367,7 @@
       "resources": ["video", "matlab", "animation"],
       "obeOutcomes": ["OBE-3"],
       "learningStyles": ["analytical"],
-      "description": "雅可比矩阵定义与物理意义，速度级运动学关系，雅可比矩阵的构造方法"
+      "description": "由ABB参考链构造几何雅可比，沿轨迹计算最小奇异值并验证A5奇异反例"
     },
     {
       "id": "kp-4-8", "label": "KP 4.8", "title": "奇异位形",
@@ -674,16 +674,16 @@
     },
 
     {
-      "id": "kp-8-1", "label": "KP 8.1", "title": "MATLAB仿真",
+      "id": "kp-8-1", "label": "KP 8.1", "title": "ABB MATLAB复算与仿真",
       "chapter": 8, "chapterTitle": "综合实践", "section": "8.1", "sectionTitle": "MATLAB仿真",
       "order": 1, "file": "kp-08-1.html",
-      "difficulty": 2, "tags": ["重点", "考点"],
+      "difficulty": 3, "tags": ["重点", "考点"],
       "bloomLevel": "应用", "learningType": "实践",
       "estimatedTime": 40,
       "resources": ["video", "matlab"],
       "obeOutcomes": ["OBE-7"],
       "learningStyles": ["practical"],
-      "description": "MATLAB Robotics Toolbox使用，运动学/动力学仿真，轨迹规划仿真实现"
+      "description": "运行ABB IRB 1200独立复算脚本，生成运动学、轨迹、约束和反证证据"
     },
     {
       "id": "kp-8-2", "label": "KP 8.2", "title": "ABB机器人编程",

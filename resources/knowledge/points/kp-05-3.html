@@ -1,0 +1,58 @@
+<!--META {"kp_id": "kp-5-3", "kp_label": "KP 5.3", "title": "势能计算", "tags": ["考点"], "difficulty": 2, "chapter": 5, "order": 3, "file": "kp-05-3.html"}-->
+<div class="kp-card" id="kp-5-3">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 5.3</span>势能计算</div>
+        <div class="kp-tags">
+          <span class="kp-tag 考点">考点</span>
+        
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>在重力场中，机器人系统总势能 V 等于各连杆重力势能之和。以基坐标系 z 轴竖直向上为正，连杆 i 的势能为：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">连杆 i 重力势能</div>
+          <div class="formula">V<sub>i</sub> = − m<sub>i</sub> <strong>g</strong><sup>T</sup> r<sub>ci</sub>　或　V<sub>i</sub> = m<sub>i</sub> <strong>g</strong> h<sub>ci</sub></div>
+        </div>
+
+        <p>其中 <span class="inline-formula">g = [0, 0, −9.81]ᵀ m/s²</span> 为重力加速度向量（z 轴向上为正时取负号），<span class="inline-formula">r<sub>ci</sub></span> 为连杆 i 质心在基坐标系中的位置向量，<span class="inline-formula">h<sub>ci</sub></span> 为质心高度。系统总势能为：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">系统总势能</div>
+          <div class="formula">V = Σ<sub>i=1</sub><sup>n</sup> V<sub>i</sub> = − Σ<sub>i=1</sub><sup>n</sup> m<sub>i</sub> <strong>g</strong><sup>T</sup> r<sub>ci</sub>(q)</div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 势能只与位形有关</div>
+          <p>注意势能 V 仅是广义坐标 q 的函数，<span class="highlight">与广义速度 q̇ 无关</span>。因此在拉格朗日方程中，∂L/∂q̇ᵢ = ∂K/∂q̇ᵢ（因为 ∂V/∂q̇ᵢ = 0），而 ∂L/∂qᵢ = ∂K/∂qᵢ − ∂V/∂qᵢ。其中 −∂V/∂qᵢ 正是重力项 G(q) 的来源。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 坐标系与重力方向</div>
+          <p>势能计算中重力方向的约定要与运动学一致。若基坐标系 z 轴竖直向上，则 g 向量沿 −z 方向；若 z 轴水平（如 SCARA 机器人），则重力沿 −y 或 −x 方向。约定不一致会导致重力项符号错误，这是动力学推导中最常见的错误之一。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型重力项推导</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3平面教学子模型；y轴向上</span>
+syms q1 q2 real
+m1=<span class="number">2</span>; m2=<span class="number">1</span>; l1=<span class="number">1</span>; l2=<span class="number">0.8</span>; lc1=<span class="number">0.5</span>; lc2=<span class="number">0.4</span>; g=<span class="number">9.81</span>;
+<span class="comment">% 质心高度（y坐标，重力沿-y方向）</span>
+hc1 = lc1*sin(q1);
+hc2 = l1*sin(q1) + lc2*sin(q1+q2);
+<span class="comment">% 各连杆势能 Vi = mi * g * hci</span>
+V1 = m1*g*hc1;  V2 = m2*g*hc2;
+<span class="comment">% 系统总势能</span>
+V = simplify(V1 + V2);
+disp(<span class="string">'总势能 V ='</span>), disp(V)
+<span class="comment">% 重力项 G(q) = dV/dq （拉格朗日方程中 -dV/dq 来源）</span>
+G = [diff(V,q1); diff(V,q2)];
+G = simplify(G);
+disp(<span class="string">'重力项 G(q) ='</span>), disp(G)
+<span class="comment">% 验证：势能仅依赖q，与速度qd无关</span>
+fprintf(<span class="string">'V仅依赖q1,q2，与qd无关\n'</span>);
+</pre>
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,84 @@
+<!--META {"kp_id": "kp-7-8", "kp_label": "KP 7.8", "title": "智能控制", "tags": ["拓展"], "difficulty": 3, "chapter": 7, "order": 8, "file": "kp-07-8.html"}-->
+<div class="kp-card" id="kp-7-8">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 7.8</span>
+          智能控制
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 拓展">拓展</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">智能控制</span>是将人工智能理论与控制理论相结合的交叉领域，用于处理传统控制方法难以应对的<strong>高度非线性、强耦合、模型未知或环境复杂</strong>的控制问题。机器人智能控制主要包括以下方向：</p>
+
+        <ul>
+          <li><strong>模糊控制</strong>：基于人类经验建立模糊规则库，将语言变量（"误差大""误差变化快"）映射为控制动作。不依赖精确模型，适合难以建模的非线性系统。</li>
+          <li><strong>神经网络控制</strong>：利用神经网络的万能逼近能力，学习机器人逆动力学模型或控制策略。可实现端到端的非线性映射，但需要大量训练数据。</li>
+          <li><strong>深度学习强化学习</strong>：通过智能体与环境的反复交互，以"试错"方式学习最优控制策略。深度强化学习（如DDPG、PPO、SAC）在高维连续动作空间的机器人控制中展现出强大能力。</li>
+        </ul>
+
+        <p>近年来，随着大模型与具身智能的快速发展，机器人控制领域涌现出多种<strong>前沿方向</strong>：</p>
+        <ul>
+            <li><strong>模型预测控制（MPC, Model Predictive Control）</strong>：MPC本质上属于基于模型的优化控制，而不是人工智能方法。它在每个控制周期求解有限时域约束优化问题，只执行第一个控制输入并滚动更新；当预测模型、代价或约束由学习方法获得时，才构成学习与MPC的融合。</li>
+          <li><strong>扩散策略（Diffusion Policy）</strong>：将图像生成领域的扩散模型引入机器人动作生成。以视觉观测和任务目标为条件，通过去噪扩散过程生成多模态的动作序列。相比传统回归策略，扩散策略能更好地表达多模态动作分布，在复杂操作任务（如物体重新排列、精密装配）中表现出更强的泛化能力。</li>
+          <li><strong>视觉-语言-动作大模型（VLA, Vision-Language-Action）</strong>：以大规模预训练视觉-语言模型（如PaLI、PaLM-E）为基础，融合机器人本体感知和动作输出，实现<strong>"看图-听指令-做动作"</strong>的端到端控制。代表性工作包括Google的<strong>RT-2</strong>（将机器人动作离散化为token，纳入大语言模型输出空间）和开源的<strong>OpenVLA</strong>（基于Llama架构，支持自然语言指令到机器人动作的直接映射）。VLA大模型具备跨任务泛化和常识推理能力，是通向通用机器人操控的重要方向。</li>
+        </ul>
+
+        <div class="svg-diagram">
+          <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <defs>
+              <marker id="arr-ai" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+              </marker>
+            </defs>
+
+            <!-- 智能体 -->
+            <rect x="30" y="80" width="130" height="100" rx="12" fill="#7c3aed"/>
+            <text x="95" y="110" text-anchor="middle" fill="white" font-size="13" font-weight="700">智能体</text>
+            <text x="95" y="130" text-anchor="middle" fill="#e9d5ff" font-size="10">Agent</text>
+            <text x="95" y="150" text-anchor="middle" fill="#e9d5ff" font-size="9">神经网络策略 π(a|s)</text>
+
+            <!-- 环境（机器人+物理世界） -->
+            <rect x="530" y="80" width="130" height="100" rx="12" fill="#0891b2"/>
+            <text x="595" y="110" text-anchor="middle" fill="white" font-size="13" font-weight="700">环境</text>
+            <text x="595" y="130" text-anchor="middle" fill="#cffafe" font-size="10">机器人 + 物理世界</text>
+            <text x="595" y="150" text-anchor="middle" fill="#cffafe" font-size="9">状态转移 s' = f(s,a)</text>
+
+            <!-- 动作箭头 -->
+            <line x1="160" y1="110" x2="525" y2="110" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arr-ai)"/>
+            <rect x="300" y="90" width="90" height="24" rx="4" fill="white" stroke="#7c3aed"/>
+            <text x="345" y="106" text-anchor="middle" fill="#7c3aed" font-size="11" font-weight="700">动作 a</text>
+
+            <!-- 状态箭头 -->
+            <line x1="530" y1="150" x2="165" y2="150" stroke="#0891b2" stroke-width="2.5" marker-end="url(#arr-ai)"/>
+            <rect x="300" y="138" width="90" height="24" rx="4" fill="white" stroke="#0891b2"/>
+            <text x="345" y="154" text-anchor="middle" fill="#0891b2" font-size="11" font-weight="700">状态 s</text>
+
+            <!-- 奖励箭头 -->
+            <line x1="530" y1="170" x2="165" y2="170" stroke="#d97706" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr-ai)"/>
+            <text x="345" y="185" text-anchor="middle" fill="#d97706" font-size="10" font-weight="600">奖励 r</text>
+
+            <!-- 三种方法标签 -->
+            <rect x="30" y="210" width="180" height="38" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+            <text x="120" y="228" text-anchor="middle" fill="#2563eb" font-size="10" font-weight="600">模糊控制</text>
+            <text x="120" y="242" text-anchor="middle" fill="#64748b" font-size="9">规则库 → 控制量</text>
+
+            <rect x="260" y="210" width="180" height="38" rx="6" fill="#fef3c7" stroke="#d97706"/>
+            <text x="350" y="228" text-anchor="middle" fill="#d97706" font-size="10" font-weight="600">神经网络控制</text>
+            <text x="350" y="242" text-anchor="middle" fill="#64748b" font-size="9">数据驱动逆模型</text>
+
+            <rect x="490" y="210" width="200" height="38" rx="6" fill="#fce7f3" stroke="#dc2626"/>
+            <text x="590" y="228" text-anchor="middle" fill="#dc2626" font-size="10" font-weight="600">深度强化学习</text>
+            <text x="590" y="242" text-anchor="middle" fill="#64748b" font-size="9">试错 → 最优策略</text>
+          </svg>
+          <div class="diagram-caption">图7-3 智能控制方法分类：模糊控制、神经网络控制与深度强化学习的智能体-环境交互模型</div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✓ 前沿趋势</div>
+          <p>近年来，<strong>Sim-to-Real迁移</strong>技术（在仿真中训练强化学习策略，迁移到真实机器人）成为研究热点。结合<strong>域随机化</strong>和<strong>元学习</strong>，机器人可以在仿真中学习数百万次尝试后，在真实环境中实现鲁棒的操控技能。</p>
+        </div>
+      </div>
+    </div>

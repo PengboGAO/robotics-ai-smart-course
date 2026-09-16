@@ -1,0 +1,138 @@
+<!--META {"kp_id": "kp-5-7", "kp_label": "KP 5.7", "title": "动力学方程", "tags": ["重点", "考点"], "difficulty": 3, "chapter": 5, "order": 7, "file": "kp-05-7.html"}-->
+<div class="kp-card" id="kp-5-7">
+      <div class="kp-header">
+        <div class="kp-title"><span class="kp-id">KP 5.7</span>动力学方程</div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 考点">考点</span>
+          <span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p>无论采用拉格朗日法还是牛顿-欧拉法，最终得到的机器人动力学方程都具有统一的<span class="highlight">封闭形式</span>：</p>
+
+        <div class="formula-block">
+          <div class="formula-label">机器人动力学方程（统一形式）</div>
+          <div class="formula">M(q) q̈ + C(q, q̇) q̇ + G(q) = τ</div>
+        </div>
+
+        <p>其中各项的物理意义如下：</p>
+        <ul>
+          <li><strong>M(q)</strong>：n×n <span class="term">惯性矩阵</span>（质量矩阵），对称正定，元素 m<sub>ij</sub>(q) 仅依赖位形 q，描述系统的惯性特性；</li>
+          <li><strong>C(q, q̇)</strong>：n×n <span class="term">科氏力与离心力矩阵</span>，元素依赖 q 和 q̇，描述速度耦合效应；</li>
+          <li><strong>G(q)</strong>：n×1 <span class="term">重力向量</span>，元素仅依赖 q，描述重力对关节的影响；</li>
+          <li><strong>τ</strong>：n×1 关节驱动力矩向量（广义力）；</li>
+          <li><strong>q, q̇, q̈</strong>：分别为关节位置、速度、加速度向量。</li>
+        </ul>
+
+        <div class="svg-diagram">
+          <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="font-family:'Microsoft YaHei',sans-serif;">
+            <!-- 标题 -->
+            <text x="380" y="24" text-anchor="middle" fill="#1a202c" font-size="16" font-weight="700">动力学方程三项物理意义</text>
+
+            <!-- 等号居中 -->
+            <text x="380" y="160" text-anchor="middle" fill="#64748b" font-size="26" font-weight="700">=</text>
+
+            <!-- 左项：惯性 M(q)q̈ -->
+            <rect x="30" y="80" width="200" height="120" rx="10" fill="#2563eb" opacity="0.10" stroke="#2563eb" stroke-width="1.5"/>
+            <text x="130" y="110" text-anchor="middle" fill="#1d4ed8" font-size="20" font-weight="700">M(q) q̈</text>
+            <text x="130" y="138" text-anchor="middle" fill="#1a202c" font-size="13" font-weight="600">惯性力项</text>
+            <text x="130" y="160" text-anchor="middle" fill="#475569" font-size="11">• 阻止关节加速/减速</text>
+            <text x="130" y="178" text-anchor="middle" fill="#475569" font-size="11">• 大小 ∝ 加速度 q̈</text>
+            <text x="130" y="194" text-anchor="middle" fill="#475569" font-size="11">• 对称正定矩阵</text>
+
+            <!-- 中项：科氏/离心 C(q,q̇)q̇ -->
+            <rect x="270" y="80" width="220" height="120" rx="10" fill="#d97706" opacity="0.10" stroke="#d97706" stroke-width="1.5"/>
+            <text x="380" y="110" text-anchor="middle" fill="#b45309" font-size="18" font-weight="700">C(q, q̇) q̇</text>
+            <text x="380" y="138" text-anchor="middle" fill="#1a202c" font-size="13" font-weight="600">科氏力/离心力项</text>
+            <text x="380" y="160" text-anchor="middle" fill="#475569" font-size="11">• 关节间速度耦合</text>
+            <text x="380" y="178" text-anchor="middle" fill="#475569" font-size="11">• 大小 ∝ 速度平方 q̇²</text>
+            <text x="380" y="194" text-anchor="middle" fill="#475569" font-size="11">• 高速运动显著</text>
+
+            <!-- 右项：重力 G(q) -->
+            <rect x="530" y="80" width="200" height="120" rx="10" fill="#059669" opacity="0.10" stroke="#059669" stroke-width="1.5"/>
+            <text x="630" y="110" text-anchor="middle" fill="#047857" font-size="20" font-weight="700">G(q)</text>
+            <text x="630" y="138" text-anchor="middle" fill="#1a202c" font-size="13" font-weight="600">重力项</text>
+            <text x="630" y="160" text-anchor="middle" fill="#475569" font-size="11">• 维持位姿的保持力矩</text>
+            <text x="630" y="178" text-anchor="middle" fill="#475569" font-size="11">• 与速度、加速度无关</text>
+            <text x="630" y="194" text-anchor="middle" fill="#475569" font-size="11">• 静止时也要克服</text>
+
+            <!-- 下方说明 -->
+            <line x1="30" y1="225" x2="730" y2="225" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="380" y="248" text-anchor="middle" fill="#1a202c" font-size="12">驱动力矩 τ = 惯性力 + 科氏/离心力 + 重力</text>
+            <text x="380" y="268" text-anchor="middle" fill="#64748b" font-size="11">三项分别对应：使机器人加速、抵抗运动耦合、对抗重力</text>
+            <text x="380" y="286" text-anchor="middle" fill="#94a3b8" font-size="10">注：完整模型还可加入摩擦项 F(q̇) 与外部扰动力 τ_ext</text>
+          </svg>
+          <div class="diagram-caption">图5-1 机器人动力学方程三项物理意义分解</div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 科氏矩阵与惯性矩阵的关系</div>
+          <p>科氏力矩阵 C(q,q̇) 与惯性矩阵 M(q) 存在内在联系。定义克里斯托弗尔符号：</p>
+          <p style="text-align:center;">c<sub>ijk</sub> = ½ ( ∂m<sub>ij</sub>/∂q<sub>k</sub> + ∂m<sub>ik</sub>/∂q<sub>j</sub> − ∂m<sub>jk</sub>/∂q<sub>i</sub> )</p>
+          <p>则 C 矩阵元素为 C<sub>ij</sub> = Σ<sub>k</sub> c<sub>ijk</sub> q̇<sub>k</sub>。利用此关系可以证明一个重要性质：<span class="highlight">Ṁ(q) − 2C(q,q̇) 为反对称矩阵</span>，即机器人的总机械能（动能+势能）变化率 d(K+V)/dt = q̇ᵀτ。当无外力矩输入（τ=0）时，系统机械能守恒。这是能量守恒在动力学方程中的体现，也是计算力矩控制稳定性证明的关键。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 惯性矩阵 M(q) 的重要性质</div>
+          <p>惯性矩阵 M(q) 具有三个关键数学性质，对机器人分析与控制具有重要意义：</p>
+          <ul>
+            <li><strong>对称性</strong>：M(q) = M(q)ᵀ，即 m<sub>ij</sub> = m<sub>ji</sub>。这源于动能二次型 K = ½q̇ᵀM(q)q̇ 的对称性，对称矩阵只需存储 n(n+1)/2 个独立元素。</li>
+            <li><strong>正定性</strong>：对任意非零 q̇，有 q̇ᵀM(q)q̇ = 2K > 0（动能为正）。正定性保证 M(q) 可逆，这是前向动力学仿真 q̈ = M⁻¹(...) 的前提，也是控制稳定性分析的基础。</li>
+            <li><strong>有界性</strong>：M(q) 的特征值有上下界 λ<sub>min</sub> ≤ λ ≤ λ<sub>max</sub>，且条件数 λ<sub>max</sub>/λ<sub>min</sub> 有限。这保证动力学方程良态，数值求解稳定。当机器人接近奇异位形时，条件数增大但仍有限（区别于雅可比矩阵在奇异处趋向无穷）。</li>
+          </ul>
+          <p>这三个性质是机器人控制系统稳定性证明（如计算力矩控制的 Lyapunov 分析）的基本假设，也是参数辨识与自适应控制收敛性分析的理论依据。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 静态与动态的区分</div>
+          <p>当机器人静止（q̇ = q̈ = 0）时，动力学方程退化为 G(q) = τ，即仅需克服重力——这就是<span class="highlight">重力补偿</span>的基础。当机器人匀速运动（q̈ = 0）时，方程为 C(q,q̇)q̇ + G(q) = τ，需同时克服科氏力与重力。理解不同运动状态下方程的简化形式，有助于工程中的前馈补偿设计。</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 动力学方程的扩展形式</div>
+          <p>理想刚体动力学方程 M(q)q̈ + C(q,q̇)q̇ + G(q) = τ 描述的是无摩擦、无扰动的理想情况。实际工程中，机器人还存在关节摩擦、外部扰动与不确定项，扩展后的完整动力学方程为：</p>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-label">含摩擦与扰动的扩展动力学方程</div>
+          <div class="formula">M(q) q̈ + C(q, q̇) q̇ + G(q) + F(q̇) = τ + τ<sub>ext</sub></div>
+        </div>
+
+        <p>其中：</p>
+        <ul>
+          <li><strong>F(q̇)</strong>：摩擦力矩向量，常用库仑+粘性摩擦模型 F<sub>i</sub> = f<sub>ci</sub>·sgn(q̇<sub>i</sub>) + b<sub>i</sub>·q̇<sub>i</sub>，f<sub>c</sub> 为库仑摩擦系数，b 为粘性摩擦系数；</li>
+          <li><strong>τ<sub>ext</sub></strong>：外部扰动力矩，包括末端接触力等效到关节的力矩、负载变化、未建模动态等。</li>
+        </ul>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 扩展方程的工程意义</div>
+          <p>摩擦项 F(q̇) 在低速运动时影响显著（库仑摩擦引起"粘滞-滑动"现象），是高精度位置控制的难点。外部扰动 τ<sub>ext</sub> 在接触作业中不可忽略。鲁棒控制（如滑模控制）与自适应控制的设计目标，正是在存在 F 和 τ<sub>ext</sub> 不确定性的情况下保证控制性能，这正是第7章控制系统的核心议题。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> ABB A2–A3教学子模型动力学方程</div>
+<pre><span class="comment">% ABB IRB 1200 A2–A3教学子模型 M(q)qdd+C(q,qd)qd+G(q)=tau</span>
+syms q1 q2 qd1 qd2 qdd1 qdd2 real
+m1=<span class="number">2</span>;m2=<span class="number">1</span>;l1=<span class="number">1</span>;l2=<span class="number">0.8</span>;lc1=<span class="number">0.5</span>;lc2=<span class="number">0.4</span>;I1=<span class="number">0.5</span>;I2=<span class="number">0.2</span>;g=<span class="number">9.81</span>;
+<span class="comment">% 惯性矩阵 M(q)（由动能二次型导出）</span>
+M11=m1*lc1^<span class="number">2</span>+I1+m2*(l1^<span class="number">2</span>+lc2^<span class="number">2</span>+<span class="number">2</span>*l1*lc2*cos(q2))+I2;
+M12=m2*(lc2^<span class="number">2</span>+l1*lc2*cos(q2))+I2;  M22=m2*lc2^<span class="number">2</span>+I2;
+M=[M11 M12; M12 M22];
+<span class="comment">% 科氏力矩阵 C(q,qd)（由克里斯托弗尔符号导出）</span>
+h=m2*l1*lc2*sin(q2);  <span class="comment">% 公共因子</span>
+C=[-h*qd2, -h*(qd1+qd2); h*qd1, <span class="number">0</span>];
+<span class="comment">% 重力向量 G(q)</span>
+G=[(m1*lc1+m2*l1)*g*cos(q1)+m2*lc2*g*cos(q1+q2);
+    m2*lc2*g*cos(q1+q2)];
+<span class="comment">% 组装动力学方程：tau = M*qdd + C*qd + G</span>
+qdd=[qdd1;qdd2]; qd=[qd1;qd2];
+tau=simplify(M*qdd+C*qd+G);
+disp(<span class="string">'tau1='</span>), disp(tau(<span class="number">1</span>)), disp(<span class="string">'tau2='</span>), disp(tau(<span class="number">2</span>))
+<span class="comment">% 正向动力学：已知tau求qdd，qdd = M^{-1}(tau - C*qd - G)</span>
+qdd_sol=simplify(M\(-C*qd-G));
+disp(<span class="string">'零力矩下加速度 qdd ='</span>), disp(qdd_sol)
+</pre>
+        </div>
+      </div>
+    </div>

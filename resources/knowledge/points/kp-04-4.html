@@ -1,0 +1,12 @@
+<!--META {"kp_id": "kp-4-5", "kp_label": "KP 4.5", "title": "ABB腕心几何法", "tags": ["难点"], "difficulty": 3, "chapter": 4, "order": 5, "file": "kp-04-4.html"}-->
+<div class="kp-card" id="kp-4-5">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.5</span>ABB腕心几何法</div><div class="kp-tags"><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p><span class="term">几何法</span>把ABB IRB 1200的前三轴定位问题投影到由A1确定的肩—肘平面，再利用余弦定理得到A2、A3候选解。几何图必须对应课程采用的轴原点、零位和角度正方向，不能把其他六轴机器人的长度符号直接套用。</p>
+    <div class="formula-block"><div class="formula-label">二维定位子问题</div><div class="formula">r = √(x<sub>w</sub><sup>2</sup>+y<sub>w</sub><sup>2</sup>)；D=(r′²+z′²−L<sub>2</sub>²−L<sub>3</sub>²)/(2L<sub>2</sub>L<sub>3</sub>)</div></div>
+    <div class="formula-block"><div class="formula-label">肘部两支</div><div class="formula">q<sub>3</sub> = atan2(±√(1−D²), D)</div></div>
+    <p>r′、z′、L<sub>2</sub>、L<sub>3</sub>必须由当前ABB等价模型的坐标系推导，不能仅凭外形尺寸填写。若|D|&gt;1，目标在该简化定位模型下不可达；若D接近±1，肘部接近伸直或折叠边界，应进一步检查雅可比条件数。</p>
+    <div class="callout callout-info"><div class="callout-title">正确使用几何法</div><p>先画腕心与肩、肘的几何关系，再写公式；用几何法得到候选解后，必须送回同一套ABB正运动学函数复算。图、公式、代码使用不同零位定义时，即使数值看似合理也不能通过。</p></div>
+    <div class="callout callout-success"><div class="callout-title">反证任务</div><p>将腕心目标沿径向外移，构造|D|&gt;1的不可达反例；保留目标、D值、失败原因和修正后的可达目标，形成“不可达不是求解器故障”的证据。</p></div>
+  </div>
+</div>

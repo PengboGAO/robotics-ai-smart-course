@@ -76,7 +76,7 @@
     <div class="callout callout-info">
       <div class="callout-title">📘 章节导读</div>
       <p>机器人要完成"从 A 点运动到 B 点"这一看似简单的任务，背后需要解决一个核心问题：<span class="highlight">如何在时间轴上规划一组光滑的运动轨迹</span>，使机器人既到达目标位姿，又满足速度、加速度、力矩等物理约束，同时避免冲击与奇异。这就是轨迹规划（Trajectory Planning）。</p>
-      <p>轨迹规划分为两大空间：<span class="highlight">关节空间规划</span>（直接规划关节变量，无奇异问题）与<span class="highlight">笛卡尔空间规划</span>（规划末端位姿，轨迹直观但需逆运动学转换）。本章系统讲解三次/五次多项式插值、LSPB 直线抛物线混合、笛卡尔直线与圆弧插补、B 样条与轨迹优化等方法，是连接动力学建模与控制系统的桥梁。</p>
+      <p>轨迹规划分为两大空间：<span class="highlight">关节空间规划</span>直接规划各轴变量，不需要逐点求逆解，但末端路径仍可能经过奇异附近；<span class="highlight">笛卡尔空间规划</span>直接约束末端路径，但需进行逆运动学、构型连续性与约束检查。本章统一以ABB IRB 1200任务验证各类插值方法。</p>
     </div>
 
 
@@ -112,7 +112,7 @@
         </div>
         <p>关节空间规划的核心优势：</p>
         <ul>
-          <li><strong>无奇异问题</strong>：直接在关节空间操作，不涉及雅可比求逆，避免奇异位形；</li>
+            <li><strong>不直接求雅可比逆</strong>：关节插值本身不会因雅可比求逆而数值发散，但生成的运动仍可能经过运动学奇异附近，必须结合任务路径、速度放大和后续控制要求检查；</li>
           <li><strong>计算简单</strong>：每个关节独立规划，无需复杂的逆运动学求解；</li>
           <li><strong>约束直接</strong>：关节速度、加速度、力矩约束可直观施加。</li>
         </ul>
@@ -125,6 +125,26 @@
         <div class="callout callout-info">
           <div class="callout-title">💡 规划的连续性要求</div>
           <p>轨迹规划需满足不同阶的连续性要求：<strong>位置连续</strong>（C⁰）保证轨迹不跳跃；<strong>速度连续</strong>（C¹）避免无限加速度冲击；<strong>加速度连续</strong>（C²）避免加加速度（jerk）突变引起的机械振动。三次多项式满足 C¹，五次多项式满足 C²，这是选择插值阶数的基本依据。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 使用jtraj进行关节空间轨迹规划</div>
+<pre><span class="comment">% 关节空间轨迹规划：jtraj五次多项式插值</span>
+L1 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L2 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.4</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L3 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.3</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+robot = SerialLink([L1 L2 L3], <span class="string">'name'</span>, <span class="string">'3DOF'</span>);
+q0 = [<span class="number">0</span> <span class="number">0</span> <span class="number">0</span>];            <span class="comment">% 起始关节角</span>
+q1 = [pi/<span class="number">2</span> pi/<span class="number">3</span> pi/<span class="number">4</span>];     <span class="comment">% 终止关节角</span>
+t  = <span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>;            <span class="comment">% 时间序列(0~2s)</span>
+<span class="comment">% jtraj: 五次多项式插值，返回位置/速度/加速度</span>
+[q, qd, qdd] = jtraj(q0, q1, t);
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t, q);   title(<span class="string">'关节位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t, qd);  title(<span class="string">'关节速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t, qdd); title(<span class="string">'关节加速度'</span>);
+robot.plot(q);  <span class="comment">% 动画演示关节运动</span>
+</pre>
         </div>
       </div>
     </div>
@@ -166,6 +186,28 @@
         <div class="callout callout-success">
           <div class="callout-title">✅ 三次多项式的特性</div>
           <p>当起止速度均为零（v₀ = v<sub>f</sub> = 0，即"停-停"轨迹）时，公式简化为 a₀ = q₀、a₁ = 0、a₂ = 3(q<sub>f</sub>−q₀)/t<sub>f</sub>²、a₃ = −2(q<sub>f</sub>−q₀)/t<sub>f</sub>³。此时位置、速度连续，但<strong>加速度在端点不连续</strong>（从 0 跳变到 6(q<sub>f</sub>−q₀)/t<sub>f</sub>²），可能引起机械冲击。这是三次多项式的主要不足。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 三次多项式系数计算与轨迹绘制</div>
+<pre><span class="comment">% 三次多项式插值：解析法求系数并绘图</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;    <span class="comment">% 起止位置</span>
+v0 = <span class="number">0</span>;  vf = <span class="number">0</span>;        <span class="comment">% 起止速度(停-停)</span>
+tf = <span class="number">2</span>;                 <span class="comment">% 运动时间</span>
+<span class="comment">% 解析法求系数 a0+a1*t+a2*t^2+a3*t^3</span>
+a0 = q0;
+a1 = v0;
+a2 = (<span class="number">3</span>*(qf-q0) - (<span class="number">2</span>*v0+vf)*tf) / tf^<span class="number">2</span>;
+a3 = (-<span class="number">2</span>*(qf-q0) + (v0+vf)*tf) / tf^<span class="number">3</span>;
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+q   = a0 + a1*t + a2*t.<span class="number">2</span> + a3*t.<span class="number">3</span>;   <span class="comment">% 位置</span>
+qd  = a1 + <span class="number">2</span>*a2*t + <span class="number">3</span>*a3*t.<span class="number">2</span>;       <span class="comment">% 速度</span>
+qdd = <span class="number">2</span>*a2 + <span class="number">6</span>*a3*t;                <span class="comment">% 加速度</span>
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -267,6 +309,32 @@
         <div class="callout callout-success">
           <div class="callout-title">✅ 五次多项式的优势</div>
           <p>当起止速度与加速度均为零时（典型"停-停"轨迹），五次多项式的加速度在端点平滑过渡为零，<span class="highlight">全程加速度连续（C²）</span>，有效消除机械冲击与振动。代价是最大速度与加速度峰值略高于三次多项式，需要更大的驱动能力。在要求平稳运行的工业机器人中，五次多项式是优先选择。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 五次多项式系数矩阵求解与绘图</div>
+<pre><span class="comment">% 五次多项式插值：6个边界条件求解6个系数</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;     <span class="comment">% 起止位置</span>
+v0 = <span class="number">0</span>;  vf = <span class="number">0</span>;         <span class="comment">% 起止速度</span>
+ac0 = <span class="number">0</span>; acf = <span class="number">0</span>;        <span class="comment">% 起止加速度(停-停)</span>
+tf = <span class="number">2</span>;
+<span class="comment">% 构建6x6方程组 M*A = B</span>
+M = [<span class="number">1</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;  <span class="number">0</span> <span class="number">1</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;
+     <span class="number">0</span> <span class="number">0</span> <span class="number">2</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;  <span class="number">1</span> tf tf^<span class="number">2</span> tf^<span class="number">3</span> tf^<span class="number">4</span> tf^<span class="number">5</span>;
+     <span class="number">0</span> <span class="number">1</span> <span class="number">2</span>*tf <span class="number">3</span>*tf^<span class="number">2</span> <span class="number">4</span>*tf^<span class="number">3</span> <span class="number">5</span>*tf^<span class="number">4</span>;
+     <span class="number">0</span> <span class="number">0</span> <span class="number">2</span> <span class="number">6</span>*tf <span class="number">12</span>*tf^<span class="number">2</span> <span class="number">20</span>*tf^<span class="number">3</span>];
+B = [q0; v0; ac0; qf; vf; acf];
+A = M \ B;   <span class="comment">% 求解系数[a0~a5]</span>
+t = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+<span class="comment">% 计算位置/速度/加速度</span>
+q   = A(<span class="number">1</span>)+A(<span class="number">2</span>)*t+A(<span class="number">3</span>)*t.<span class="number">2</span>+A(<span class="number">4</span>)*t.<span class="number">3</span>+A(<span class="number">5</span>)*t.<span class="number">4</span>+A(<span class="number">6</span>)*t.<span class="number">5</span>;
+qd  = A(<span class="number">2</span>)+<span class="number">2</span>*A(<span class="number">3</span>)*t+<span class="number">3</span>*A(<span class="number">4</span>)*t.<span class="number">2</span>+<span class="number">4</span>*A(<span class="number">5</span>)*t.<span class="number">3</span>+<span class="number">5</span>*A(<span class="number">6</span>)*t.<span class="number">4</span>;
+qdd = <span class="number">2</span>*A(<span class="number">3</span>)+<span class="number">6</span>*A(<span class="number">4</span>)*t+<span class="number">12</span>*A(<span class="number">5</span>)*t.<span class="number">2</span>+<span class="number">20</span>*A(<span class="number">6</span>)*t.<span class="number">3</span>;
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -378,6 +446,35 @@
           </div>
           <p>实际中需在速度上限与加速度上限之间折中选择 v。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> LSPB轨迹计算与绘图</div>
+<pre><span class="comment">% LSPB直线抛物线混合轨迹规划</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;    <span class="comment">% 起止位置</span>
+tf = <span class="number">2</span>;                 <span class="comment">% 总时间</span>
+v  = <span class="number">0.7</span>*(qf-q0)/tf;     <span class="comment">% 匀速(需满足约束)</span>
+tb = (q0 - qf + v*tf) / v;  <span class="comment">% 过渡时间</span>
+a  = v / tb;                <span class="comment">% 加速度</span>
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+q  = zeros(size(t));
+<span class="comment">% 三段轨迹：加速段-匀速段-减速段</span>
+for i = <span class="number">1</span>:length(t)
+    if t(i) &lt;= tb
+        q(i) = q0 + <span class="number">0.5</span>*a*t(i)^<span class="number">2</span>;         <span class="comment">% 抛物线加速</span>
+    elseif t(i) &lt;= tf - tb
+        q(i) = q0 + <span class="number">0.5</span>*a*tb^<span class="number">2</span> + v*(t(i)-tb);  <span class="comment">% 直线匀速</span>
+    else
+        q(i) = qf - <span class="number">0.5</span>*a*(tf-t(i))^<span class="number">2</span>;    <span class="comment">% 抛物线减速</span>
+    end
+end
+qd  = gradient(q, t);    <span class="comment">% 数值求导: 速度</span>
+qdd = gradient(qd, t);   <span class="comment">% 加速度</span>
+figure;
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q);   ylabel(<span class="string">'位置'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qd);  ylabel(<span class="string">'速度'</span>);
+subplot(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>); plot(t,qdd); ylabel(<span class="string">'加速度'</span>);
+</pre>
+        </div>
       </div>
     </div>
 
@@ -436,6 +533,30 @@
           <div class="callout-title">⚠️ 笛卡尔空间规划的挑战</div>
           <p>笛卡尔空间规划虽然轨迹直观，但存在三大挑战：① <strong>计算量大</strong>——每个插补点都需求解逆运动学；② <strong>奇异问题</strong>——路径经过奇异位形时逆解不存在或趋于无穷；③ <strong>不可达问题</strong>——部分笛卡尔路径点可能超出工作空间或关节限位。因此实际系统需进行奇异检测与可达性预判。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 笛卡尔空间轨迹规划(ctraj+逆运动学)</div>
+<pre><span class="comment">% 笛卡尔空间规划：ctraj直线插补 + 逆运动学</span>
+L1 = Link(<span class="string">'d'</span>, <span class="number">0.5</span>, <span class="string">'a'</span>, <span class="number">0</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L2 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.4</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+L3 = Link(<span class="string">'d'</span>, <span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0.3</span>, <span class="string">'alpha'</span>, <span class="number">0</span>);
+robot = SerialLink([L1 L2 L3], <span class="string">'name'</span>, <span class="string">'3R'</span>);
+T0 = robot.fkine([<span class="number">0</span> <span class="number">0</span> <span class="number">0</span>]);         <span class="comment">% 起点位姿</span>
+T1 = robot.fkine([pi/<span class="number">4</span> pi/<span class="number">3</span> pi/<span class="number">4</span>]);  <span class="comment">% 终点位姿</span>
+t  = <span class="number">0</span>:<span class="number">0.05</span>:<span class="number">2</span>;
+Ts = ctraj(T0, T1, length(t));  <span class="comment">% 笛卡尔直线插值</span>
+q  = zeros(length(t), <span class="number">3</span>);
+<span class="comment">% 逐点逆运动学求解关节角</span>
+for i = <span class="number">1</span>:length(t)
+    q(i,:) = robot.ikine(Ts(i));
+end
+p = transl(Ts);  <span class="comment">% 提取末端位置</span>
+figure; plot(t, q); title(<span class="string">'关节角轨迹'</span>);
+figure; plot3(p(:,<span class="number">1</span>),p(:,<span class="number">2</span>),p(:,<span class="number">3</span>),<span class="string">'b-o'</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>);
+title(<span class="string">'末端笛卡尔空间轨迹'</span>);
+</pre>
+        </div>
       </div>
     </div>
 
@@ -467,6 +588,29 @@
         <div class="callout callout-info">
           <div class="callout-title">💡 姿态插值的选择</div>
           <p>直线插补中"直线"仅指位置轨迹，<span class="highlight">姿态变化并非沿直线</span>。姿态变化路径取决于插值方法：四元数 SLERP 给出姿态空间的最短路径（大圆弧），而 RPY 线性插值可能绕远路。对姿态精度要求高的任务（如焊接、装配），推荐使用四元数 SLERP。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 笛卡尔空间直线插补</div>
+<pre><span class="comment">% 笛卡尔空间直线插补</span>
+p0 = [<span class="number">0.4</span>; <span class="number">0.0</span>; <span class="number">0.5</span>];   <span class="comment">% 起点</span>
+pf = [<span class="number">0.6</span>; <span class="number">0.2</span>; <span class="number">0.3</span>];   <span class="comment">% 终点</span>
+tf = <span class="number">2</span>;                   <span class="comment">% 运动时间</span>
+N  = <span class="number">50</span>;                 <span class="comment">% 插补点数</span>
+t  = linspace(<span class="number">0</span>, tf, N);
+s  = t / tf;               <span class="comment">% 归一化路径参数(匀速)</span>
+<span class="comment">% 位置直线插值: p(t) = p0 + s*(pf-p0)</span>
+P = p0 + s' .* (pf - p0)';
+<span class="comment">% 绘制三维直线轨迹</span>
+figure;
+plot3(P(:,<span class="number">1</span>), P(:,<span class="number">2</span>), P(:,<span class="number">3</span>), <span class="string">'b-o'</span>, <span class="string">'LineWidth'</span>, <span class="number">1.5</span>);
+hold on;
+plot3(p0(<span class="number">1</span>), p0(<span class="number">2</span>), p0(<span class="number">3</span>), <span class="string">'rs'</span>, <span class="string">'MarkerSize'</span>, <span class="number">10</span>);
+plot3(pf(<span class="number">1</span>), pf(<span class="number">2</span>), pf(<span class="number">3</span>), <span class="string">'gs'</span>, <span class="string">'MarkerSize'</span>, <span class="number">10</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>);
+title(<span class="string">'笛卡尔空间直线插补轨迹'</span>);
+legend(<span class="string">'轨迹'</span>, <span class="string">'起点'</span>, <span class="string">'终点'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -526,7 +670,33 @@
 
         <div class="callout callout-info">
           <div class="callout-title">💡 空间圆弧 vs 平面圆弧</div>
-          <p>工业机器人常需空间任意位姿的圆弧运动。空间圆弧需先将三点确定平面，在平面内完成圆弧插值后，再映射回三维空间。姿态变化通常与位置圆弧解耦，单独用 SLERP 插值。这种"位置圆弧 + 姿态球面插值"的组合是 ABB、KUKA 等工业控制器的标准做法。</p>
+          <p>ABB IRB 1200常需完成空间圆弧任务。课程先由三点确定圆弧平面，在平面内插值位置，再独立插值姿态；进入RobotStudio时还要比较课程插值结果与RAPID <code>MoveC</code>的路径和配置选择。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 空间三点圆弧插补</div>
+<pre><span class="comment">% 空间三点圆弧插补</span>
+P1 = [<span class="number">0.4</span>; <span class="number">0.0</span>; <span class="number">0.5</span>];   <span class="comment">% 起点</span>
+P2 = [<span class="number">0.5</span>; <span class="number">0.1</span>; <span class="number">0.4</span>];   <span class="comment">% 中间点</span>
+P3 = [<span class="number">0.6</span>; <span class="number">0.0</span>; <span class="number">0.3</span>];   <span class="comment">% 终点</span>
+<span class="comment">% 求圆弧平面法向量</span>
+n = cross(P2-P1, P3-P1);  n = n / norm(n);
+<span class="comment">% 求圆心C(中垂面交点)</span>
+A = [<span class="number">2</span>*(P2-P1)'; <span class="number">2</span>*(P3-P1)'; n'];
+b = [norm(P2)^<span class="number">2</span>-norm(P1)^<span class="number">2</span>; norm(P3)^<span class="number">2</span>-norm(P1)^<span class="number">2</span>; n'*P1];
+C = A \ b;              <span class="comment">% 圆心</span>
+r = norm(P1 - C);       <span class="comment">% 半径</span>
+u = (P1 - C) / r;       <span class="comment">% 平面正交基u</span>
+v = cross(n, u);         <span class="comment">% 正交基v</span>
+th1 = atan2(v'*(P1-C), u'*(P1-C));
+th3 = atan2(v'*(P3-C), u'*(P3-C));
+s  = linspace(<span class="number">0</span>, <span class="number">1</span>, <span class="number">50</span>);
+th = th1 + s*(th3-th1);  <span class="comment">% 圆心角插值</span>
+P  = C + r*(cos(th)*u + sin(th)*v);
+figure; plot3(P(<span class="number">1</span>,:),P(<span class="number">2</span>,:),P(<span class="number">3</span>,:),<span class="string">'b-'</span>,<span class="string">'LineWidth'</span>,<span class="number">2</span>);
+hold on; plot3(P1(<span class="number">1</span>),P1(<span class="number">2</span>),P1(<span class="number">3</span>),<span class="string">'rs'</span>,P3(<span class="number">1</span>),P3(<span class="number">2</span>),P3(<span class="number">3</span>),<span class="string">'gs'</span>);
+grid on; xlabel(<span class="string">'X'</span>); ylabel(<span class="string">'Y'</span>); zlabel(<span class="string">'Z'</span>); title(<span class="string">'空间圆弧插补'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -588,6 +758,30 @@
           <div class="callout-title">✅ 多点轨迹的规划策略</div>
           <p>当轨迹需经过多个中间路径点时，有三种常见策略：① <strong>分段三次多项式</strong>——每段独立三次多项式，节点处匹配速度保证 C¹，但加速度不连续；② <strong>三次 B 样条</strong>——整体 C² 连续，光滑性最佳，但不一定精确经过路径点（需用插值型 B 样条）；③ <strong>LSPB 串联</strong>——每段用 LSPB，节点速度匹配，兼顾匀速与连续性。工业控制器多采用 B 样条或分段多项式方案。</p>
         </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> B样条轨迹生成(多点轨迹)</div>
+<pre><span class="comment">% B样条轨迹生成：三次B样条(多点轨迹规划)</span>
+<span class="comment">% 定义路径点(waypoints)</span>
+wp = [<span class="number">0</span> <span class="number">0.5</span> <span class="number">1.0</span> <span class="number">1.5</span> <span class="number">2.0</span> <span class="number">1.5</span> <span class="number">1.0</span>;
+      <span class="number">0</span> <span class="number">0.8</span> <span class="number">0.5</span> <span class="number">0.3</span> <span class="number">0.0</span> <span class="number">0.4</span> <span class="number">0.7</span>]';
+N = <span class="number">100</span>;   <span class="comment">% 采样点数</span>
+t_wp   = linspace(<span class="number">0</span>, <span class="number">1</span>, size(wp,<span class="number">1</span>));
+t_fine = linspace(<span class="number">0</span>, <span class="number">1</span>, N);
+<span class="comment">% 三次样条插值(等价于C2连续的插值型B样条)</span>
+q1 = spline(t_wp, wp(:,<span class="number">1</span>), t_fine);
+q2 = spline(t_wp, wp(:,<span class="number">2</span>), t_fine);
+<span class="comment">% 数值微分求速度</span>
+qd1 = gradient(q1, t_fine);
+qd2 = gradient(q2, t_fine);
+figure;
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>);
+plot(t_fine, q1, <span class="string">'b-'</span>, t_wp, wp(:,<span class="number">1</span>), <span class="string">'ro'</span>);
+ylabel(<span class="string">'位置'</span>); legend(<span class="string">'B样条轨迹'</span>, <span class="string">'路径点'</span>);
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>);
+plot(t_fine, qd1, <span class="string">'r-'</span>); ylabel(<span class="string">'速度'</span>);
+</pre>
+        </div>
       </div>
     </div>
 
@@ -632,7 +826,7 @@
 
         <div class="callout callout-success">
           <div class="callout-title">✅ 轨迹优化的工程价值</div>
-          <p>轨迹优化能充分利用机器人驱动能力。以时间最优为例，相比固定时间律的轨迹，时间最优轨迹可缩短 20%~40% 运动时间，在批量生产中显著提升节拍效率。现代工业机器人控制器（如 ABB 的 TrueMove、KUKA 的 KRC）均内置了轨迹优化功能。</p>
+          <p>轨迹优化用于在工作范围、速度、加速度、奇异和碰撞约束下改善ABB IRB 1200任务节拍。优化收益必须由同一工位、同一工具负载和同一控制器设置下的前后记录计算，不预设固定百分比；课程结果需在RobotStudio或实体系统复核。</p>
         </div>
 
         <div class="callout callout-info">
@@ -644,6 +838,29 @@
           <div class="callout-title">💡 现代轨迹优化方法：TOPP-RA 与 MPC 实时规划</div>
           <p><strong>TOPP-RA（Time-Optimal Path Parameterization via Reachability Analysis）</strong>是基于可达性分析的时间最优路径参数化方法。给定一条几何路径（如 B 样条），TOPP-RA 在路径参数-路径参数速度的相平面内，通过前向与后向可达性传播确定最大可行速度曲线，在关节速度、加速度、力矩等多重约束下求得严格时间最优解。与传统切换曲线法相比，TOPP-RA 数值稳定性更好、能统一处理多种约束，是当前时间最优轨迹规划的主流算法，已集成于 OpenSoT、TrajectoryOptimization 等开源库中。</p>
           <p><strong>MPC 实时轨迹规划（Model Predictive Control）</strong>将轨迹规划与反馈控制融合为在线滚动优化问题：在每个控制周期内，基于当前状态预测未来有限时域内的运动，以最优控制序列的第一步作为实际输入，不断滚动更新。MPC 可显式处理关节限位、速度/加速度约束、障碍物避碰等不等式约束，且具备对模型误差与外部扰动的闭环修正能力。随着嵌入式算力提升与快速 QP 求解器的成熟，MPC 已在协作机器人安全运动规划、自主驾驶轨迹决策等领域得到广泛工程应用，代表了实时轨迹规划的发展方向。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 最小Jerk轨迹优化与代价计算</div>
+<pre><span class="comment">% 最小Jerk轨迹优化(解析解实现)</span>
+q0 = <span class="number">0</span>;  qf = pi/<span class="number">2</span>;   <span class="comment">% 起止位置</span>
+tf = <span class="number">2</span>;               <span class="comment">% 运动时间</span>
+t  = <span class="number">0</span>:<span class="number">0.01</span>:tf;
+s  = t / tf;            <span class="comment">% 归一化时间 s in [0,1]</span>
+<span class="comment">% 最小Jerk解析解: 10s^3 - 15s^4 + 6s^5</span>
+q  = q0 + (qf-q0)*(<span class="number">10</span>*s.<span class="number">3</span> - <span class="number">15</span>*s.<span class="number">4</span> + <span class="number">6</span>*s.<span class="number">5</span>);
+<span class="comment">% 速度/加速度/加加速度(jerk)</span>
+qd   = (qf-q0)*(<span class="number">30</span>*s.<span class="number">2</span> - <span class="number">60</span>*s.<span class="number">3</span> + <span class="number">30</span>*s.<span class="number">4</span>) / tf;
+qdd  = (qf-q0)*(<span class="number">60</span>*s - <span class="number">180</span>*s.<span class="number">2</span> + <span class="number">120</span>*s.<span class="number">3</span>) / tf^<span class="number">2</span>;
+qddd = (qf-q0)*(<span class="number">60</span> - <span class="number">360</span>*s + <span class="number">360</span>*s.<span class="number">2</span>) / tf^<span class="number">3</span>;
+<span class="comment">% 计算Jerk代价积分</span>
+jerk_cost = trapz(t, qddd.<span class="number">2</span>);
+fprintf(<span class="string">'最小Jerk代价 J = %.6f\n'</span>, jerk_cost);
+figure;
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>); plot(t,q,<span class="string">'b'</span>); ylabel(<span class="string">'位置'</span>);
+title(<span class="string">'最小Jerk轨迹'</span>);
+subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>); plot(t,qddd,<span class="string">'r'</span>); ylabel(<span class="string">'Jerk'</span>);
+</pre>
         </div>
       </div>
     </div>
@@ -827,7 +1044,7 @@ fprintf('LSPB: tb=%.3f, a=%.4f, 匀速段 v=%.4f\n', tb, a, v);
       <div class="kp-body">
         <p>本章系统讲授了机器人轨迹规划的两大空间、多种插值方法与优化策略，核心要点归纳如下：</p>
         <ul>
-          <li><strong>关节空间规划</strong>直接规划关节变量，无奇异问题、计算简单，适合点到点运动；但末端路径形状不可控。代表方法有三次多项式（C¹）、五次多项式（C²）、LSPB（C¹，含匀速段）。</li>
+          <li><strong>关节空间规划</strong>无需逐点求逆解、计算较直接，适合ABB点到点运动；但末端路径不可控，且仍需沿轨迹检查雅可比奇异、限位、速度和碰撞。</li>
           <li><strong>笛卡尔空间规划</strong>在末端位姿空间规划，轨迹几何形状可控（直线/圆弧/样条），适合轮廓作业；但需逐点逆运动学求解，存在奇异与可达性问题。</li>
           <li><strong>连续性阶数</strong>是选择插值方法的关键：C⁰ 保证位置连续、C¹ 保证速度连续（消除无限加速度）、C² 保证加速度连续（消除加加速度冲击）。阶数越高越平滑，但峰值速度/加速度越大。</li>
           <li><strong>LSPB</strong>兼顾匀速作业与速度连续，三段结构（抛物线-直线-抛物线）在工业中广泛使用，但加速度在过渡点跳变。</li>

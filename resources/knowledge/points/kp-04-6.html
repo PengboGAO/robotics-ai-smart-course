@@ -1,0 +1,18 @@
+<!--META {"kp_id": "kp-4-6", "kp_label": "KP 4.6", "title": "ABB数值逆运动学", "tags": ["难点"], "difficulty": 4, "chapter": 4, "order": 6, "file": "kp-04-6.html"}-->
+<div class="kp-card" id="kp-4-6">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.6</span>ABB数值逆运动学</div><div class="kp-tags"><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p>数值逆运动学从初值q<sub>0</sub>出发，利用当前ABB关节链的几何雅可比迭代减小位姿误差。课程采用阻尼最小二乘法，降低接近奇异位形时伪逆放大的风险。</p>
+    <div class="formula-block"><div class="formula-label">阻尼最小二乘更新</div><div class="formula">Δq = J<sup>T</sup>(JJ<sup>T</sup>+λ²I)<sup>−1</sup>e；q<sub>k+1</sub>=clip(q<sub>k</sub>+Δq, q<sub>min</sub>, q<sub>max</sub>)</div></div>
+    <p>误差e由位置误差和姿态误差组成，二者单位不同，实际工程中应说明权重。每次迭代后执行ABB IRB 1200-5/0.9工作范围裁剪；收敛判据分别报告位置误差、姿态误差与迭代次数。</p>
+    <div class="code-block"><div class="code-label"><span class="lang">MATLAB</span> ABB阻尼最小二乘核心</div><pre>for iteration = 1:300
+    T = forwardKinematics(q, jointOrigins, jointAxes);
+    error = poseError(T, targetTransform);
+    J = geometricJacobian(q, jointOrigins, jointAxes);
+    step = J' * ((J*J' + damping^2*eye(6)) \ error);
+    q = min(max(q + step', lowerRad), upperRad);
+end</pre></div>
+    <div class="callout callout-warning"><div class="callout-title">必须检查的失败类型</div><p>初值落入另一解支、目标不可达、关节限位截断、姿态权重不合理或雅可比病态都可能导致不收敛。AI只能帮助判断先检查哪一类原因，不能把某次收敛结果直接宣布为唯一正确解。</p></div>
+    <div class="callout callout-success"><div class="callout-title">验证要求</div><p>对求得的q执行再正解，并同时报告位置误差、姿态误差、限位状态和最小奇异值。完整可运行实现见 <a href="../../abb/ABB_IRB1200_5_90_trajectory_validation.m">ABB复算脚本</a>。</p></div>
+  </div>
+</div>

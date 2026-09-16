@@ -1,0 +1,12 @@
+<!--META {"kp_id": "kp-4-4", "kp_label": "KP 4.4", "title": "ABB逆运动学代数分解", "tags": ["难点"], "difficulty": 4, "chapter": 4, "order": 4, "file": "kp-04-3.html"}-->
+<div class="kp-card" id="kp-4-4">
+  <div class="kp-header"><div class="kp-title"><span class="kp-id">KP 4.4</span>ABB逆运动学代数分解</div><div class="kp-tags"><span class="kp-tag 难点">难点</span><span class="difficulty"><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star active">★</span><span class="star">★</span></span></div></div>
+  <div class="kp-body">
+    <p><span class="term">代数法</span>从目标位姿T<sub>d</sub>与正运动学T<sub>06</sub>(q)的矩阵元素关系求关节变量。对ABB IRB 1200，应先把目标从工件坐标和工具坐标统一到机器人法兰坐标，再讨论逆解；遗漏tooldata或wobjdata会使“数学逆解正确、现场目标错误”。</p>
+    <div class="formula-block"><div class="formula-label">目标坐标统一</div><div class="formula"><sup>base</sup>T<sub>flange,d</sub> = <sup>base</sup>T<sub>workobject</sub> · <sup>workobject</sup>T<sub>tool,d</sub> · (<sup>flange</sup>T<sub>tool</sub>)<sup>−1</sup></div></div>
+    <p>IRB 1200后三轴形成球腕几何条件，可按“腕心位置—腕部姿态”分解候选解。先由目标法兰位姿回退到腕心，再求A1～A3；随后计算R<sub>36</sub>=R<sub>03</sub><sup>T</sup>R<sub>06</sub>并求A4～A6。实际实现仍需核对本课程D-H坐标系与ABB轴角定义之间的固定偏置。</p>
+    <div class="formula-block"><div class="formula-label">姿态分离</div><div class="formula">R<sub>36</sub> = R<sub>03</sub><sup>T</sup>R<sub>d</sub></div></div>
+    <div class="callout callout-warning"><div class="callout-title">多解不是错误</div><p>同一目标可能出现肩左/右、肘上/下、腕翻转等候选解。必须依次执行工作范围检查、与当前构型的连续性比较、雅可比奇异筛查和碰撞检查；不能只返回第一组数学解。</p></div>
+    <div class="callout callout-success"><div class="callout-title">评价证据</div><p>提交目标坐标变换、候选解列表、每组解的再正解误差、限位状态与选解理由。再正解一致只证明运动学内部一致，不证明无碰撞或实体安全。</p></div>
+  </div>
+</div>

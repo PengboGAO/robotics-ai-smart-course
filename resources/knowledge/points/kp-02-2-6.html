@@ -1,0 +1,131 @@
+<!--META {"kp_id":"kp-2-6","kp_label":"KP 2.6","title":"齐次变换矩阵","tags":["重点","难点"],"difficulty":3,"chapter":2,"order":6,"file":"kp-02-2-6.html"}-->
+<div class="kp-card" id="kp-2-6">
+      <div class="kp-header">
+        <div class="kp-title">
+          <span class="kp-id">KP 2.6</span>
+          齐次变换矩阵
+        </div>
+        <div class="kp-tags">
+          <span class="kp-tag 重点">重点</span>
+          <span class="kp-tag 难点">难点</span>
+          <span class="difficulty">
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+            <span class="star active">★</span>
+          </span>
+        </div>
+      </div>
+      <div class="kp-body">
+        <p><span class="term">齐次变换矩阵</span>（Homogeneous Transformation Matrix）T 是一个 4×4 矩阵，将旋转与平移统一在单一矩阵中，同时描述坐标系间的姿态与位置关系。这是机器人运动学最核心的数学工具。</p>
+        <div class="formula-block">
+          <div class="formula-label">齐次变换矩阵结构 <span class="formula-num">(2-8)</span></div>
+          <div class="formula">
+            <sup>A</sup>T<sub>B</sub> = [ &nbsp;R(3×3), &nbsp;p(3×1); <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0(1×3), &nbsp;&nbsp;&nbsp;1 &nbsp;]
+          </div>
+        </div>
+        <p>其中 R 为 3×3 旋转矩阵，描述 {B} 相对 {A} 的姿态；p 为 3×1 平移向量，描述 {B} 原点在 {A} 中的位置；底部行 [0 0 0 1] 为齐次坐标的辅助行，保证矩阵可逆且乘法封闭。</p>
+
+        <!-- 分块矩阵SVG -->
+        <div class="svg-diagram">
+          <svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Microsoft YaHei', sans-serif;">
+            <!-- 大括号左 -->
+            <text x="50" y="170" fill="#1a202c" font-size="60">[</text>
+            <!-- 大括号右 -->
+            <text x="420" y="170" fill="#1a202c" font-size="60">]</text>
+
+            <!-- R 分块 (蓝色, 左上 3x3) -->
+            <rect x="80" y="50" width="220" height="150" fill="#2563eb" opacity="0.18" stroke="#2563eb" stroke-width="2"/>
+            <text x="190" y="130" text-anchor="middle" fill="#2563eb" font-size="26" font-weight="700">R</text>
+            <text x="190" y="152" text-anchor="middle" fill="#2563eb" font-size="11">旋转矩阵 3×3</text>
+
+            <!-- p 分块 (橙色, 右上 3x1) -->
+            <rect x="310" y="50" width="90" height="150" fill="#d97706" opacity="0.18" stroke="#d97706" stroke-width="2"/>
+            <text x="355" y="130" text-anchor="middle" fill="#d97706" font-size="26" font-weight="700">p</text>
+            <text x="355" y="152" text-anchor="middle" fill="#d97706" font-size="11">平移 3×1</text>
+
+            <!-- 底部行 (灰色) -->
+            <rect x="80" y="210" width="320" height="40" fill="#94a3b8" opacity="0.2" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="240" y="235" text-anchor="middle" fill="#64748b" font-size="13" font-weight="600">0 &nbsp; 0 &nbsp; 0 &nbsp; 1</text>
+
+            <!-- 标注 -->
+            <line x1="190" y1="50" x2="190" y2="25" stroke="#2563eb" stroke-width="1.2"/>
+            <text x="190" y="18" text-anchor="middle" fill="#2563eb" font-size="11" font-weight="700">姿态 (蓝)</text>
+
+            <line x1="355" y1="50" x2="355" y2="25" stroke="#d97706" stroke-width="1.2"/>
+            <text x="355" y="18" text-anchor="middle" fill="#d97706" font-size="11" font-weight="700">位置 (橙)</text>
+
+            <!-- 维度标注 -->
+            <text x="440" y="130" fill="#1a202c" font-size="11">3 行</text>
+            <text x="440" y="150" fill="#1a202c" font-size="11">↓</text>
+            <text x="240" y="280" text-anchor="middle" fill="#1a202c" font-size="11">← 4 列 →</text>
+          </svg>
+          <div class="diagram-caption">图2-5 齐次变换矩阵分块结构：R（蓝色）描述姿态，p（橙色）描述位置</div>
+        </div>
+
+        <p><strong>坐标变换作用</strong>：齐次变换矩阵将点在 {B} 中的齐次坐标 [x, y, z, 1]<sup>T</sup> 映射到 {A} 中：</p>
+        <div class="formula-block">
+          <div class="formula-label">齐次坐标变换 <span class="formula-num">(2-9)</span></div>
+          <div class="formula">
+            [x<sub>A</sub>, y<sub>A</sub>, z<sub>A</sub>, 1]<sup>T</sup> = <sup>A</sup>T<sub>B</sub> · [x<sub>B</sub>, y<sub>B</sub>, z<sub>B</sub>, 1]<sup>T</sup>
+          </div>
+        </div>
+
+        <p><strong>复合变换</strong>：多个坐标系间的变换可通过矩阵连乘级联。若 {C} 相对 {B} 的变换为 <sup>B</sup>T<sub>C</sub>，{B} 相对 {A} 的变换为 <sup>A</sup>T<sub>B</sub>，则 {C} 相对 {A} 的变换为：</p>
+        <div class="formula-block">
+          <div class="formula-label">复合变换（连乘） <span class="formula-num">(2-10)</span></div>
+          <div class="formula">
+            <sup>A</sup>T<sub>C</sub> = <sup>A</sup>T<sub>B</sub> · <sup>B</sup>T<sub>C</sub>
+          </div>
+        </div>
+        <p>这一性质是机器人正运动学的理论基础：从基座到末端的位姿可通过各连杆齐次变换矩阵的连乘得到。注意矩阵乘法不满足交换律，因此变换顺序至关重要。</p>
+
+        <p><strong>逆变换</strong>：已知 <sup>A</sup>T<sub>B</sub> 求 <sup>B</sup>T<sub>A</sub> 时，无需对 4×4 矩阵求逆，可利用旋转矩阵正交性简化计算：</p>
+        <div class="formula-block">
+          <div class="formula-label">齐次变换矩阵的逆 <span class="formula-num">(2-11)</span></div>
+          <div class="formula">
+            <sup>B</sup>T<sub>A</sub> = (<sup>A</sup>T<sub>B</sub>)<sup>-1</sup> = [ &nbsp;R<sup>T</sup>, &nbsp;-R<sup>T</sup>p; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0, &nbsp;&nbsp;&nbsp;&nbsp;1 ]
+          </div>
+        </div>
+        <p>即逆变换的旋转部分取 R 的转置，平移部分取 -R<sup>T</sup>p。这一技巧在逆运动学与坐标系转换中频繁使用，比直接求逆矩阵更高效且数值更稳定。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 SE(3) 群</div>
+          <p>所有齐次变换矩阵构成<strong>特殊欧氏群</strong> SE(3)，它是 SO(3) 旋转群与三维平移的半直积。SE(3) 在乘法下封闭、有逆、有单位元，这些群性质保证了多连杆变换连乘的数学合法性。</p>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ 变换顺序不可交换</div>
+          <p>齐次变换矩阵乘法不满足交换律：<sup>A</sup>T<sub>B</sub>·<sup>B</sup>T<sub>C</sub> ≠ <sup>B</sup>T<sub>C</sub>·<sup>A</sup>T<sub>B</sub>。先平移再旋转与先旋转再平移的结果不同。在推导运动学方程时，必须严格按坐标系链的顺序连乘。</p>
+        </div>
+
+        <!-- MATLAB代码 -->
+        <div class="code-block">
+          <div class="code-label"><span class="lang">MATLAB</span> 齐次变换矩阵构造与复合</div>
+<pre>% 定义平移向量与旋转角
+p = [1; 2; 3];          % 平移向量
+theta = pi/4;           % 45 度
+
+% 构造绕 Z 轴旋转的齐次变换矩阵
+Rz = [cos(theta) -sin(theta) 0; sin(theta) cos(theta) 0; 0 0 1];
+T = [Rz, p; 0 0 0, 1]
+
+% 点在 {B} 中的坐标, 求在 {A} 中的坐标
+p_B = [0.5; 0.5; 0; 1];     % 齐次坐标
+p_A = T * p_B
+
+% 复合变换: 先平移 T1 再旋转 T2
+T1 = [eye(3), [1;0;0]; 0 0 0, 1];   % 平移
+T2 = [Rz, [0;0;0]; 0 0 0, 1];       % 旋转
+T_total = T1 * T2                   % 复合结果
+disp('注意: T1*T2 与 T2*T1 结果不同')
+T_reverse = T2 * T1                 % 反序对比</pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-title">✅ 核心要点</div>
+          <p>齐次变换矩阵是第 3 章正运动学（D-H 参数法）的直接数学工具。掌握 T 的分块结构、坐标变换作用与复合连乘性质，是学习后续运动学建模的前提。</p>
+        </div>
+      </div>
+    </div>
