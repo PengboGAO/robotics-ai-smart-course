@@ -98,7 +98,7 @@ if(!abb.goal.every((value,index)=>value>=abb.limits[index][0]&&value<=abb.limits
 if(!peaks.every((value,index)=>value<=abb.max[index]))throw new Error("ABB验证轨迹速度约束失败");
 
 const viewer=await readFile(join(root,"resources/knowledge/viewer.js"),"utf8");for(const token of ["knowledgeProgress","data-hint","points/","knowledge-extensions.json"])if(!viewer.includes(token))throw new Error(`知识学习页功能缺失: ${token}`);
-const serviceWorker=await readFile(join(root,"service-worker.js"),"utf8");for(const token of ["robotics-smart-course-v11","NETWORK_FIRST","cache.put(event.request","knowledge-system.js","question-bank.js","viewer.html","mesh-frames/manifest.json"])if(!serviceWorker.includes(token))throw new Error(`离线缓存缺失: ${token}`);
+const serviceWorker=await readFile(join(root,"service-worker.js"),"utf8");for(const token of ["robotics-smart-course-v12","NETWORK_FIRST","previousCourseCaches","includeUncontrolled:true","client.navigate(client.url)","cache.put(event.request","knowledge-system.js","question-bank.js","viewer.html","mesh-frames/manifest.json"])if(!serviceWorker.includes(token))throw new Error(`离线缓存缺失: ${token}`);
 for(const token of ["updateViaCache:\"none\"","controllerchange","location.reload()"]){if(!app.includes(token))throw new Error(`自动更新机制缺失: ${token}`);}
 
 const collectHtml=async directory=>{
